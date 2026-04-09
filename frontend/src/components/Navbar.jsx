@@ -24,6 +24,8 @@ function Navbar() {
           <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold hover:bg-yellow-300 transition">
             Cotizar
           </Link>
+          <Link to="/comparador" className="hover:text-yellow-400 transition">Comparador</Link>
+
         </div>
 
         <button
