@@ -11,6 +11,7 @@ import Contacto from './pages/Contacto'
 import FAQ from './pages/FAQ'
 import Galeria from './pages/Galeria'
 import Blog from './pages/Blog'
+import DetalleProducto from './pages/DetalleProducto'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Inicio />} />
             <Route path="/catalogo" element={<Catalogo />} />
+            <Route path="/catalogo/:id" element={<DetalleProducto />} />
             <Route path="/cotizar" element={<Cotizacion />} />
             <Route path="/seguimiento" element={<Seguimiento />} />
             <Route path="/mantenimiento" element={<Mantenimiento />} />
