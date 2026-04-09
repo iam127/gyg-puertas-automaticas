@@ -8,6 +8,9 @@ import Seguimiento from './pages/Seguimiento'
 import Mantenimiento from './pages/Mantenimiento'
 import Nosotros from './pages/Nosotros'
 import Contacto from './pages/Contacto'
+import FAQ from './pages/FAQ'
+import Galeria from './pages/Galeria'
+import Blog from './pages/Blog'
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
             <Route path="/mantenimiento" element={<Mantenimiento />} />
             <Route path="/nosotros" element={<Nosotros />} />
             <Route path="/contacto" element={<Contacto />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/galeria" element={<Galeria />} />
+            <Route path="/blog" element={<Blog />} />
           </Routes>
         </main>
         <Footer />
