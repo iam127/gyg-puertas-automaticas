@@ -6,6 +6,8 @@ import Catalogo from './pages/Catalogo'
 import Cotizacion from './pages/Cotizacion'
 import Seguimiento from './pages/Seguimiento'
 import Mantenimiento from './pages/Mantenimiento'
+import Nosotros from './pages/Nosotros'
+import Contacto from './pages/Contacto'
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
             <Route path="/cotizar" element={<Cotizacion />} />
             <Route path="/seguimiento" element={<Seguimiento />} />
             <Route path="/mantenimiento" element={<Mantenimiento />} />
+            <Route path="/nosotros" element={<Nosotros />} />
+            <Route path="/contacto" element={<Contacto />} />
           </Routes>
         </main>
         <Footer />
