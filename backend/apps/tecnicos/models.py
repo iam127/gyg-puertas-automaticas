@@ -14,3 +14,15 @@ class Tecnico(models.Model):
     class Meta:
         verbose_name = 'Tecnico'
         verbose_name_plural = 'Tecnicos'
+
+class CodigoInvitacion(models.Model):
+    codigo = models.CharField(max_length=20, unique=True)
+    usado = models.BooleanField(default=False)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.codigo
+
+    class Meta:
+        verbose_name = 'Codigo de Invitacion'
+        verbose_name_plural = 'Codigos de Invitacion'
