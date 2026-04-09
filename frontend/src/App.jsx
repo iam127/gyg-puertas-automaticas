@@ -12,6 +12,7 @@ import FAQ from './pages/FAQ'
 import Galeria from './pages/Galeria'
 import Blog from './pages/Blog'
 import DetalleProducto from './pages/DetalleProducto'
+import GuiaPuerta from './pages/GuiaPuerta'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/galeria" element={<Galeria />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/guia" element={<GuiaPuerta />} />
           </Routes>
         </main>
         <Footer />
