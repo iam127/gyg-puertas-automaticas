@@ -1,30 +1,53 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 function Navbar() {
+  const [menuAbierto, setMenuAbierto] = useState(false)
+
   return (
-    <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1rem 2rem',
-      backgroundColor: '#1a1a2e',
-      color: 'white'
-    }}>
-      <Link to="/" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 'bold' }}>
-        GyG Puertas Automaticas
-      </Link>
-      <div style={{ display: 'flex', gap: '1.5rem' }}>
-        <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Inicio</Link>
-        <Link to="/nosotros" style={{ color: 'white', textDecoration: 'none' }}>Nosotros</Link>
-        <Link to="/catalogo" style={{ color: 'white', textDecoration: 'none' }}>Catalogo</Link>
-        <Link to="/galeria" style={{ color: 'white', textDecoration: 'none' }}>Galeria</Link>
-        <Link to="/blog" style={{ color: 'white', textDecoration: 'none' }}>Blog</Link>
-        <Link to="/faq" style={{ color: 'white', textDecoration: 'none' }}>FAQ</Link>
-        <Link to="/seguimiento" style={{ color: 'white', textDecoration: 'none' }}>Seguimiento</Link>
-        <Link to="/cotizar" style={{ color: 'white', textDecoration: 'none' }}>Cotizar</Link>
-        <Link to="/mantenimiento" style={{ color: 'white', textDecoration: 'none' }}>Mantenimiento</Link>
-        <Link to="/contacto" style={{ color: 'white', textDecoration: 'none' }}>Contacto</Link>
+    <nav className="bg-gray-900 text-white shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <Link to="/" className="text-xl font-bold text-yellow-400">
+          GyG Puertas Automáticas
+        </Link>
+
+        <div className="hidden md:flex gap-6 text-sm font-medium">
+          <Link to="/" className="hover:text-yellow-400 transition">Inicio</Link>
+          <Link to="/nosotros" className="hover:text-yellow-400 transition">Nosotros</Link>
+          <Link to="/catalogo" className="hover:text-yellow-400 transition">Catálogo</Link>
+          <Link to="/galeria" className="hover:text-yellow-400 transition">Galería</Link>
+          <Link to="/blog" className="hover:text-yellow-400 transition">Blog</Link>
+          <Link to="/faq" className="hover:text-yellow-400 transition">FAQ</Link>
+          <Link to="/seguimiento" className="hover:text-yellow-400 transition">Seguimiento</Link>
+          <Link to="/mantenimiento" className="hover:text-yellow-400 transition">Mantenimiento</Link>
+          <Link to="/contacto" className="hover:text-yellow-400 transition">Contacto</Link>
+          <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold hover:bg-yellow-300 transition">
+            Cotizar
+          </Link>
+        </div>
+
+        <button
+          className="md:hidden text-white"
+          onClick={() => setMenuAbierto(!menuAbierto)}
+        >
+          ☰
+        </button>
       </div>
+
+      {menuAbierto && (
+        <div className="md:hidden flex flex-col gap-3 px-4 py-3 bg-gray-800 text-sm">
+          <Link to="/" className="hover:text-yellow-400">Inicio</Link>
+          <Link to="/nosotros" className="hover:text-yellow-400">Nosotros</Link>
+          <Link to="/catalogo" className="hover:text-yellow-400">Catálogo</Link>
+          <Link to="/galeria" className="hover:text-yellow-400">Galería</Link>
+          <Link to="/blog" className="hover:text-yellow-400">Blog</Link>
+          <Link to="/faq" className="hover:text-yellow-400">FAQ</Link>
+          <Link to="/seguimiento" className="hover:text-yellow-400">Seguimiento</Link>
+          <Link to="/mantenimiento" className="hover:text-yellow-400">Mantenimiento</Link>
+          <Link to="/contacto" className="hover:text-yellow-400">Contacto</Link>
+          <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-center">Cotizar</Link>
+        </div>
+      )}
     </nav>
   )
 }
