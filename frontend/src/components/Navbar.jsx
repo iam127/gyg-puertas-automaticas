@@ -46,6 +46,7 @@ function Navbar() {
           <Link to="/mantenimiento" className="hover:text-yellow-400">Mantenimiento</Link>
           <Link to="/contacto" className="hover:text-yellow-400">Contacto</Link>
           <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-center">Cotizar</Link>
+          <Link to="/comparador" className="hover:text-yellow-400 transition">Comparador</Link>
         </div>
       )}
     </nav>

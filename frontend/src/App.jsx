@@ -13,6 +13,7 @@ import Galeria from './pages/Galeria'
 import Blog from './pages/Blog'
 import DetalleProducto from './pages/DetalleProducto'
 import GuiaPuerta from './pages/GuiaPuerta'
+import Comparador from './pages/Comparador'
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/galeria" element={<Galeria />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/guia" element={<GuiaPuerta />} />
+            <Route path="/comparador" element={<Comparador />} />
           </Routes>
         </main>
         <Footer />
