@@ -1,34 +1,88 @@
 import { Link } from 'react-router-dom'
 
 function Footer() {
+  const whatsappUrl = 'https://wa.me/51947316874?text=Hola%2C%20me%20gustaria%20obtener%20informacion%20sobre%20sus%20puertas%20automaticas'
+
   return (
     <footer className="bg-gray-900 text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div>
-          <h3 className="text-yellow-400 font-bold text-lg mb-3">GyG Puertas Automáticas</h3>
-          <p className="text-gray-400 text-sm">Soluciones en puertas automáticas para tu hogar y empresa. Calidad y seguridad garantizada.</p>
+      <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+
+        <div className="md:col-span-2">
+          <h3 className="text-yellow-400 font-bold text-xl mb-3">GyG Puertas Automaticas</h3>
+          <p className="text-gray-400 text-sm mb-4">Soluciones en puertas automaticas para tu hogar y empresa. Calidad, seguridad y garantia en cada instalacion.</p>
+          <div className="space-y-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <span>📍</span>
+              <a href="https://maps.google.com/?q=Manuel+Odria+161+Lima+Peru" target="_blank" rel="noreferrer" className="hover:text-yellow-400 transition">
+                Manuel Odria 161, Lima, Peru
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>📞</span>
+              <a href="tel:+51947316864" className="hover:text-yellow-400 transition">
+                +51 947 316 864
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>📧</span>
+              <a href="mailto:gygpuertasautomaticas@gmail.com" className="hover:text-yellow-400 transition">
+                gygpuertasautomaticas@gmail.com
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>💬</span>
+              <a href={whatsappUrl} target="_blank" rel="noreferrer" className="hover:text-yellow-400 transition">
+                +51 947 316 874 (WhatsApp)
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>🕐</span>
+              <span>Atencion 24/7</span>
+            </div>
+          </div>
         </div>
+
         <div>
-          <h4 className="font-bold text-lg mb-3">Enlaces rápidos</h4>
+          <h4 className="font-bold text-lg mb-3">Enlaces rapidos</h4>
           <ul className="text-gray-400 text-sm space-y-2">
-            <li><Link to="/catalogo" className="hover:text-yellow-400 transition">Catálogo</Link></li>
-            <li><Link to="/cotizar" className="hover:text-yellow-400 transition">Solicitar Cotización</Link></li>
+            <li><Link to="/catalogo" className="hover:text-yellow-400 transition">Catalogo</Link></li>
+            <li><Link to="/cotizar" className="hover:text-yellow-400 transition">Solicitar Cotizacion</Link></li>
             <li><Link to="/mantenimiento" className="hover:text-yellow-400 transition">Mantenimiento</Link></li>
             <li><Link to="/seguimiento" className="hover:text-yellow-400 transition">Seguimiento</Link></li>
+            <li><Link to="/galeria" className="hover:text-yellow-400 transition">Galeria</Link></li>
+            <li><Link to="/blog" className="hover:text-yellow-400 transition">Blog</Link></li>
             <li><Link to="/faq" className="hover:text-yellow-400 transition">Preguntas Frecuentes</Link></li>
+            <li><Link to="/nosotros" className="hover:text-yellow-400 transition">Nosotros</Link></li>
+            <li><Link to="/contacto" className="hover:text-yellow-400 transition">Contacto</Link></li>
           </ul>
         </div>
+
         <div>
-          <h4 className="font-bold text-lg mb-3">Contacto</h4>
+          <h4 className="font-bold text-lg mb-3">Servicios</h4>
           <ul className="text-gray-400 text-sm space-y-2">
-            <li>📍 Lima, Perú</li>
-            <li>📧 contacto@gygpuertas.com</li>
-            <li>📞 +51 999 999 999</li>
+            <li>Puertas Levadizas</li>
+            <li>Puertas Corredizas</li>
+            <li>Puertas Batientes</li>
+            <li>Puertas Seccionales</li>
+            <li>Puertas Industriales</li>
+            <li>Cercos Electricos</li>
+            <li>Barreras Automaticas</li>
           </ul>
+          <div className="mt-6">
+            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition flex items-center gap-2 w-fit">
+              Escribenos por WhatsApp
+            </a>
+          </div>
         </div>
+
       </div>
-      <div className="border-t border-gray-700 text-center text-gray-500 text-sm py-4">
-        © 2026 GyG Puertas Automáticas. Todos los derechos reservados.
+
+      <div className="border-t border-gray-700 text-center text-gray-500 text-sm py-4 px-4 flex flex-col md:flex-row justify-between items-center gap-2">
+        <p>2026 GyG Puertas Automaticas. Todos los derechos reservados.</p>
+        <div className="flex gap-4">
+          <Link to="/faq" className="hover:text-yellow-400 transition">Preguntas Frecuentes</Link>
+          <Link to="/contacto" className="hover:text-yellow-400 transition">Contacto</Link>
+        </div>
       </div>
     </footer>
   )
