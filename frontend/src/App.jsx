@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import Chatbot from './components/Chatbot'
 import Inicio from './pages/Inicio'
 import Catalogo from './pages/Catalogo'
 import Cotizacion from './pages/Cotizacion'
@@ -37,6 +38,7 @@ function App() {
             <Route path="/comparador" element={<Comparador />} />
           </Routes>
         </main>
+        <Chatbot />
         <Footer />
       </div>
     </BrowserRouter>

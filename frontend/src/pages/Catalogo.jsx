@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getProductos, getCategorias, buscarProductos, getProductosPorUso } from '../services/productos'
+import { getProductos, getCategorias, buscarProductos, getProductosPorUso, buscarInteligente } from '../services/productos'
 
 function Catalogo() {
   const [productos, setProductos] = useState([])
   const [categorias, setCategorias] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [filtroUso, setFiltroUso] = useState('')
+  const [modoIA, setModoIA] = useState(false)
+  const [cargandoIA, setCargandoIA] = useState(false)
 
   useEffect(() => {
     getProductos().then(res => setProductos(res.data))
@@ -15,10 +17,17 @@ function Catalogo() {
 
   const handleBusqueda = (e) => {
     e.preventDefault()
-    if (busqueda.trim()) {
-      buscarProductos(busqueda).then(res => setProductos(res.data))
-    } else {
+    if (!busqueda.trim()) {
       getProductos().then(res => setProductos(res.data))
+      return
+    }
+    if (modoIA) {
+      setCargandoIA(true)
+      buscarInteligente(busqueda)
+        .then(res => setProductos(res.data.productos))
+        .finally(() => setCargandoIA(false))
+    } else {
+      buscarProductos(busqueda).then(res => setProductos(res.data))
     }
   }
 
@@ -37,17 +46,38 @@ function Catalogo() {
       <p className="text-gray-500 mb-8">Encuentra la puerta automática ideal para tu necesidad</p>
 
       {/* BUSCADOR */}
-      <form onSubmit={handleBusqueda} className="flex gap-2 mb-6">
-        <input
-          type="text"
-          placeholder="Describe lo que necesitas..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-yellow-400"
-        />
-        <button type="submit" className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition">
-          Buscar
-        </button>
+      <form onSubmit={handleBusqueda} className="mb-4">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder={modoIA ? "Describe lo que necesitas en lenguaje natural..." : "Buscar producto..."}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
+          />
+          <button
+            type="submit"
+            disabled={cargandoIA}
+            className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-xl font-bold hover:bg-yellow-300 transition disabled:opacity-50"
+          >
+            {cargandoIA ? 'Buscando...' : 'Buscar'}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 mt-2">
+          <button
+            type="button"
+            onClick={() => setModoIA(!modoIA)}
+            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition ${
+              modoIA ? 'bg-yellow-400 text-gray-900' : 'border border-gray-300 text-gray-600'
+            }`}
+          >
+            🤖 {modoIA ? 'Búsqueda con IA activada' : 'Activar búsqueda con IA'}
+          </button>
+          {modoIA && (
+            <span className="text-xs text-gray-400">Describe en lenguaje natural lo que necesitas</span>
+          )}
+        </div>
       </form>
 
       {/* FILTROS */}
@@ -65,6 +95,18 @@ function Catalogo() {
             {uso === '' ? 'Todos' : uso.charAt(0).toUpperCase() + uso.slice(1)}
           </button>
         ))}
+        <Link
+          to="/comparador"
+          className="px-4 py-2 rounded-full font-medium border border-gray-300 text-gray-600 hover:border-yellow-400 transition ml-auto"
+        >
+          ⚖️ Comparar productos
+        </Link>
+        <Link
+          to="/guia"
+          className="px-4 py-2 rounded-full font-medium border border-gray-300 text-gray-600 hover:border-yellow-400 transition"
+        >
+          🤔 ¿Qué puerta necesito?
+        </Link>
       </div>
 
       {/* PRODUCTOS */}
