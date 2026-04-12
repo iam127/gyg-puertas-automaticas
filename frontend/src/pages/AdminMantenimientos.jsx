@@ -1,0 +1,224 @@
+import { useEffect, useState } from 'react'
+import api from '../services/api'
+import { FaSearch, FaEye, FaTimes, FaEdit } from 'react-icons/fa'
+
+const ESTADOS = [
+  { value: '', label: 'Todos' },
+  { value: 'recibido', label: 'Recibido' },
+  { value: 'en_revision', label: 'En Revision' },
+  { value: 'visita_agendada', label: 'Visita Agendada' },
+  { value: 'en_proceso', label: 'En Proceso' },
+  { value: 'completado', label: 'Completado' },
+  { value: 'cancelado', label: 'Cancelado' },
+]
+
+const estadoColor = {
+  recibido: 'bg-blue-100 text-blue-700',
+  en_revision: 'bg-yellow-100 text-yellow-700',
+  visita_agendada: 'bg-purple-100 text-purple-700',
+  en_proceso: 'bg-orange-100 text-orange-700',
+  completado: 'bg-green-100 text-green-700',
+  cancelado: 'bg-red-100 text-red-700',
+}
+
+const tipoColor = {
+  preventivo: 'bg-blue-100 text-blue-700',
+  correctivo: 'bg-orange-100 text-orange-700',
+  garantia: 'bg-green-100 text-green-700',
+}
+
+function AdminMantenimientos() {
+  const [mantenimientos, setMantenimientos] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('')
+  const [seleccionado, setSeleccionado] = useState(null)
+  const [nuevoEstado, setNuevoEstado] = useState('')
+
+  useEffect(() => {
+    cargarMantenimientos()
+  }, [])
+
+  const cargarMantenimientos = () => {
+    setCargando(true)
+    api.get('/mantenimientos/')
+      .then(res => setMantenimientos(res.data))
+      .finally(() => setCargando(false))
+  }
+
+  const cambiarEstado = (id) => {
+    api.patch(`/mantenimientos/${id}/`, { estado: nuevoEstado })
+      .then(() => {
+        cargarMantenimientos()
+        setSeleccionado(null)
+      })
+  }
+
+  const mantenimientosFiltrados = mantenimientos.filter(m => {
+    const matchBusqueda = busqueda === '' ||
+      m.nombre_cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      m.codigo?.toLowerCase().includes(busqueda.toLowerCase())
+    const matchEstado = filtroEstado === '' || m.estado === filtroEstado
+    return matchBusqueda && matchEstado
+  })
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Mantenimientos</h2>
+        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+          {mantenimientos.length} total
+        </span>
+      </div>
+
+      {/* FILTROS */}
+      <div className="flex gap-4 mb-6 flex-wrap">
+        <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2 flex-1">
+          <FaSearch size={14} className="text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar por nombre o codigo..."
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            className="flex-1 focus:outline-none text-sm"
+          />
+        </div>
+        <select
+          value={filtroEstado}
+          onChange={e => setFiltroEstado(e.target.value)}
+          className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none"
+        >
+          {ESTADOS.map(e => (
+            <option key={e.value} value={e.value}>{e.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* TABLA */}
+      {cargando ? (
+        <p className="text-gray-500 text-center py-10">Cargando...</p>
+      ) : mantenimientosFiltrados.length === 0 ? (
+        <p className="text-gray-500 text-center py-10">No se encontraron mantenimientos.</p>
+      ) : (
+        <div className="bg-white rounded-xl shadow overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Codigo</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Cliente</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Telefono</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Tipo</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Distrito</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Estado</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Fecha</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mantenimientosFiltrados.map((m, i) => (
+                <tr key={m.id} className={`border-b border-gray-100 hover:bg-gray-50 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-4 py-3 font-medium text-green-600">{m.codigo}</td>
+                  <td className="px-4 py-3">{m.nombre_cliente}</td>
+                  <td className="px-4 py-3">{m.telefono}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${tipoColor[m.tipo] || 'bg-gray-100 text-gray-700'}`}>
+                      {m.tipo}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">{m.distrito}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${estadoColor[m.estado] || 'bg-gray-100 text-gray-700'}`}>
+                      {m.estado?.replace(/_/g, ' ')}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {new Date(m.creado_en).toLocaleDateString('es-PE')}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => { setSeleccionado(m); setNuevoEstado(m.estado) }}
+                      className="bg-yellow-400 text-gray-900 px-3 py-1 rounded-lg text-xs font-bold hover:bg-yellow-300 transition flex items-center gap-1"
+                    >
+                      <FaEdit size={12} />
+                      Gestionar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* MODAL */}
+      {seleccionado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-screen overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-lg font-bold">Mantenimiento {seleccionado.codigo}</h3>
+              <button onClick={() => setSeleccionado(null)} className="text-gray-400 hover:text-gray-600">
+                <FaTimes size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Cliente</p>
+                  <p className="font-medium">{seleccionado.nombre_cliente}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Telefono</p>
+                  <p className="font-medium">{seleccionado.telefono}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Correo</p>
+                  <p className="font-medium">{seleccionado.correo}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Distrito</p>
+                  <p className="font-medium">{seleccionado.distrito}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Tipo</p>
+                  <p className="font-medium capitalize">{seleccionado.tipo}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Tipo de puerta</p>
+                  <p className="font-medium">{seleccionado.tipo_puerta}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Disponibilidad</p>
+                  <p className="font-medium">{seleccionado.disponibilidad}</p>
+                </div>
+              </div>
+              <div className="text-sm">
+                <p className="text-gray-500">Descripcion del problema</p>
+                <p className="font-medium bg-gray-50 p-3 rounded-xl">{seleccionado.descripcion_problema}</p>
+              </div>
+              <div className="text-sm">
+                <p className="text-gray-500 mb-2">Cambiar estado</p>
+                <select
+                  value={nuevoEstado}
+                  onChange={e => setNuevoEstado(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
+                >
+                  {ESTADOS.filter(e => e.value !== '').map(e => (
+                    <option key={e.value} value={e.value}>{e.label}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => cambiarEstado(seleccionado.id)}
+                className="w-full bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold hover:bg-yellow-300 transition"
+              >
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default AdminMantenimientos
