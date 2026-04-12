@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaWhatsapp, FaClock } from 'react-icons/fa'
 import logo from '../assets/Logo-gyg.png'
 
 function Footer() {
@@ -9,35 +10,35 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
 
         <div className="md:col-span-2">
-          <img src={logo} alt="GyG Puertas Automaticas" className="h-16 object-contain mb-4" />
-          <p className="text-gray-500 text-sm mb-4">Soluciones en puertas automaticas para tu hogar y empresa. Calidad, seguridad y garantia en cada instalacion.</p>
-          <div className="space-y-2 text-sm text-gray-600">
+          <img src={logo} alt="GyG Puertas Automaticas" className="h-12 object-contain mb-3" />
+          <p className="text-gray-500 text-sm mb-4 max-w-sm">Soluciones en puertas automaticas para tu hogar y empresa. Calidad, seguridad y garantia en cada instalacion.</p>
+                  <div className="space-y-2 text-sm text-gray-600">
             <div className="flex items-center gap-2">
-              <span>📍</span>
-              <a href="https://maps.google.com/?q=Manuel+Odria+161+Lima+Peru" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition">
-                Manuel Odria 161, Lima, Peru
+              <FaMapMarkerAlt className="text-yellow-500 flex-shrink-0" size={16} />
+              <a href="https://maps.google.com/?q=Manuel+Odria+161+Ate+Lima+Peru" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition">
+                Manuel Odria 161, Ate, Lima, Peru
               </a>
             </div>
             <div className="flex items-center gap-2">
-              <span>📞</span>
+              <FaPhone className="text-yellow-500 flex-shrink-0" size={16} />
               <a href="tel:+51947316864" className="hover:text-yellow-500 transition">
                 +51 947 316 864
               </a>
             </div>
             <div className="flex items-center gap-2">
-              <span>📧</span>
+              <FaEnvelope className="text-yellow-500 flex-shrink-0" size={16} />
               <a href="mailto:gygpuertasautomaticas@gmail.com" className="hover:text-yellow-500 transition">
                 gygpuertasautomaticas@gmail.com
               </a>
             </div>
             <div className="flex items-center gap-2">
-              <span>💬</span>
+              <FaWhatsapp className="text-yellow-500 flex-shrink-0" size={16} />
               <a href={whatsappUrl} target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition">
                 +51 947 316 874 (WhatsApp)
               </a>
             </div>
             <div className="flex items-center gap-2">
-              <span>🕐</span>
+              <FaClock className="text-yellow-500 flex-shrink-0" size={16} />
               <span>Atencion 24/7</span>
             </div>
           </div>
@@ -52,7 +53,6 @@ function Footer() {
             <li><Link to="/seguimiento" className="hover:text-yellow-500 transition">Seguimiento</Link></li>
             <li><Link to="/galeria" className="hover:text-yellow-500 transition">Galeria</Link></li>
             <li><Link to="/blog" className="hover:text-yellow-500 transition">Blog</Link></li>
-            <li><Link to="/faq" className="hover:text-yellow-500 transition">Preguntas Frecuentes</Link></li>
             <li><Link to="/nosotros" className="hover:text-yellow-500 transition">Nosotros</Link></li>
             <li><Link to="/contacto" className="hover:text-yellow-500 transition">Contacto</Link></li>
           </ul>
@@ -69,11 +69,6 @@ function Footer() {
             <li>Cercos Electricos</li>
             <li>Barreras Automaticas</li>
           </ul>
-          <div className="mt-6">
-            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition flex items-center gap-2 w-fit">
-              Escribenos por WhatsApp
-            </a>
-          </div>
         </div>
 
       </div>
@@ -81,7 +76,6 @@ function Footer() {
       <div className="border-t border-gray-200 text-gray-400 text-sm py-4 px-4 flex flex-col md:flex-row justify-between items-center gap-2">
         <p>© 2026 GyG Puertas Automaticas. Todos los derechos reservados.</p>
         <div className="flex gap-4">
-          <Link to="/faq" className="hover:text-yellow-500 transition">Preguntas Frecuentes</Link>
           <Link to="/contacto" className="hover:text-yellow-500 transition">Contacto</Link>
         </div>
       </div>

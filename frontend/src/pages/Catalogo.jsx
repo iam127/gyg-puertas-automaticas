@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { FaRobot, FaBalanceScale, FaQuestion, FaDoorOpen } from 'react-icons/fa'
 import { getProductos, getCategorias, buscarProductos, getProductosPorUso, buscarInteligente } from '../services/productos'
 
 function Catalogo() {
@@ -42,8 +43,8 @@ function Catalogo() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-2">Catálogo de Productos</h1>
-      <p className="text-gray-500 mb-8">Encuentra la puerta automática ideal para tu necesidad</p>
+      <h1 className="text-3xl font-bold mb-2">Catalogo de Productos</h1>
+      <p className="text-gray-500 mb-8">Encuentra la puerta automatica ideal para tu necesidad</p>
 
       {/* BUSCADOR */}
       <form onSubmit={handleBusqueda} className="mb-4">
@@ -72,7 +73,8 @@ function Catalogo() {
               modoIA ? 'bg-yellow-400 text-gray-900' : 'border border-gray-300 text-gray-600'
             }`}
           >
-            🤖 {modoIA ? 'Búsqueda con IA activada' : 'Activar búsqueda con IA'}
+            <FaRobot size={14} />
+            {modoIA ? 'Busqueda con IA activada' : 'Activar busqueda con IA'}
           </button>
           {modoIA && (
             <span className="text-xs text-gray-400">Describe en lenguaje natural lo que necesitas</span>
@@ -97,15 +99,17 @@ function Catalogo() {
         ))}
         <Link
           to="/comparador"
-          className="px-4 py-2 rounded-full font-medium border border-gray-300 text-gray-600 hover:border-yellow-400 transition ml-auto"
+          className="px-4 py-2 rounded-full font-medium border border-gray-300 text-gray-600 hover:border-yellow-400 transition ml-auto flex items-center gap-2"
         >
-          ⚖️ Comparar productos
+          <FaBalanceScale size={14} />
+          Comparar productos
         </Link>
         <Link
           to="/guia"
-          className="px-4 py-2 rounded-full font-medium border border-gray-300 text-gray-600 hover:border-yellow-400 transition"
+          className="px-4 py-2 rounded-full font-medium border border-gray-300 text-gray-600 hover:border-yellow-400 transition flex items-center gap-2"
         >
-          🤔 ¿Qué puerta necesito?
+          <FaQuestion size={14} />
+          Que puerta necesito?
         </Link>
       </div>
 
@@ -119,7 +123,9 @@ function Catalogo() {
               {producto.imagen_principal ? (
                 <img src={producto.imagen_principal} alt={producto.nombre} className="w-full h-48 object-cover" />
               ) : (
-                <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400 text-4xl">🚪</div>
+                <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400">
+                  <FaDoorOpen size={48} />
+                </div>
               )}
               <div className="p-4">
                 <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-medium">
@@ -131,7 +137,7 @@ function Catalogo() {
                   to={`/catalogo/${producto.id}`}
                   className="text-yellow-500 font-bold hover:underline text-sm"
                 >
-                  Ver detalle →
+                  Ver detalle
                 </Link>
               </div>
             </div>

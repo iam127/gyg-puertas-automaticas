@@ -29,28 +29,39 @@ function Navbar() {
 
       {/* NAVBAR */}
       <nav className="bg-white text-gray-900 shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 flex justify-between items-stretch h-20">
           <Link to="/" className="flex items-center">
             <img src={logo} alt="GyG Puertas Automaticas" className="h-14 object-contain" />
           </Link>
 
-          <div className="hidden md:flex gap-5 text-sm font-medium items-center">
-            <Link to="/" className="hover:text-yellow-500 transition">Inicio</Link>
-            <Link to="/nosotros" className="hover:text-yellow-500 transition">Nosotros</Link>
-            <Link to="/catalogo" className="hover:text-yellow-500 transition">Catalogo</Link>
-            <Link to="/galeria" className="hover:text-yellow-500 transition">Galeria</Link>
-            <Link to="/blog" className="hover:text-yellow-500 transition">Blog</Link>
-            <Link to="/faq" className="hover:text-yellow-500 transition">FAQ</Link>
-            <Link to="/seguimiento" className="hover:text-yellow-500 transition">Seguimiento</Link>
-            <Link to="/mantenimiento" className="hover:text-yellow-500 transition">Mantenimiento</Link>
-            <Link to="/contacto" className="hover:text-yellow-500 transition">Contacto</Link>
-            <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition">
-              Cotizar
-            </Link>
+          <div className="hidden md:flex text-sm font-medium items-stretch">
+            {[
+              { to: '/', label: 'Inicio' },
+              { to: '/nosotros', label: 'Nosotros' },
+              { to: '/catalogo', label: 'Catalogo' },
+              { to: '/galeria', label: 'Galeria' },
+              { to: '/blog', label: 'Blog' },
+              { to: '/seguimiento', label: 'Seguimiento' },
+              { to: '/mantenimiento', label: 'Mantenimiento' },
+              { to: '/contacto', label: 'Contacto' },
+            ].map((item, i) => (
+              <Link
+                key={i}
+                to={item.to}
+                className="flex items-center px-3 hover:bg-yellow-400 hover:text-gray-900 transition"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <div className="flex items-center ml-16">
+              <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-16 py-3 font-bold hover:bg-yellow-300 transition text-sm">
+                Cotizar
+              </Link>
+            </div>
           </div>
 
           <button
-            className="md:hidden text-gray-900"
+            className="md:hidden text-gray-900 flex items-center"
             onClick={() => setMenuAbierto(!menuAbierto)}
           >
             {menuAbierto ? <FaTimes size={24} /> : <FaBars size={24} />}
@@ -64,7 +75,6 @@ function Navbar() {
             <Link to="/catalogo" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>Catalogo</Link>
             <Link to="/galeria" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>Galeria</Link>
             <Link to="/blog" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>Blog</Link>
-            <Link to="/faq" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>FAQ</Link>
             <Link to="/seguimiento" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>Seguimiento</Link>
             <Link to="/mantenimiento" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>Mantenimiento</Link>
             <Link to="/contacto" className="hover:text-yellow-500" onClick={() => setMenuAbierto(false)}>Contacto</Link>
