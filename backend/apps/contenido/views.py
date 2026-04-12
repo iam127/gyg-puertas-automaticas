@@ -3,7 +3,7 @@ from .models import Blog, FAQ, Galeria, Testimonio
 from .serializers import BlogSerializer, FAQSerializer, GaleriaSerializer, TestimonioSerializer
 
 class BlogViewSet(viewsets.ModelViewSet):
-    queryset = Blog.objects.filter(publicado=True)
+    queryset = Blog.objects.all()
     serializer_class = BlogSerializer
 
 class FAQViewSet(viewsets.ModelViewSet):
@@ -15,5 +15,5 @@ class GaleriaViewSet(viewsets.ModelViewSet):
     serializer_class = GaleriaSerializer
 
 class TestimonioViewSet(viewsets.ModelViewSet):
-    queryset = Testimonio.objects.filter(aprobado=True)
+    queryset = Testimonio.objects.all()
     serializer_class = TestimonioSerializer

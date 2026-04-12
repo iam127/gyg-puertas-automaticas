@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Mantenimiento, VisitaMantenimiento, Testimonio
-from .serializers import MantenimientoSerializer, MantenimientoListSerializer, VisitaMantenimientoSerializer, TestimonioSerializer
+from .models import Mantenimiento, VisitaMantenimiento
+from .serializers import MantenimientoSerializer, MantenimientoListSerializer, VisitaMantenimientoSerializer
 
 class MantenimientoViewSet(viewsets.ModelViewSet):
     queryset = Mantenimiento.objects.all()
@@ -36,13 +36,3 @@ class MantenimientoViewSet(viewsets.ModelViewSet):
 class VisitaMantenimientoViewSet(viewsets.ModelViewSet):
     queryset = VisitaMantenimiento.objects.all()
     serializer_class = VisitaMantenimientoSerializer
-
-class TestimonioViewSet(viewsets.ModelViewSet):
-    queryset = Testimonio.objects.all()
-    serializer_class = TestimonioSerializer
-
-    @action(detail=False, methods=['get'])
-    def aprobados(self, request):
-        testimonios = Testimonio.objects.filter(aprobado=True)
-        serializer = TestimonioSerializer(testimonios, many=True)
-        return Response(serializer.data)

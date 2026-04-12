@@ -20,7 +20,7 @@ function AdminContenido() {
     setCargando(true)
     Promise.all([
       api.get('/testimonios/'),
-      api.get('/blogs/'),
+      api.get('/blog/'),
     ]).then(([testRes, blogRes]) => {
       setTestimonios(testRes.data)
       setBlogs(blogRes.data)
@@ -63,14 +63,14 @@ function AdminContenido() {
   const handleSubmitBlog = (e) => {
     e.preventDefault()
     const request = editando
-      ? api.patch(`/blogs/${editando.id}/`, formBlog)
-      : api.post('/blogs/', formBlog)
+      ? api.patch(`/blog/${editando.id}/`, formBlog)
+      : api.post('/blog/', formBlog)
     request.then(() => { cargarDatos(); cerrarModal() })
   }
 
   const eliminar = (id) => {
     if (window.confirm('Eliminar este elemento?')) {
-      const endpoint = tab === 'testimonios' ? `/testimonios/${id}/` : `/blogs/${id}/`
+      const endpoint = tab === 'testimonios' ? `/testimonios/${id}/` : `/blog/${id}/`
       api.delete(endpoint).then(cargarDatos)
     }
   }
