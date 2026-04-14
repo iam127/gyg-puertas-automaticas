@@ -13,6 +13,18 @@ class MantenimientoViewSet(viewsets.ModelViewSet):
             return MantenimientoListSerializer
         return MantenimientoSerializer
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        try:
+            from apps.notificaciones.whatsapp import notificar_nuevo_mantenimiento
+            from apps.notificaciones.email import notificar_mantenimiento_email
+            mantenimiento = Mantenimiento.objects.get(id=response.data['id'])
+            notificar_nuevo_mantenimiento(mantenimiento)
+            notificar_mantenimiento_email(mantenimiento)
+        except Exception as e:
+            print(f"Error enviando notificacion: {e}")
+        return response
+
     @action(detail=False, methods=['get'])
     def seguimiento(self, request):
         codigo = request.query_params.get('codigo', None)
