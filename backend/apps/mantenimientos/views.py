@@ -1,12 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from .models import Mantenimiento, VisitaMantenimiento
 from .serializers import MantenimientoSerializer, MantenimientoListSerializer, VisitaMantenimientoSerializer
 
 class MantenimientoViewSet(viewsets.ModelViewSet):
     queryset = Mantenimiento.objects.all()
     serializer_class = MantenimientoSerializer
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -48,3 +50,4 @@ class MantenimientoViewSet(viewsets.ModelViewSet):
 class VisitaMantenimientoViewSet(viewsets.ModelViewSet):
     queryset = VisitaMantenimiento.objects.all()
     serializer_class = VisitaMantenimientoSerializer
+    permission_classes = [AllowAny]

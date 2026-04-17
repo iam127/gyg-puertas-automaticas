@@ -73,10 +73,9 @@ function Footer() {
 
       </div>
 
-      <div className="border-t border-gray-200 text-gray-400 text-sm py-4 px-4 flex flex-col md:flex-row justify-between items-center gap-2">
+      <div className="border-t border-gray-200 text-gray-400 text-sm py-4 px-4 text-center">
         <p>© 2026 GyG Puertas Automaticas. Todos los derechos reservados.</p>
         <div className="flex gap-4">
-          <Link to="/contacto" className="hover:text-yellow-500 transition">Contacto</Link>
         </div>
       </div>
     </footer>

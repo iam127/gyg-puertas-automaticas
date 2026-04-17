@@ -1,12 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from .models import Cotizacion, VisitaTecnica, CotizacionFormal
 from .serializers import CotizacionSerializer, CotizacionListSerializer, VisitaTecnicaSerializer, CotizacionFormalSerializer
 
 class CotizacionViewSet(viewsets.ModelViewSet):
     queryset = Cotizacion.objects.all()
     serializer_class = CotizacionSerializer
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -64,7 +66,9 @@ class CotizacionViewSet(viewsets.ModelViewSet):
 class VisitaTecnicaViewSet(viewsets.ModelViewSet):
     queryset = VisitaTecnica.objects.all()
     serializer_class = VisitaTecnicaSerializer
+    permission_classes = [AllowAny]
 
 class CotizacionFormalViewSet(viewsets.ModelViewSet):
     queryset = CotizacionFormal.objects.all()
     serializer_class = CotizacionFormalSerializer
+    permission_classes = [AllowAny]

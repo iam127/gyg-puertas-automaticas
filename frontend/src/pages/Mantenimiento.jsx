@@ -3,6 +3,36 @@ import { crearMantenimiento } from '../services/mantenimientos'
 import { Link } from 'react-router-dom'
 import { FaTools, FaWrench, FaShieldAlt, FaCheckCircle } from 'react-icons/fa'
 
+const TIPOS = [
+  {
+    value: 'preventivo',
+    icon: <FaTools size={32} />,
+    titulo: 'Mantenimiento Preventivo',
+    desc: 'Revision periodica para evitar fallas y prolongar la vida util de tu puerta.',
+    color: 'border-blue-400 bg-blue-50',
+    colorActivo: 'border-blue-500 bg-blue-100',
+    iconColor: 'text-blue-500',
+  },
+  {
+    value: 'correctivo',
+    icon: <FaWrench size={32} />,
+    titulo: 'Mantenimiento Correctivo',
+    desc: 'Diagnostico y reparacion de fallas en tu puerta automatica.',
+    color: 'border-orange-400 bg-orange-50',
+    colorActivo: 'border-orange-500 bg-orange-100',
+    iconColor: 'text-orange-500',
+  },
+  {
+    value: 'garantia',
+    icon: <FaShieldAlt size={32} />,
+    titulo: 'Garantia',
+    desc: 'Cobertura de garantia para trabajos realizados por GyG.',
+    color: 'border-green-400 bg-green-50',
+    colorActivo: 'border-green-500 bg-green-100',
+    iconColor: 'text-green-500',
+  },
+]
+
 function Mantenimiento() {
   const [form, setForm] = useState({
     nombre_cliente: '',
@@ -61,145 +91,174 @@ function Mantenimiento() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-2">Solicitar Mantenimiento / Garantia</h1>
-      <p className="text-gray-500 mb-8">Completa el formulario y nuestro equipo tecnico te atendera.</p>
+    <div>
+      {/* HERO */}
+      <section className="bg-gray-900 text-white py-16 px-4 text-center">
+        <h1 className="text-4xl font-bold mb-4">
+          Solicitar <span className="text-yellow-400">Mantenimiento</span>
+        </h1>
+        <p className="text-gray-300 max-w-2xl mx-auto">
+          Completa el formulario y nuestro equipo tecnico te atendera a la brevedad.
+        </p>
+      </section>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de solicitud *</label>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { value: 'preventivo', label: 'Mantenimiento Preventivo', icon: <FaTools size={18} /> },
-              { value: 'correctivo', label: 'Mantenimiento Correctivo', icon: <FaWrench size={18} /> },
-              { value: 'garantia', label: 'Garantia', icon: <FaShieldAlt size={18} /> },
-            ].map(op => (
+      {/* TIPOS DE SERVICIO */}
+      <section className="py-12 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-xl font-bold text-center text-gray-900 mb-8">Selecciona el tipo de servicio</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {TIPOS.map(tipo => (
               <button
-                key={op.value}
+                key={tipo.value}
                 type="button"
-                onClick={() => setForm({ ...form, tipo: op.value })}
-                className={`p-3 rounded-xl border text-sm font-medium transition flex flex-col items-center gap-2 ${
-                  form.tipo === op.value
-                    ? 'bg-yellow-400 border-yellow-400 text-gray-900'
-                    : 'border-gray-300 hover:border-yellow-400'
+                onClick={() => setForm({ ...form, tipo: tipo.value })}
+                className={`p-6 rounded-2xl border-2 text-left transition hover:shadow-md ${
+                  form.tipo === tipo.value ? tipo.colorActivo + ' shadow-md' : 'bg-white border-gray-200 hover:border-gray-300'
                 }`}
               >
-                {op.icon}
-                {op.label}
+                <div className={`mb-3 ${form.tipo === tipo.value ? tipo.iconColor : 'text-gray-400'}`}>
+                  {tipo.icon}
+                </div>
+                <h3 className="font-bold text-gray-900 mb-1">{tipo.titulo}</h3>
+                <p className="text-gray-500 text-sm">{tipo.desc}</p>
+                {form.tipo === tipo.value && (
+                  <div className="mt-3">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${tipo.iconColor} bg-white`}>
+                      Seleccionado
+                    </span>
+                  </div>
+                )}
               </button>
             ))}
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
-            <input
-              name="nombre_cliente"
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
-            <input
-              name="telefono"
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-            />
+      {/* FORMULARIO */}
+      <section className="py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Datos de contacto</h2>
+
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+                {error}
+              </div>
+            )}
+
+            {!form.tipo && (
+              <div className="bg-yellow-50 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-xl mb-6 text-sm">
+                Por favor selecciona un tipo de servicio arriba antes de continuar.
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+                  <input
+                    name="nombre_cliente"
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
+                  <input
+                    name="telefono"
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
+                <input
+                  name="correo"
+                  type="email"
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Direccion *</label>
+                  <input
+                    name="direccion"
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Distrito *</label>
+                  <input
+                    name="distrito"
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de puerta instalada *</label>
+                  <input
+                    name="tipo_puerta"
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha aproximada de instalacion</label>
+                  <input
+                    name="fecha_instalacion_aprox"
+                    type="date"
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion del problema *</label>
+                <textarea
+                  name="descripcion_problema"
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad para visita tecnica *</label>
+                <input
+                  name="disponibilidad"
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={cargando || !form.tipo}
+                className="w-full bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold hover:bg-yellow-300 transition disabled:opacity-50 mt-2"
+              >
+                {cargando ? 'Enviando...' : 'Enviar solicitud'}
+              </button>
+            </form>
           </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
-          <input
-            name="correo"
-            type="email"
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Direccion *</label>
-            <input
-              name="direccion"
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Distrito *</label>
-            <input
-              name="distrito"
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de puerta instalada *</label>
-            <input
-              name="tipo_puerta"
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha aproximada de instalacion</label>
-            <input
-              name="fecha_instalacion_aprox"
-              type="date"
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion del problema *</label>
-          <textarea
-            name="descripcion_problema"
-            onChange={handleChange}
-            required
-            rows={4}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad para visita tecnica *</label>
-          <input
-            name="disponibilidad"
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:border-yellow-400"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={cargando || !form.tipo}
-          className="w-full bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold hover:bg-yellow-300 transition disabled:opacity-50"
-        >
-          {cargando ? 'Enviando...' : 'Enviar solicitud'}
-        </button>
-      </form>
+      </section>
     </div>
   )
 }
