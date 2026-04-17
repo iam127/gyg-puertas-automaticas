@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getProductos } from '../services/productos'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 function Comparador() {
   const [productos, setProductos] = useState([])
@@ -26,6 +27,9 @@ function Comparador() {
   if (comparando && seleccionados.length >= 2) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-10">
+        <Helmet>
+          <title>Comparador | GyG Puertas Automaticas</title>
+        </Helmet>
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Comparando productos</h1>
           <button

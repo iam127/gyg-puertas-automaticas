@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { FaFileExcel, FaFilePdf, FaChartBar, FaChartPie } from 'react-icons/fa'
+import { Helmet } from 'react-helmet-async'
 
 function AdminReportes() {
   const [stats, setStats] = useState({
@@ -86,6 +87,9 @@ function AdminReportes() {
 
   return (
     <div>
+      <Helmet>
+        <title>Reportes | GyG Admin</title>
+      </Helmet>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Reportes</h2>
         <div className="flex gap-3">

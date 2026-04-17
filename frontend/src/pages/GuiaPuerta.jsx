@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 const preguntas = [
   {
@@ -97,6 +98,9 @@ function GuiaPuerta() {
   if (resultado) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+      <Helmet>
+        <title>Que puerta necesito | GyG Puertas Automaticas</title>
+      </Helmet>
         <div className="text-6xl mb-4">🚪</div>
         <h2 className="text-2xl font-bold mb-2">Te recomendamos:</h2>
         <div className="bg-yellow-50 border border-yellow-400 rounded-xl px-8 py-6 mb-6">

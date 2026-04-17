@@ -14,6 +14,7 @@ import AdminMantenimientos from './AdminMantenimientos'
 import AdminTecnicos from './AdminTecnicos'
 import AdminContenido from './AdminContenido'
 import AdminReportes from './AdminReportes'
+import { Helmet } from 'react-helmet-async'
 
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: <FaThLarge /> },
@@ -72,6 +73,9 @@ function AdminPanel() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      <Helmet>
+        <title>Panel | GyG Admin</title>
+      </Helmet>
 
       {/* SIDEBAR */}
       <div className={`${sidebarAbierto ? 'w-64' : 'w-16'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getProductosDestacados } from '../services/productos'
+import { FaShieldAlt, FaStar, FaClock, FaTools, FaMoneyBillWave, FaHeadset, FaArrowRight, FaPhone, FaCheckCircle } from 'react-icons/fa'
 import { getTestimonios } from '../services/contenido'
+import { Helmet } from 'react-helmet-async'
 
 import puerta01 from '../assets/Puerta01.jpg'
 import puerta02 from '../assets/Puerta02.jpg'
@@ -34,20 +35,20 @@ const tiposPuertas = [
   { imagen: puerta08, nombre: 'Puertas de Madera', uso: 'Residencial' },
 ]
 
-const porQueElegirnos = [
-  { icono: '1', titulo: 'Experiencia comprobada', desc: 'Mas de 10 anos instalando puertas automaticas en Lima y provincias con resultados garantizados.' },
-  { icono: '2', titulo: 'Garantia incluida', desc: 'Todos nuestros productos e instalaciones cuentan con garantia. Tu inversion esta protegida.' },
-  { icono: '3', titulo: 'Atencion rapida', desc: 'Respondemos tu solicitud en menos de 24 horas y coordinamos la visita tecnica a la brevedad.' },
-  { icono: '4', titulo: 'Tecnicos certificados', desc: 'Nuestro equipo esta capacitado y certificado para instalar y mantener todo tipo de puertas automaticas.' },
-  { icono: '5', titulo: 'Precios competitivos', desc: 'Ofrecemos los mejores precios del mercado sin sacrificar la calidad de nuestros productos.' },
-  { icono: '6', titulo: 'Soporte 24/7', desc: 'Estamos disponibles las 24 horas del dia, los 7 dias de la semana para atender cualquier emergencia.' },
+const ventajas = [
+  { icono: <FaStar size={18} />, titulo: 'Experiencia comprobada', desc: 'Mas de 10 anos instalando puertas automaticas en toda Lima con resultados garantizados.' },
+  { icono: <FaShieldAlt size={18} />, titulo: 'Garantia incluida', desc: 'Todos nuestros productos e instalaciones cuentan con garantia real en piezas y mano de obra.' },
+  { icono: <FaClock size={18} />, titulo: 'Atencion en 24 horas', desc: 'Respondemos tu solicitud rapidamente y coordinamos la visita tecnica gratuita.' },
+  { icono: <FaTools size={18} />, titulo: 'Tecnicos certificados', desc: 'Nuestro equipo esta capacitado para instalar y mantener todas las marcas del mercado.' },
+  { icono: <FaMoneyBillWave size={18} />, titulo: 'Precios competitivos', desc: 'Ofrecemos los mejores precios del mercado sin sacrificar la calidad del trabajo.' },
+  { icono: <FaHeadset size={18} />, titulo: 'Soporte 24/7', desc: 'Disponibles las 24 horas del dia para atender cualquier emergencia con tu puerta.' },
 ]
 
 const pasos = [
-  { numero: '01', titulo: 'Solicita cotizacion', desc: 'Llena el formulario con tus datos y descripcion de lo que necesitas.' },
-  { numero: '02', titulo: 'Visita tecnica', desc: 'Nuestro tecnico va a tu domicilio a tomar medidas y evaluar el espacio.' },
-  { numero: '03', titulo: 'Instalacion', desc: 'Realizamos la instalacion con materiales de primera calidad.' },
-  { numero: '04', titulo: 'Garantia activa', desc: 'Entregamos el trabajo con garantia y soporte tecnico incluido.' },
+  { n: '01', titulo: 'Solicita tu cotizacion', desc: 'Completa el formulario con los datos de tu proyecto.' },
+  { n: '02', titulo: 'Visita tecnica gratuita', desc: 'Un tecnico especialista visita tu domicilio sin costo.' },
+  { n: '03', titulo: 'Instalacion profesional', desc: 'Instalamos con materiales de primera calidad.' },
+  { n: '04', titulo: 'Garantia activada', desc: 'Recibes tu puerta con garantia y soporte continuo.' },
 ]
 
 const marcas = [
@@ -60,189 +61,166 @@ const marcas = [
 ]
 
 const testimoniosDefault = [
-  { nombre: 'Carlos M.', comentario: 'Excelente servicio, instalaron mi puerta corrediza en un dia. Muy profesionales.', estrellas: 5 },
-  { nombre: 'Maria L.', comentario: 'Muy buena atencion, el tecnico fue puntual y el trabajo quedo perfecto.', estrellas: 5 },
-  { nombre: 'Roberto K.', comentario: 'Recomiendo GyG, precios justos y garantia real. Ya llevo 2 anos sin problemas.', estrellas: 5 },
+  { nombre: 'Carlos M.', comentario: 'Excelente servicio, instalaron mi puerta corrediza en un dia. Muy profesionales y puntuales.', estrellas: 5 },
+  { nombre: 'Maria L.', comentario: 'Muy buena atencion, el tecnico fue puntual y el trabajo quedo perfecto. Lo recomiendo.', estrellas: 5 },
+  { nombre: 'Roberto K.', comentario: 'Recomiendo GyG, precios justos y garantia real. Ya llevo 2 anos sin ningun problema.', estrellas: 5 },
 ]
 
-function Inicio() {
+export default function Inicio() {
   const [slideActual, setSlideActual] = useState(0)
-  const [productosDestacados, setProductosDestacados] = useState([])
   const [testimonios, setTestimonios] = useState([])
 
   useEffect(() => {
-    getProductosDestacados().then(res => setProductosDestacados(res.data)).catch(() => {})
     getTestimonios().then(res => setTestimonios(res.data)).catch(() => {})
   }, [])
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setSlideActual(prev => (prev + 1) % slides.length)
-    }, 4000)
-    return () => clearInterval(timer)
+    const t = setInterval(() => setSlideActual(p => (p + 1) % slides.length), 5000)
+    return () => clearInterval(t)
   }, [])
 
   return (
     <div>
+      <Helmet>
+        <title>GyG Puertas Automaticas | Instalacion y Mantenimiento en Lima</title>
+      </Helmet>
 
-      {/* SLIDER */}
-      <section className="relative h-[500px] overflow-hidden">
+      {/* HERO */}
+      <section className="relative overflow-hidden" style={{ height: '90vh', minHeight: '580px', maxHeight: '780px' }}>
         {slides.map((slide, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              opacity: i === slideActual ? 1 : 0,
-              transition: 'opacity 1s ease-in-out'
-            }}
-          >
-            <img
-              src={slide.imagen}
-              alt={slide.titulo}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              color: 'white',
-              padding: '1rem'
-            }}>
-              <div>
-                <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                  <span className="text-yellow-400">GyG</span> Puertas Automaticas
-                </h1>
-                <p className="text-xl md:text-2xl mb-2 font-medium">{slide.titulo}</p>
-                <p className="text-gray-300 mb-8">{slide.desc}</p>
-                <div className="flex justify-center gap-4 flex-wrap">
-                  <Link to="/catalogo" className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-bold hover:bg-yellow-300 transition">
-                    Ver Catalogo
-                  </Link>
-                  <Link to="/cotizar" className="border border-white text-white px-6 py-3 rounded-full font-bold hover:bg-white hover:text-gray-900 transition">
-                    Solicitar Cotizacion
-                  </Link>
-                </div>
-              </div>
-            </div>
+          <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === slideActual ? 1 : 0, transition: 'opacity 1.5s ease' }}>
+            <img src={slide.imagen} alt={slide.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.78) 50%, rgba(0,0,0,0.2) 100%)' }} />
           </div>
         ))}
-        <div style={{ position: 'absolute', bottom: '1rem', left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: '0.5rem', zIndex: 10 }}>
+        <div className="relative z-10 h-full flex items-center px-6 md:px-20">
+          <div style={{ maxWidth: '580px' }}>
+            <p className="text-yellow-400 text-sm font-bold uppercase tracking-widest mb-4">
+              GyG Puertas Automaticas
+            </p>
+            <h1 className="text-white font-black mb-6" style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)', lineHeight: 1.1 }}>
+              {slides[slideActual].titulo}
+            </h1>
+            <p className="text-gray-300 text-lg mb-10 leading-relaxed">
+              {slides[slideActual].desc}. Instalacion profesional en toda Lima con garantia incluida.
+            </p>
+            <div className="flex gap-4 flex-wrap">
+              <Link to="/cotizar" className="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-lg hover:bg-yellow-300 transition flex items-center gap-2">
+                Cotizacion Gratuita <FaArrowRight size={14} />
+              </Link>
+              <a href="tel:+51947316864" className="text-white font-semibold px-8 py-4 rounded-lg flex items-center gap-2 transition" style={{ border: '1.5px solid rgba(255,255,255,0.35)', backdropFilter: 'blur(4px)' }}>
+                <FaPhone size={14} /> Llamar ahora
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
           {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setSlideActual(i)}
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: i === slideActual ? '#facc15' : 'rgba(255,255,255,0.5)',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            />
+            <button key={i} onClick={() => setSlideActual(i)} className="rounded-full transition-all" style={{ width: i === slideActual ? '28px' : '8px', height: '8px', background: i === slideActual ? '#facc15' : 'rgba(255,255,255,0.4)', border: 'none', cursor: 'pointer' }} />
           ))}
         </div>
       </section>
 
       {/* ESTADISTICAS */}
-      <section className="bg-yellow-400 py-10 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-gray-900">
+      <section className="bg-yellow-400">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4">
           {[
-            { numero: '10+', label: 'Anos de experiencia' },
-            { numero: '500+', label: 'Clientes satisfechos' },
-            { numero: '1000+', label: 'Proyectos realizados' },
-            { numero: '24/7', label: 'Atencion disponible' },
-          ].map((stat, i) => (
-            <div key={i}>
-              <p className="text-4xl font-bold">{stat.numero}</p>
-              <p className="text-sm font-medium mt-1">{stat.label}</p>
+            { n: '10+', l: 'Anos de experiencia' },
+            { n: '500+', l: 'Clientes satisfechos' },
+            { n: '1000+', l: 'Proyectos realizados' },
+            { n: '24/7', l: 'Soporte disponible' },
+          ].map((s, i) => (
+            <div key={i} className="py-8 px-6 text-center border-r border-yellow-500 last:border-0">
+              <p className="text-4xl font-black text-gray-900">{s.n}</p>
+              <p className="text-xs font-semibold text-gray-700 mt-2 uppercase tracking-wider">{s.l}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* POR QUE ELEGIRNOS */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-2">Por que elegirnos</h2>
-        <p className="text-gray-500 text-center mb-10">Somos tu mejor opcion en puertas automaticas en Lima</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {porQueElegirnos.map((item, i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition border border-gray-100">
-              <div className="bg-yellow-400 text-gray-900 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg mb-3">
-                {item.icono}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3">Nuestras ventajas</p>
+            <h2 className="text-4xl font-black text-gray-900 mb-4">Por que elegirnos</h2>
+            <p className="text-gray-500 max-w-md mx-auto">Somos tu mejor opcion en puertas automaticas en Lima con mas de una decada de experiencia.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {ventajas.map((v, i) => (
+              <div key={i} className="bg-gray-50 rounded-2xl p-7 border border-gray-100 hover:border-yellow-300 hover:shadow-md transition group">
+                <div className="w-11 h-11 bg-yellow-400 rounded-xl flex items-center justify-center text-gray-900 mb-5 group-hover:scale-110 transition">
+                  {v.icono}
+                </div>
+                <h3 className="font-bold text-gray-900 text-base mb-2">{v.titulo}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{v.desc}</p>
               </div>
-              <h3 className="text-lg font-bold mb-2">{item.titulo}</h3>
-              <p className="text-gray-600 text-sm">{item.desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* TIPOS DE PUERTAS */}
-      <section className="py-16 px-4 bg-gray-50">
+      {/* PRODUCTOS */}
+      <section className="py-24 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2">Nuestros Productos</h2>
-          <p className="text-gray-500 text-center mb-10">Fabricamos e instalamos todo tipo de puertas automaticas</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex justify-between items-end mb-16 flex-wrap gap-4">
+            <div>
+              <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3">Lo que ofrecemos</p>
+              <h2 className="text-4xl font-black text-gray-900">Nuestros Productos</h2>
+            </div>
+            <Link to="/catalogo" className="bg-gray-900 text-white font-bold px-6 py-3 rounded-lg hover:bg-gray-800 transition flex items-center gap-2 text-sm">
+              Ver catalogo <FaArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {tiposPuertas.map((tipo, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition group">
-                <div className="overflow-hidden h-48">
-                  <img
-                    src={tipo.imagen}
-                    alt={tipo.nombre}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
+              <div key={i} className="rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition group bg-white">
+                <div className="overflow-hidden h-52">
+                  <img src={tipo.imagen} alt={tipo.nombre} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-lg">{tipo.nombre}</h3>
-                  <p className="text-gray-500 text-sm mb-3">{tipo.uso}</p>
-                  <Link to="/catalogo" className="text-yellow-500 font-bold hover:underline text-sm">
-                    Ver mas
+                <div className="p-5">
+                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">{tipo.uso}</span>
+                  <h3 className="font-bold text-gray-900 text-lg mt-3 mb-1">{tipo.nombre}</h3>
+                  <Link to="/catalogo" className="text-yellow-500 font-bold text-sm flex items-center gap-1 mt-3 hover:gap-2 transition-all">
+                    Ver detalle <FaArrowRight size={11} />
                   </Link>
                 </div>
               </div>
             ))}
           </div>
-          <div className="text-center mt-8">
-            <Link to="/catalogo" className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-bold hover:bg-yellow-300 transition">
-              Ver todo el catalogo
-            </Link>
-          </div>
         </div>
       </section>
 
       {/* PROCESO */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-2">Como trabajamos</h2>
-        <p className="text-gray-500 text-center mb-10">Un proceso simple y transparente para tu tranquilidad</p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {pasos.map((paso, i) => (
-            <div key={i} className="text-center">
-              <div className="bg-yellow-400 text-gray-900 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                {paso.numero}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3">Como trabajamos</p>
+            <h2 className="text-4xl font-black text-gray-900">Un proceso simple y transparente</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {pasos.map((p, i) => (
+              <div key={i} className="text-center">
+                <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center text-2xl font-black text-gray-900 mx-auto mb-5 shadow-md">
+                  {p.n}
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">{p.titulo}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{p.desc}</p>
               </div>
-              <h3 className="font-bold text-lg mb-2">{paso.titulo}</h3>
-              <p className="text-gray-600 text-sm">{paso.desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* MARCAS */}
       <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2">Trabajamos con las mejores marcas</h2>
-          <p className="text-gray-500 text-center mb-10">Motores y equipos importados de marcas reconocidas mundialmente</p>
+          <p className="text-center text-gray-400 text-xs font-bold uppercase tracking-widest mb-10">Marcas con las que trabajamos</p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {marcas.map((marca, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 text-center shadow-md hover:shadow-xl transition border border-gray-100 flex flex-col items-center justify-center gap-3 h-36">
-                <img src={marca.logo} alt={marca.nombre} className="h-16 w-full object-contain" />
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{marca.pais}</span>
+            {marcas.map((m, i) => (
+              <div key={i} className="bg-white rounded-2xl p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition border border-gray-100">
+                <img src={m.logo} alt={m.nombre} className="h-10 w-full object-contain" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{m.pais}</span>
               </div>
             ))}
           </div>
@@ -250,35 +228,56 @@ function Inicio() {
       </section>
 
       {/* TESTIMONIOS */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-10">Lo que dicen nuestros clientes</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(testimonios.length > 0 ? testimonios : testimoniosDefault).map((t, i) => (
-            <div key={i} className="bg-gray-50 rounded-xl p-6 shadow border border-gray-100">
-              <p className="text-yellow-400 text-xl mb-2">{'*****'.slice(0, t.estrellas || t.calificacion)}</p>
-              <p className="text-gray-700 mb-3 italic">"{t.comentario}"</p>
-              <p className="font-bold text-gray-900">{t.nombre || t.nombre_cliente}</p>
-            </div>
-          ))}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3">Testimonios</p>
+            <h2 className="text-4xl font-black text-gray-900">Lo que dicen nuestros clientes</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {(testimonios.length > 0 ? testimonios : testimoniosDefault).map((t, i) => (
+              <div key={i} className="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(t.estrellas || t.calificacion)].map((_, j) => <FaStar key={j} size={15} className="text-yellow-400" />)}
+                </div>
+                <p className="text-gray-600 text-base leading-relaxed mb-6 italic">"{t.comentario}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-gray-900 text-lg">
+                    {(t.nombre || t.nombre_cliente)[0]}
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm">{t.nombre || t.nombre_cliente}</p>
+                    <p className="text-gray-400 text-xs">Cliente verificado</p>
+                  </div>
+                  <FaCheckCircle size={15} className="text-green-500 ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section className="bg-gray-900 py-16 px-4 text-center text-white">
-        <h2 className="text-3xl font-bold mb-4">Listo para automatizar tu puerta?</h2>
-        <p className="text-gray-300 mb-8 max-w-xl mx-auto">Solicita una cotizacion gratuita y nuestro equipo coordinara una visita tecnica sin costo.</p>
-        <div className="flex justify-center gap-4 flex-wrap">
-          <Link to="/cotizar" className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-yellow-300 transition">
-            Solicitar Cotizacion
-          </Link>
-          <a href="https://wa.me/51947316874" target="_blank" rel="noreferrer" className="bg-green-500 text-white px-8 py-3 rounded-full font-bold hover:bg-green-600 transition">
-            Escribir por WhatsApp
-          </a>
+      {/* CTA */}
+      <section className="py-24 px-4 bg-gray-900">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-yellow-400 text-xs font-bold uppercase tracking-widest mb-4">Contactanos hoy</p>
+          <h2 className="text-white font-black mb-6" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 1.1 }}>
+            Listo para automatizar tu puerta?
+          </h2>
+          <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+            Visita tecnica gratuita en toda Lima. Sin compromiso, sin costos ocultos.
+          </p>
+          <div className="flex justify-center gap-4 flex-wrap">
+            <Link to="/cotizar" className="bg-yellow-400 text-gray-900 font-black px-10 py-4 rounded-lg hover:bg-yellow-300 transition flex items-center gap-2 text-base">
+              Solicitar Cotizacion <FaArrowRight size={14} />
+            </Link>
+            <a href="https://wa.me/51947316874" target="_blank" rel="noreferrer" className="bg-green-500 text-white font-bold px-10 py-4 rounded-lg hover:bg-green-600 transition text-base">
+              Escribir por WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 
     </div>
   )
 }
-
-export default Inicio

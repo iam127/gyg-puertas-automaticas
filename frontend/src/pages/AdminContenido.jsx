@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa'
+import { Helmet } from 'react-helmet-async'
+
 
 function AdminContenido() {
   const [tab, setTab] = useState('testimonios')
@@ -81,6 +83,9 @@ function AdminContenido() {
 
   return (
     <div>
+      <Helmet>
+        <title>Contenido | GyG Admin</title>
+      </Helmet>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Contenido</h2>
         <button

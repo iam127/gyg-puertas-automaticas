@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, setTokens } from '../services/auth'
 import logo from '../assets/Logo-gyg.png'
+import { Helmet } from 'react-helmet-async'
 
 function AdminLogin() {
   const [form, setForm] = useState({ username: '', password: '' })
@@ -29,6 +30,9 @@ function AdminLogin() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <Helmet>
+          <title>Login | GyG Admin</title>
+        </Helmet>
         <div className="text-center mb-8">
           <img src={logo} alt="GyG" className="h-16 object-contain mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900">Panel Administrativo</h1>

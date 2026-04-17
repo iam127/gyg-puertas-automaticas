@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { FaSearch, FaEye, FaTimes, FaEdit } from 'react-icons/fa'
+import { Helmet } from 'react-helmet-async'
 
 const ESTADOS = [
   { value: '', label: 'Todos' },
@@ -64,6 +65,9 @@ function AdminMantenimientos() {
 
   return (
     <div>
+      <Helmet>
+        <title>Mantenimiento | GyG Admin</title>
+      </Helmet>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Mantenimientos</h2>
         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getProducto } from '../services/productos'
+import { Helmet } from 'react-helmet-async'
 
 function DetalleProducto() {
   const { id } = useParams()
@@ -28,6 +29,9 @@ function DetalleProducto() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
+      <Helmet>
+        <title>{producto.nombre} | GyG Puertas Automaticas</title>
+      </Helmet>
       <div className="mb-6">
         <Link to="/catalogo" className="text-yellow-500 hover:underline text-sm">
           ← Volver al catálogo

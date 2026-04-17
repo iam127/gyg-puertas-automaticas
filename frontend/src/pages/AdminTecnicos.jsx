@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { FaPlus, FaTrash, FaTimes, FaCopy, FaSearch } from 'react-icons/fa'
+import { Helmet } from 'react-helmet-async'
 
 function AdminTecnicos() {
   const [tecnicos, setTecnicos] = useState([])
@@ -51,6 +52,9 @@ function AdminTecnicos() {
 
   return (
     <div>
+      <Helmet>
+        <title>Tecnicos | GyG Admin</title>
+      </Helmet>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Tecnicos</h2>
         <button
