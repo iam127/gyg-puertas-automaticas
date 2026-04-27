@@ -24,7 +24,9 @@ class MantenimientoViewSet(viewsets.ModelViewSet):
             notificar_nuevo_mantenimiento(mantenimiento)
             notificar_mantenimiento_email(mantenimiento)
         except Exception as e:
-            print(f"Error enviando notificacion: {e}")
+                    import traceback
+                    print(f"Error enviando notificacion: {e}")
+                    traceback.print_exc()
         return response
 
     @action(detail=False, methods=['get'])

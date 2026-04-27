@@ -1,9 +1,15 @@
 import { useState } from 'react'
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaWhatsapp, FaClock, FaChevronDown } from 'react-icons/fa'
+import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaWhatsapp, FaClock, FaChevronDown, FaCheckCircle } from 'react-icons/fa'
 import { Helmet } from 'react-helmet-async'
+import api from '../services/api'
 
 function Contacto() {
   const [faqAbierto, setFaqAbierto] = useState(null)
+  const [formContacto, setFormContacto] = useState({ nombre: '', telefono: '', correo: '', mensaje: '' })
+  const [enviando, setEnviando] = useState(false)
+  const [enviado, setEnviado] = useState(false)
+  const [errorContacto, setErrorContacto] = useState('')
+
   const whatsappUrl = 'https://wa.me/51947316874?text=Hola%2C%20me%20gustaria%20obtener%20informacion%20sobre%20sus%20puertas%20automaticas'
   const mapsUrl = 'https://maps.google.com/?q=Manuel+Odria+161+Ate+Lima+Peru'
 
@@ -15,11 +21,25 @@ function Contacto() {
     { pregunta: 'Trabajan en toda Lima?', respuesta: 'Si, atendemos en todos los distritos de Lima Metropolitana.' },
   ]
 
+  const handleSubmitContacto = (e) => {
+    e.preventDefault()
+    setEnviando(true)
+    setErrorContacto('')
+    api.post('/contacto/', formContacto)
+      .then(() => {
+        setEnviado(true)
+        setFormContacto({ nombre: '', telefono: '', correo: '', mensaje: '' })
+      })
+      .catch(() => setErrorContacto('Ocurrio un error. Por favor intenta de nuevo.'))
+      .finally(() => setEnviando(false))
+  }
+
   return (
     <div>
       <Helmet>
-          <title>Contacto | GyG Puertas Automaticas</title>
+        <title>Contacto | GyG Puertas Automaticas</title>
       </Helmet>
+
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
         <div className="relative z-10">
@@ -121,42 +141,81 @@ function Contacto() {
               <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Formulario</span>
               <h2 className="text-3xl font-bold mt-1 mb-8 text-gray-900">Envianos un mensaje</h2>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <form className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
-                    />
+                {enviado ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaCheckCircle size={32} className="text-green-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Mensaje enviado</h3>
+                    <p className="text-gray-500 text-sm mb-6">Nos comunicaremos contigo a la brevedad. Gracias por contactarnos.</p>
+                    <button
+                      onClick={() => setEnviado(false)}
+                      className="border border-gray-200 px-6 py-2.5 rounded-xl font-medium text-sm hover:bg-gray-50 transition"
+                    >
+                      Enviar otro mensaje
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico</label>
-                    <input
-                      type="email"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-                    <textarea
-                      rows={5}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-yellow-400 text-gray-900 py-3.5 rounded-xl font-bold hover:bg-yellow-300 transition shadow-sm"
-                  >
-                    Enviar mensaje
-                  </button>
-                </form>
+                ) : (
+                  <form onSubmit={handleSubmitContacto} className="space-y-5">
+                    {errorContacto && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                        {errorContacto}
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+                      <input
+                        type="text"
+                        value={formContacto.nombre}
+                        onChange={e => setFormContacto({...formContacto, nombre: e.target.value})}
+                        required
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
+                      <input
+                        type="text"
+                        value={formContacto.telefono}
+                        onChange={e => setFormContacto({...formContacto, telefono: e.target.value})}
+                        required
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
+                      <input
+                        type="email"
+                        value={formContacto.correo}
+                        onChange={e => setFormContacto({...formContacto, correo: e.target.value})}
+                        required
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
+                      <textarea
+                        rows={5}
+                        value={formContacto.mensaje}
+                        onChange={e => setFormContacto({...formContacto, mensaje: e.target.value})}
+                        required
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-gray-50"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={enviando}
+                      className="w-full bg-yellow-400 text-gray-900 py-3.5 rounded-xl font-bold hover:bg-yellow-300 transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {enviando ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                          Enviando...
+                        </>
+                      ) : 'Enviar mensaje'}
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
 

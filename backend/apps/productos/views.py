@@ -9,7 +9,7 @@ class CategoriaProductoViewSet(viewsets.ModelViewSet):
     serializer_class = CategoriaProductoSerializer
 
 class ProductoViewSet(viewsets.ModelViewSet):
-    queryset = Producto.objects.filter(activo=True)
+    queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion', 'uso', 'material']
@@ -19,6 +19,9 @@ class ProductoViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ProductoListSerializer
         return ProductoSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
     @action(detail=False, methods=['get'])
     def destacados(self, request):

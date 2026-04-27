@@ -1,12 +1,14 @@
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+
 
 def notificar_cotizacion_email(cotizacion):
     try:
+        # EMAIL AL CLIENTE
         subject = f'GyG Puertas - Cotizacion recibida {cotizacion.codigo}'
         text_content = f'Hola {cotizacion.nombre_cliente}, recibimos tu cotizacion {cotizacion.codigo}'
 
-        html_content = f'''
+        html_cliente = f'''
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,12 +44,10 @@ def notificar_cotizacion_email(cotizacion):
     <div class="body">
       <p class="greeting">Hola, {cotizacion.nombre_cliente}</p>
       <p class="message">Recibimos tu solicitud de cotizacion correctamente. Nuestro equipo te contactara a la brevedad para coordinar una visita tecnica gratuita.</p>
-
       <div class="codigo-box">
         <p>Tu codigo de seguimiento es:</p>
         <h2>{cotizacion.codigo}</h2>
       </div>
-
       <div class="details">
         <h3>Detalles de tu solicitud</h3>
         <div class="detail-row">
@@ -67,7 +67,6 @@ def notificar_cotizacion_email(cotizacion):
           <p style="margin:0;color:#111827;font-weight:bold;font-size:14px;">{cotizacion.descripcion}</p>
         </div>
       </div>
-
       <div class="cta">
         <a href="http://localhost:5173/seguimiento">Hacer seguimiento</a>
       </div>
@@ -84,26 +83,87 @@ def notificar_cotizacion_email(cotizacion):
 '''
 
         msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [cotizacion.correo])
-        msg.attach_alternative(html_content, "text/html")
+        msg.attach_alternative(html_cliente, "text/html")
         msg.send()
 
-        send_mail(
+        # EMAIL A LA EMPRESA
+        html_empresa = f'''
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0;">
+  <div style="max-width:600px;margin:30px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+    <div style="background:#111827;padding:25px;text-align:center;">
+      <h2 style="color:#facc15;margin:0;font-size:20px;">Nueva Cotizacion Recibida</h2>
+      <p style="color:#9ca3af;margin:6px 0 0;font-size:13px;">Codigo: {cotizacion.codigo}</p>
+    </div>
+    <div style="padding:25px;">
+      <div style="background:#fefce8;border:2px solid #facc15;border-radius:10px;padding:15px;text-align:center;margin-bottom:20px;">
+        <p style="margin:0 0 4px;color:#6b7280;font-size:12px;">Codigo de seguimiento</p>
+        <h2 style="margin:0;color:#111827;font-size:26px;letter-spacing:4px;font-weight:bold;">{cotizacion.codigo}</h2>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;width:40%;">Cliente</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.nombre_cliente}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Telefono</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.telefono}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;">Correo</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.correo}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Distrito</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.distrito}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;">Tipo de uso</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.tipo_uso}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Disponibilidad</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.disponibilidad}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 8px;color:#6b7280;">Descripcion</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{cotizacion.descripcion}</td>
+        </tr>
+      </table>
+      <div style="margin-top:20px;text-align:center;">
+        <a href="http://localhost:5173/admin-panel" style="background:#facc15;color:#111827;padding:12px 30px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:14px;">Ver en el panel admin</a>
+      </div>
+    </div>
+    <div style="background:#f9fafb;padding:15px;text-align:center;border-top:1px solid #e5e7eb;">
+      <p style="margin:0;color:#9ca3af;font-size:12px;">GyG Puertas Automaticas — Panel Administrativo</p>
+    </div>
+  </div>
+</body>
+</html>
+'''
+
+        msg_empresa = EmailMultiAlternatives(
             subject=f'Nueva cotizacion recibida - {cotizacion.codigo}',
-            message=f'Cliente: {cotizacion.nombre_cliente}\nTelefono: {cotizacion.telefono}\nCorreo: {cotizacion.correo}\nDistrito: {cotizacion.distrito}\nTipo de uso: {cotizacion.tipo_uso}\nDescripcion: {cotizacion.descripcion}\nDisponibilidad: {cotizacion.disponibilidad}\nCodigo: {cotizacion.codigo}',
+            body=f'Nueva cotizacion de {cotizacion.nombre_cliente} - {cotizacion.telefono}',
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[settings.EMAIL_HOST_USER],
-            fail_silently=True,
+            to=[settings.EMAIL_HOST_USER]
         )
+        msg_empresa.attach_alternative(html_empresa, "text/html")
+        msg_empresa.send(fail_silently=True)
+
     except Exception as e:
         print(f"Error enviando email cotizacion: {e}")
 
 
 def notificar_mantenimiento_email(mantenimiento):
     try:
+        # EMAIL AL CLIENTE
         subject = f'GyG Puertas - Solicitud de {mantenimiento.tipo} recibida {mantenimiento.codigo}'
         text_content = f'Hola {mantenimiento.nombre_cliente}, recibimos tu solicitud {mantenimiento.codigo}'
 
-        html_content = f'''
+        html_cliente = f'''
 <!DOCTYPE html>
 <html>
 <head>
@@ -139,12 +199,10 @@ def notificar_mantenimiento_email(mantenimiento):
     <div class="body">
       <p class="greeting">Hola, {mantenimiento.nombre_cliente}</p>
       <p class="message">Recibimos tu solicitud de {mantenimiento.tipo} correctamente. Nuestro tecnico se comunicara contigo para coordinar la visita.</p>
-
       <div class="codigo-box">
         <p>Tu codigo de seguimiento es:</p>
         <h2>{mantenimiento.codigo}</h2>
       </div>
-
       <div class="details">
         <h3>Detalles de tu solicitud</h3>
         <div class="detail-row">
@@ -168,7 +226,6 @@ def notificar_mantenimiento_email(mantenimiento):
           <p style="margin:0;color:#111827;font-weight:bold;font-size:14px;">{mantenimiento.descripcion_problema}</p>
         </div>
       </div>
-
       <div class="cta">
         <a href="http://localhost:5173/seguimiento">Hacer seguimiento</a>
       </div>
@@ -185,15 +242,79 @@ def notificar_mantenimiento_email(mantenimiento):
 '''
 
         msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [mantenimiento.correo])
-        msg.attach_alternative(html_content, "text/html")
+        msg.attach_alternative(html_cliente, "text/html")
         msg.send()
 
-        send_mail(
+        # EMAIL A LA EMPRESA
+        html_empresa = f'''
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0;">
+  <div style="max-width:600px;margin:30px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+    <div style="background:#111827;padding:25px;text-align:center;">
+      <h2 style="color:#facc15;margin:0;font-size:20px;">Nueva Solicitud de {mantenimiento.tipo.capitalize()}</h2>
+      <p style="color:#9ca3af;margin:6px 0 0;font-size:13px;">Codigo: {mantenimiento.codigo}</p>
+    </div>
+    <div style="padding:25px;">
+      <div style="background:#fefce8;border:2px solid #facc15;border-radius:10px;padding:15px;text-align:center;margin-bottom:20px;">
+        <p style="margin:0 0 4px;color:#6b7280;font-size:12px;">Codigo de seguimiento</p>
+        <h2 style="margin:0;color:#111827;font-size:26px;letter-spacing:4px;font-weight:bold;">{mantenimiento.codigo}</h2>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;width:40%;">Cliente</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.nombre_cliente}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Telefono</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.telefono}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;">Correo</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.correo}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Distrito</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.distrito}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;">Tipo</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.tipo}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Tipo de puerta</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.tipo_puerta}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;">Disponibilidad</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.disponibilidad}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 8px;color:#6b7280;">Problema</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mantenimiento.descripcion_problema}</td>
+        </tr>
+      </table>
+      <div style="margin-top:20px;text-align:center;">
+        <a href="http://localhost:5173/admin-panel" style="background:#facc15;color:#111827;padding:12px 30px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:14px;">Ver en el panel admin</a>
+      </div>
+    </div>
+    <div style="background:#f9fafb;padding:15px;text-align:center;border-top:1px solid #e5e7eb;">
+      <p style="margin:0;color:#9ca3af;font-size:12px;">GyG Puertas Automaticas — Panel Administrativo</p>
+    </div>
+  </div>
+</body>
+</html>
+'''
+
+        msg_empresa = EmailMultiAlternatives(
             subject=f'Nueva solicitud de {mantenimiento.tipo} - {mantenimiento.codigo}',
-            message=f'Cliente: {mantenimiento.nombre_cliente}\nTelefono: {mantenimiento.telefono}\nCorreo: {mantenimiento.correo}\nDistrito: {mantenimiento.distrito}\nTipo: {mantenimiento.tipo}\nTipo de puerta: {mantenimiento.tipo_puerta}\nProblema: {mantenimiento.descripcion_problema}\nDisponibilidad: {mantenimiento.disponibilidad}\nCodigo: {mantenimiento.codigo}',
+            body=f'Nueva solicitud de {mantenimiento.nombre_cliente} - {mantenimiento.telefono}',
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[settings.EMAIL_HOST_USER],
-            fail_silently=True,
+            to=[settings.EMAIL_HOST_USER]
         )
+        msg_empresa.attach_alternative(html_empresa, "text/html")
+        msg_empresa.send(fail_silently=True)
+
     except Exception as e:
         print(f"Error enviando email mantenimiento: {e}")

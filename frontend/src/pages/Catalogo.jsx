@@ -73,8 +73,8 @@ function Catalogo() {
                   type="text"
                   placeholder={modoIA ? "Describe lo que necesitas en lenguaje natural..." : "Buscar producto..."}
                   value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  className="w-full rounded-xl pl-10 pr-4 py-3 text-gray-900 focus:outline-none border-2 border-gray-300 focus:border-yellow-400"
+                  onChange={(e) => setBusqueda(e.target.value)}className="w-full rounded-xl pl-10 pr-4 py-3 focus:outline-none border-2 border-gray-300 focus:border-yellow-400"
+style={{ color: '#111827', backgroundColor: '#ffffff' }}className="w-full rounded-xl pl-10 pr-4 py-3 text-gray-900 focus:outline-none border-2 border-gray-300 focus:border-yellow-400"
                 />
               </div>
               <button

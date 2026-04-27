@@ -121,7 +121,7 @@ function Seguimiento() {
                   value={codigo}
                   onChange={(e) => setCodigo(e.target.value.toUpperCase())}
                   required
-                  className="w-full rounded-xl pl-10 pr-4 py-3 text-gray-900 focus:outline-none border-2 border-gray-300 focus:border-yellow-400"
+                  className="w-full rounded-xl pl-10 pr-4 py-3 text-gray-900 bg-white focus:outline-none border-2 border-gray-300 focus:border-yellow-400"
                 />
               </div>
               <button

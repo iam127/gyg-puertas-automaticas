@@ -118,3 +118,19 @@ class CotizacionFormal(models.Model):
     class Meta:
         verbose_name = 'Cotizacion Formal'
         verbose_name_plural = 'Cotizaciones Formales'
+
+class MensajeContacto(models.Model):
+    nombre = models.CharField(max_length=200)
+    telefono = models.CharField(max_length=20)
+    correo = models.EmailField()
+    mensaje = models.TextField()
+    leido = models.BooleanField(default=False)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Mensaje de {self.nombre}'
+
+    class Meta:
+        verbose_name = 'Mensaje de Contacto'
+        verbose_name_plural = 'Mensajes de Contacto'
+        ordering = ['-creado_en']

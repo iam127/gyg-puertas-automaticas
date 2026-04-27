@@ -3,6 +3,11 @@ import { getGaleria } from '../services/contenido'
 import { FaTimes, FaExpand, FaDoorOpen, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { Helmet } from 'react-helmet-async'
 
+const getUrl = (url) => {
+  if (!url) return ''
+  return url.startsWith('http') ? url : `http://127.0.0.1:8000${url}`
+}
+
 function Galeria() {
   const [galeria, setGaleria] = useState([])
   const [filtro, setFiltro] = useState('')
@@ -14,7 +19,7 @@ function Galeria() {
   }, [])
 
   const galeriaFiltrada = filtro
-    ? galeria.filter(g => g.tipo_puerta.toLowerCase().includes(filtro.toLowerCase()))
+    ? galeria.filter(g => g.tipo_puerta?.toLowerCase().includes(filtro.toLowerCase()))
     : galeria
 
   const abrirImagen = (item, index) => {
@@ -34,13 +39,14 @@ function Galeria() {
     setIndexSeleccionado(nuevoIndex)
   }
 
-  const tipos = ['', 'Levadiza', 'Corrediza', 'Batiente', 'Seccional']
+  const tipos = ['', 'Puerta Corrediza', 'Porton Levadizo', 'Puerta Batiente', 'Puerta Enrollable', 'Barrera Vehicular']
 
   return (
     <div>
       <Helmet>
         <title>Galeria | GyG Puertas Automaticas</title>
       </Helmet>
+
       {/* HERO */}
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
@@ -95,25 +101,32 @@ function Galeria() {
                 {galeriaFiltrada.map((item, index) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer group border border-gray-100"
+                    className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition cursor-pointer group border border-gray-100"
                     onClick={() => abrirImagen(item, index)}
                   >
-                    <div className="relative overflow-hidden h-56">
+                    <div style={{ position: 'relative', height: '224px', borderRadius: '16px 16px 0 0', overflow: 'hidden', backgroundColor: '#f9fafb' }}>
                       <img
-                        src={item.imagen}
+                        src={getUrl(item.imagen)}
                         alt={item.titulo}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        onError={(e) => { e.target.style.display = 'none' }}
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
-                        <FaExpand size={28} className="text-white opacity-0 group-hover:opacity-100 transition" />
+                      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.3s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.3)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0)'}
+                      >
+                        <FaExpand size={28} color="white" style={{ opacity: 0 }} />
                       </div>
                       {item.tipo_puerta && (
-                        <div className="absolute top-3 left-3">
+                        <div style={{ position: 'absolute', top: 12, left: 12 }}>
                           <span className="bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                             {item.tipo_puerta}
                           </span>
                         </div>
                       )}
+                      <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.5)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FaExpand size={14} color="white" />
+                      </div>
                     </div>
                     <div className="p-5">
                       <h3 className="font-bold text-gray-900 mb-1">{item.titulo}</h3>
@@ -132,36 +145,38 @@ function Galeria() {
       {/* MODAL */}
       {imagenSeleccionada && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}
           onClick={() => setImagenSeleccionada(null)}
         >
           <div
-            className="bg-white rounded-2xl overflow-hidden max-w-3xl w-full shadow-2xl relative"
+            className="bg-white rounded-2xl overflow-hidden max-w-3xl w-full shadow-2xl"
+            style={{ position: 'relative' }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="relative">
+            <div style={{ position: 'relative', backgroundColor: '#f9fafb' }}>
               <img
-                src={imagenSeleccionada.imagen}
+                src={getUrl(imagenSeleccionada.imagen)}
                 alt={imagenSeleccionada.titulo}
-                className="w-full max-h-96 object-cover"
+                style={{ width: '100%', maxHeight: '384px', objectFit: 'contain', display: 'block', backgroundColor: '#f9fafb' }}
               />
               <button
                 onClick={() => setImagenSeleccionada(null)}
-                className="absolute top-3 right-3 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80 transition"
+                style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <FaTimes size={18} />
+                <FaTimes size={16} />
               </button>
               {galeriaFiltrada.length > 1 && (
                 <>
                   <button
                     onClick={anterior}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-80 transition"
+                    style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <FaChevronLeft size={16} />
                   </button>
                   <button
                     onClick={siguiente}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-80 transition"
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <FaChevronRight size={16} />
                   </button>

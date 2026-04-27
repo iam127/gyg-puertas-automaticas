@@ -17,7 +17,9 @@ class ProductoSerializer(serializers.ModelSerializer):
     categoria_id = serializers.PrimaryKeyRelatedField(
         queryset=CategoriaProducto.objects.all(),
         source='categoria',
-        write_only=True
+        write_only=True,
+        required=False,
+        allow_null=True
     )
 
     class Meta:
@@ -27,10 +29,11 @@ class ProductoSerializer(serializers.ModelSerializer):
 class ProductoListSerializer(serializers.ModelSerializer):
     imagen_principal = serializers.SerializerMethodField()
     categoria_nombre = serializers.CharField(source='categoria.nombre', read_only=True)
+    categoria_id = serializers.IntegerField(source='categoria.id', read_only=True)
 
     class Meta:
         model = Producto
-        fields = ['id', 'nombre', 'descripcion', 'uso', 'material', 'destacado', 'imagen_principal', 'categoria_nombre']
+        fields = ['id', 'nombre', 'descripcion', 'especificaciones', 'uso', 'material', 'destacado', 'activo', 'imagen_principal', 'categoria_nombre', 'categoria_id']
 
     def get_imagen_principal(self, obj):
         imagen = obj.imagenes.filter(principal=True).first()

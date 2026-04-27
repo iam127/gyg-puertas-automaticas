@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Tecnico
+from .models import Tecnico, CodigoInvitacion
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +31,8 @@ class TecnicoRegistroSerializer(serializers.Serializer):
         except CodigoInvitacion.DoesNotExist:
             raise serializers.ValidationError("Codigo de invitacion invalido o ya fue usado.")
         return value
+    
+class CodigoInvitacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CodigoInvitacion
+        fields = '__all__'

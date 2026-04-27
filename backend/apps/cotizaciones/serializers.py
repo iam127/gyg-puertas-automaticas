@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cotizacion, ImagenCotizacion, VisitaTecnica, ImagenVisita, CotizacionFormal
+from .models import Cotizacion, ImagenCotizacion, VisitaTecnica, ImagenVisita, CotizacionFormal, MensajeContacto
 
 class ImagenCotizacionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +30,8 @@ class CotizacionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cotizacion
         fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo_uso', 'estado', 'creado_en']
+
+class MensajeContactoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MensajeContacto
+        fields = '__all__'
