@@ -5,7 +5,7 @@ import api from '../services/api'
 function Chatbot() {
   const [abierto, setAbierto] = useState(false)
   const [mensajes, setMensajes] = useState([
-    { rol: 'assistant', contenido: 'Hola! Soy el asistente virtual de GyG Puertas Automaticas. En que puedo ayudarte?' }
+    { rol: 'assistant', contenido: '¡Hola! Soy el asistente virtual de GyG Puertas Automáticas. ¿En qué puedo ayudarte?' }
   ])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -30,7 +30,7 @@ function Chatbot() {
       })
       setMensajes([...nuevosMensajes, { rol: 'assistant', contenido: res.data.respuesta }])
     } catch {
-      setMensajes([...nuevosMensajes, { rol: 'assistant', contenido: 'Lo siento, ocurrio un error. Por favor intenta de nuevo.' }])
+      setMensajes([...nuevosMensajes, { rol: 'assistant', contenido: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.' }])
     } finally {
       setCargando(false)
     }

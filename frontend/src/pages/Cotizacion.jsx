@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet-async'
 const TIPOS_USO = [
   { value: 'residencial', label: 'Residencial', icono: <FaHome size={24} />, desc: 'Para tu hogar o cochera' },
   { value: 'comercial', label: 'Comercial', icono: <FaBuilding size={24} />, desc: 'Para tu negocio o empresa' },
-  { value: 'industrial', label: 'Industrial', icono: <FaIndustry size={24} />, desc: 'Para uso industrial o almacen' },
+  { value: 'industrial', label: 'Industrial', icono: <FaIndustry size={24} />, desc: 'Para uso industrial o almacén' },
 ]
 
 function Cotizacion() {
@@ -40,7 +40,7 @@ function Cotizacion() {
         setCodigo(res.data.codigo)
         setEnviado(true)
       })
-      .catch(() => setError('Ocurrio un error al enviar la solicitud. Intentalo de nuevo.'))
+      .catch(() => setError('Ocurrió un error al enviar la solicitud. Inténtalo de nuevo.'))
       .finally(() => setCargando(false))
   }
 
@@ -48,20 +48,20 @@ function Cotizacion() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Helmet>
-          <title>Cotizacion | GyG Puertas Automaticas</title>
+          <title>Cotización | GyG Puertas Automáticas</title>
         </Helmet>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 max-w-lg w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaCheckCircle size={40} className="text-green-500" />
           </div>
           <h2 className="text-2xl font-bold mb-2 text-gray-900">Solicitud enviada correctamente</h2>
-          <p className="text-gray-500 mb-6">Tu codigo de seguimiento es:</p>
+          <p className="text-gray-500 mb-6">Tu código de seguimiento es:</p>
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl px-8 py-6 mb-6">
-            <p className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Codigo de seguimiento</p>
+            <p className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Código de seguimiento</p>
             <p className="text-3xl font-bold text-gray-900 tracking-widest">{codigo}</p>
           </div>
           <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-            Guarda este codigo para hacer seguimiento de tu solicitud. tambien te lo enviamos por correo y WhatsApp.
+            Guarda este código para hacer seguimiento de tu solicitud. También te lo enviamos por correo y WhatsApp.
           </p>
           <div className="flex justify-center gap-3">
             <Link to="/seguimiento" className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-bold hover:bg-yellow-300 transition">
@@ -78,15 +78,18 @@ function Cotizacion() {
 
   return (
     <div>
+      <Helmet>
+        <title>Cotización | GyG Puertas Automáticas</title>
+      </Helmet>
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
         <div className="relative z-10">
           <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Gratis y sin compromiso</span>
           <h1 className="text-5xl font-bold mt-2 mb-4">
-            Solicitar <span className="text-yellow-400">Cotizacion</span>
+            Solicitar <span className="text-yellow-400">Cotización</span>
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Completa el formulario y nuestro equipo te contactara a la brevedad para coordinar una visita tecnica gratuita.
+            Completa el formulario y nuestro equipo te contactará a la brevedad para coordinar una visita técnica gratuita.
           </p>
         </div>
       </section>
@@ -143,7 +146,7 @@ function Cotizacion() {
 
             {!form.tipo_uso && (
               <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
-                <span className="font-bold">Atencion:</span>
+                <span className="font-bold">Atención:</span>
                 Por favor selecciona el tipo de uso arriba antes de continuar.
               </div>
             )}
@@ -160,7 +163,7 @@ function Cotizacion() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
                   <input
                     name="telefono"
                     onChange={handleChange}
@@ -171,7 +174,7 @@ function Cotizacion() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
                 <input
                   name="correo"
                   type="email"
@@ -182,7 +185,7 @@ function Cotizacion() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Direccion *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
                 <input
                   name="direccion"
                   onChange={handleChange}
@@ -202,7 +205,7 @@ function Cotizacion() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Referencias de ubicacion</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Referencias de ubicación</label>
                   <input
                     name="referencias"
                     onChange={handleChange}
@@ -212,7 +215,7 @@ function Cotizacion() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion de lo que necesitas *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción de lo que necesitas *</label>
                 <textarea
                   name="descripcion"
                   onChange={handleChange}
@@ -223,7 +226,7 @@ function Cotizacion() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad para visita tecnica *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad para visita técnica *</label>
                 <input
                   name="disponibilidad"
                   onChange={handleChange}
@@ -233,7 +236,7 @@ function Cotizacion() {
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500 border border-gray-100">
-                Al enviar tu solicitud, nuestro equipo te contactara en menos de 24 horas para coordinar la visita tecnica gratuita.
+                Al enviar tu solicitud, nuestro equipo te contactará en menos de 24 horas para coordinar la visita técnica gratuita.
               </div>
 
               <button
@@ -241,7 +244,7 @@ function Cotizacion() {
                 disabled={cargando || !form.tipo_uso}
                 className="w-full bg-yellow-400 text-gray-900 py-3.5 rounded-xl font-bold hover:bg-yellow-300 transition disabled:opacity-50 text-base shadow-sm"
               >
-                {cargando ? 'Enviando...' : 'Enviar solicitud de cotizacion'}
+                {cargando ? 'Enviando...' : 'Enviar solicitud de cotización'}
               </button>
             </form>
           </div>

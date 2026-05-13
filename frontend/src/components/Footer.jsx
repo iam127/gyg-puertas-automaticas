@@ -10,13 +10,13 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
 
         <div className="md:col-span-2">
-          <img src={logo} alt="GyG Puertas Automaticas" className="h-12 object-contain mb-3" />
-          <p className="text-gray-500 text-sm mb-4 max-w-sm">Soluciones en puertas automaticas para tu hogar y empresa. Calidad, seguridad y garantia en cada instalacion.</p>
+          <img src={logo} alt="GyG Puertas Automáticas" className="h-12 object-contain mb-3" />
+          <p className="text-gray-500 text-sm mb-4 max-w-sm">Soluciones en puertas automáticas para tu hogar y empresa. Calidad, seguridad y garantía en cada instalación.</p>
                   <div className="space-y-2 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <FaMapMarkerAlt className="text-yellow-500 flex-shrink-0" size={16} />
               <a href="https://maps.google.com/?q=Manuel+Odria+161+Ate+Lima+Peru" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition">
-                Manuel Odria 161, Ate, Lima, Peru
+                Manuel Odria 161, Ate, Lima, Perú
               </a>
             </div>
             <div className="flex items-center gap-2">
@@ -39,19 +39,19 @@ function Footer() {
             </div>
             <div className="flex items-center gap-2">
               <FaClock className="text-yellow-500 flex-shrink-0" size={16} />
-              <span>Atencion 24/7</span>
+              <span>Atención 24/7</span>
             </div>
           </div>
         </div>
 
         <div>
-          <h4 className="font-bold text-lg mb-3 text-gray-900">Enlaces rapidos</h4>
+          <h4 className="font-bold text-lg mb-3 text-gray-900">Enlaces rápidos</h4>
           <ul className="text-gray-600 text-sm space-y-2">
-            <li><Link to="/catalogo" className="hover:text-yellow-500 transition">Catalogo</Link></li>
-            <li><Link to="/cotizar" className="hover:text-yellow-500 transition">Solicitar Cotizacion</Link></li>
+            <li><Link to="/catalogo" className="hover:text-yellow-500 transition">Catálogo</Link></li>
+            <li><Link to="/cotizar" className="hover:text-yellow-500 transition">Solicitar Cotización</Link></li>
             <li><Link to="/mantenimiento" className="hover:text-yellow-500 transition">Mantenimiento</Link></li>
             <li><Link to="/seguimiento" className="hover:text-yellow-500 transition">Seguimiento</Link></li>
-            <li><Link to="/galeria" className="hover:text-yellow-500 transition">Galeria</Link></li>
+            <li><Link to="/galeria" className="hover:text-yellow-500 transition">Galería</Link></li>
             <li><Link to="/blog" className="hover:text-yellow-500 transition">Blog</Link></li>
             <li><Link to="/nosotros" className="hover:text-yellow-500 transition">Nosotros</Link></li>
             <li><Link to="/contacto" className="hover:text-yellow-500 transition">Contacto</Link></li>
@@ -66,15 +66,15 @@ function Footer() {
             <li>Puertas Batientes</li>
             <li>Puertas Seccionales</li>
             <li>Puertas Industriales</li>
-            <li>Cercos Electricos</li>
-            <li>Barreras Automaticas</li>
+            <li>Cercos Eléctricos</li>
+            <li>Barreras Automáticas</li>
           </ul>
         </div>
 
       </div>
 
       <div className="border-t border-gray-200 text-gray-400 text-sm py-4 px-4 text-center">
-        <p>© 2026 GyG Puertas Automaticas. Todos los derechos reservados.</p>
+        <p>© 2026 GyG Puertas Automáticas. Todos los derechos reservados.</p>
         <div className="flex gap-4">
         </div>
       </div>

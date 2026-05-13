@@ -14,11 +14,11 @@ function Contacto() {
   const mapsUrl = 'https://maps.google.com/?q=Manuel+Odria+161+Ate+Lima+Peru'
 
   const faqs = [
-    { pregunta: 'Cuanto tiempo demora la instalacion?', respuesta: 'El tiempo de instalacion varia segun el tipo de puerta y complejidad del trabajo. En promedio demora entre 1 y 3 dias.' },
-    { pregunta: 'Que garantia tienen sus productos?', respuesta: 'Todos nuestros productos cuentan con garantia de 12 meses en piezas y mano de obra.' },
-    { pregunta: 'Realizan mantenimiento a puertas de otras marcas?', respuesta: 'Si, nuestro equipo tecnico esta capacitado para dar mantenimiento a puertas automaticas de diferentes marcas.' },
-    { pregunta: 'Como solicito una cotizacion?', respuesta: 'Puedes solicitar una cotizacion desde nuestra web completando el formulario. Nuestro equipo coordinara una visita tecnica para darte un precio exacto.' },
-    { pregunta: 'Trabajan en toda Lima?', respuesta: 'Si, atendemos en todos los distritos de Lima Metropolitana.' },
+    { pregunta: '¿Cuánto tiempo demora la instalación?', respuesta: 'El tiempo de instalación varía según el tipo de puerta y complejidad del trabajo. En promedio demora entre 1 y 3 días.' },
+    { pregunta: '¿Qué garantía tienen sus productos?', respuesta: 'Todos nuestros productos cuentan con garantía de 12 meses en piezas y mano de obra.' },
+    { pregunta: '¿Realizan mantenimiento a puertas de otras marcas?', respuesta: 'Sí, nuestro equipo técnico está capacitado para dar mantenimiento a puertas automáticas de diferentes marcas.' },
+    { pregunta: '¿Cómo solicito una cotización?', respuesta: 'Puedes solicitar una cotización desde nuestra web completando el formulario. Nuestro equipo coordinará una visita técnica para darte un precio exacto.' },
+    { pregunta: '¿Trabajan en toda Lima?', respuesta: 'Sí, atendemos en todos los distritos de Lima Metropolitana.' },
   ]
 
   const handleSubmitContacto = (e) => {
@@ -30,14 +30,14 @@ function Contacto() {
         setEnviado(true)
         setFormContacto({ nombre: '', telefono: '', correo: '', mensaje: '' })
       })
-      .catch(() => setErrorContacto('Ocurrio un error. Por favor intenta de nuevo.'))
+      .catch(() => setErrorContacto('Ocurrió un error. Por favor intenta de nuevo.'))
       .finally(() => setEnviando(false))
   }
 
   return (
     <div>
       <Helmet>
-        <title>Contacto | GyG Puertas Automaticas</title>
+        <title>Contacto | GyG Puertas Automáticas</title>
       </Helmet>
 
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
@@ -45,10 +45,10 @@ function Contacto() {
         <div className="relative z-10">
           <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Estamos para ayudarte</span>
           <h1 className="text-5xl font-bold mt-2 mb-4">
-            <span className="text-yellow-400">Contactanos</span>
+            <span className="text-yellow-400">Contáctanos</span>
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Estamos disponibles las 24 horas del dia para atender tus consultas.
+            Estamos disponibles las 24 horas del día para atender tus consultas.
           </p>
         </div>
       </section>
@@ -58,7 +58,7 @@ function Contacto() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
             <div>
-              <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Informacion</span>
+              <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Información</span>
               <h2 className="text-3xl font-bold mt-1 mb-8 text-gray-900">Datos de contacto</h2>
               <div className="space-y-3">
 
@@ -67,9 +67,9 @@ function Contacto() {
                     <FaMapMarkerAlt size={18} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Direccion</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Dirección</p>
                     <a href={mapsUrl} target="_blank" rel="noreferrer" className="text-gray-800 font-medium hover:text-yellow-500 transition">
-                      Manuel Odria 161, Ate, Lima, Peru
+                      Manuel Odria 161, Ate, Lima, Perú
                     </a>
                   </div>
                 </div>
@@ -79,7 +79,7 @@ function Contacto() {
                     <FaPhone size={18} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Telefono</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Teléfono</p>
                     <a href="tel:+51947316864" className="text-gray-800 font-medium hover:text-yellow-500 transition">
                       +51 947 316 864
                     </a>
@@ -116,15 +116,15 @@ function Contacto() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Horario</p>
-                    <p className="text-gray-800 font-medium">Atencion 24/7</p>
+                    <p className="text-gray-800 font-medium">Atención 24/7</p>
                   </div>
                 </div>
 
               </div>
 
               <div className="mt-6 bg-gray-900 rounded-2xl p-6 text-white">
-                <p className="font-bold mb-2">Prefiere escribirnos por WhatsApp?</p>
-                <p className="text-gray-400 text-sm mb-4">Respondemos en minutos durante el horario de atencion.</p>
+                <p className="font-bold mb-2">¿Prefieres escribirnos por WhatsApp?</p>
+                <p className="text-gray-400 text-sm mb-4">Respondemos en minutos durante el horario de atención.</p>
                 <a
                   href={whatsappUrl}
                   target="_blank"
@@ -139,7 +139,7 @@ function Contacto() {
 
             <div>
               <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Formulario</span>
-              <h2 className="text-3xl font-bold mt-1 mb-8 text-gray-900">Envianos un mensaje</h2>
+              <h2 className="text-3xl font-bold mt-1 mb-8 text-gray-900">Envíanos un mensaje</h2>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 {enviado ? (
                   <div className="text-center py-8">
@@ -173,7 +173,7 @@ function Contacto() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
                       <input
                         type="text"
                         value={formContacto.telefono}
@@ -183,7 +183,7 @@ function Contacto() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
                       <input
                         type="email"
                         value={formContacto.correo}
@@ -226,12 +226,12 @@ function Contacto() {
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Ubicacion</span>
-            <h2 className="text-3xl font-bold mt-1 text-gray-900">Nuestra ubicacion</h2>
+            <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Ubicación</span>
+            <h2 className="text-3xl font-bold mt-1 text-gray-900">Nuestra ubicación</h2>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
             <iframe
-              title="Ubicacion GyG Puertas Automaticas"
+              title="Ubicación GyG Puertas Automáticas"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.7721014655776!2d-76.96118472643364!3d-12.05919544212926!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c68b563365f1%3A0x73f0003e430cce42!2sManuel%20A.%20Odria%20161%2C%20Ate%2015012!5e0!3m2!1ses-419!2spe!4v1775957636768!5m2!1ses-419!2spe"
               width="100%"
               height="420"
@@ -259,7 +259,7 @@ function Contacto() {
           <div className="text-center mb-10">
             <span className="text-yellow-500 font-bold text-sm uppercase tracking-wider">Dudas comunes</span>
             <h2 className="text-3xl font-bold mt-1 text-gray-900">Preguntas frecuentes</h2>
-            <p className="text-gray-500 mt-2">Resolvemos tus dudas mas comunes</p>
+            <p className="text-gray-500 mt-2">Resolvemos tus dudas más comunes</p>
           </div>
           <div className="space-y-3">
             {faqs.map((faq, i) => (

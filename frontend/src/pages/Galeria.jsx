@@ -39,12 +39,12 @@ function Galeria() {
     setIndexSeleccionado(nuevoIndex)
   }
 
-  const tipos = ['', 'Puerta Corrediza', 'Porton Levadizo', 'Puerta Batiente', 'Puerta Enrollable', 'Barrera Vehicular']
+  const tipos = ['', 'Puerta Corrediza', 'Portón Levadizo', 'Puerta Batiente', 'Puerta Enrollable', 'Barrera Vehicular']
 
   return (
     <div>
       <Helmet>
-        <title>Galeria | GyG Puertas Automaticas</title>
+        <title>Galería | GyG Puertas Automáticas</title>
       </Helmet>
 
       {/* HERO */}
@@ -53,7 +53,7 @@ function Galeria() {
         <div className="relative z-10">
           <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Nuestros trabajos</span>
           <h1 className="text-5xl font-bold mt-2 mb-4">
-            Galeria de <span className="text-yellow-400">Trabajos</span>
+            Galería de <span className="text-yellow-400">Trabajos</span>
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
             Conoce algunos de nuestros trabajos realizados en Lima y alrededores.
@@ -89,7 +89,7 @@ function Galeria() {
               <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaDoorOpen size={36} className="text-gray-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-700 mb-2">No hay imagenes disponibles</h3>
+              <h3 className="text-xl font-bold text-gray-700 mb-2">No hay imágenes disponibles</h3>
               <p className="text-gray-500">Vuelve pronto para ver nuestros trabajos.</p>
             </div>
           ) : (

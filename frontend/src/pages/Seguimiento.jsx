@@ -22,17 +22,17 @@ const estadoColor = {
 
 const pasosCotizacion = [
   { estado: 'recibido', label: 'Recibido' },
-  { estado: 'en_revision', label: 'En revision' },
+  { estado: 'en_revision', label: 'En revisión' },
   { estado: 'visita_agendada', label: 'Visita agendada' },
   { estado: 'cotizado', label: 'Cotizado' },
   { estado: 'aceptado', label: 'Aceptado' },
-  { estado: 'instalacion_agendada', label: 'Instalacion agendada' },
+  { estado: 'instalacion_agendada', label: 'Instalación agendada' },
   { estado: 'completado', label: 'Completado' },
 ]
 
 const pasosMantenimiento = [
   { estado: 'recibido', label: 'Recibido' },
-  { estado: 'en_revision', label: 'En revision' },
+  { estado: 'en_revision', label: 'En revisión' },
   { estado: 'visita_agendada', label: 'Visita agendada' },
   { estado: 'en_proceso', label: 'En proceso' },
   { estado: 'completado', label: 'Completado' },
@@ -83,15 +83,15 @@ function Seguimiento() {
     if (codigo.startsWith('GYG')) {
       getSeguimiento(codigo)
         .then(res => setResultado({ tipo: 'cotizacion', data: res.data }))
-        .catch(() => setError('No se encontro ninguna solicitud con ese codigo.'))
+        .catch(() => setError('No se encontró ninguna solicitud con ese código.'))
         .finally(() => setCargando(false))
     } else if (codigo.startsWith('MANT')) {
       getSeguimientoMantenimiento(codigo)
         .then(res => setResultado({ tipo: 'mantenimiento', data: res.data }))
-        .catch(() => setError('No se encontro ninguna solicitud con ese codigo.'))
+        .catch(() => setError('No se encontró ninguna solicitud con ese código.'))
         .finally(() => setCargando(false))
     } else {
-      setError('Codigo invalido. Debe empezar con GYG o MANT.')
+      setError('Código inválido. Debe empezar con GYG o MANT.')
       setCargando(false)
     }
   }
@@ -99,7 +99,7 @@ function Seguimiento() {
   return (
     <div>
       <Helmet>
-        <title>Seguimiento | GyG Puertas Automaticas</title>
+        <title>Seguimiento | GyG Puertas Automáticas</title>
       </Helmet>
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
@@ -109,7 +109,7 @@ function Seguimiento() {
             Seguimiento de <span className="text-yellow-400">Solicitud</span>
           </h1>
           <p className="text-gray-300 max-w-xl mx-auto mb-10">
-            Ingresa tu codigo de seguimiento para ver el estado de tu solicitud en tiempo real.
+            Ingresa tu código de seguimiento para ver el estado de tu solicitud en tiempo real.
           </p>
           <form onSubmit={handleBuscar} className="max-w-xl mx-auto">
             <div className="flex gap-3">
@@ -172,7 +172,7 @@ function Seguimiento() {
                     </div>
                     <div>
                       <p className="text-gray-400 text-xs uppercase tracking-wider">
-                        {resultado.tipo === 'cotizacion' ? 'Cotizacion' : 'Mantenimiento'}
+                        {resultado.tipo === 'cotizacion' ? 'Cotización' : 'Mantenimiento'}
                       </p>
                       <p className="text-yellow-400 font-bold text-2xl">{resultado.data.codigo}</p>
                     </div>
@@ -192,14 +192,14 @@ function Seguimiento() {
               </div>
 
               <div className="px-6 pb-6">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Informacion de la solicitud</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Información de la solicitud</p>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-gray-50 rounded-xl p-4">
                     <p className="text-gray-400 text-xs mb-1">Cliente</p>
                     <p className="font-bold text-gray-900">{resultado.data.nombre_cliente}</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-gray-400 text-xs mb-1">Telefono</p>
+                    <p className="text-gray-400 text-xs mb-1">Teléfono</p>
                     <p className="font-bold text-gray-900">{resultado.data.telefono}</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4">
@@ -216,7 +216,7 @@ function Seguimiento() {
 
                 {resultado.data.descripcion && (
                   <div className="bg-gray-50 rounded-xl p-4 mb-3">
-                    <p className="text-gray-400 text-xs mb-1">Descripcion</p>
+                    <p className="text-gray-400 text-xs mb-1">Descripción</p>
                     <p className="font-medium text-gray-900 text-sm">{resultado.data.descripcion}</p>
                   </div>
                 )}
@@ -237,7 +237,7 @@ function Seguimiento() {
 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4 mt-2">
                   <p className="text-yellow-700 text-sm font-medium text-center">
-                    Necesitas ayuda con tu solicitud? Contactanos directamente.
+                    ¿Necesitas ayuda con tu solicitud? Contáctanos directamente.
                   </p>
                 </div>
 

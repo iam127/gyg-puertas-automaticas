@@ -29,7 +29,7 @@ class CotizacionSerializer(serializers.ModelSerializer):
 class CotizacionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cotizacion
-        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo_uso', 'estado', 'creado_en']
+        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo_uso', 'estado', 'disponibilidad', 'descripcion', 'referencias', 'creado_en']
 
 class MensajeContactoSerializer(serializers.ModelSerializer):
     class Meta:

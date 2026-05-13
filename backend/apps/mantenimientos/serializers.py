@@ -23,7 +23,7 @@ class MantenimientoSerializer(serializers.ModelSerializer):
 class MantenimientoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mantenimiento
-        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'distrito', 'tipo', 'estado', 'garantia_vigente', 'creado_en']
+        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo', 'tipo_puerta', 'disponibilidad', 'descripcion_problema', 'estado', 'garantia_vigente', 'creado_en']
 
 class TestimonioSerializer(serializers.ModelSerializer):
     class Meta:

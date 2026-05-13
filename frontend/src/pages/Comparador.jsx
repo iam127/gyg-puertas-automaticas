@@ -33,16 +33,16 @@ function Comparador() {
   const filas = [
     { campo: 'uso', label: 'Tipo de uso' },
     { campo: 'material', label: 'Material' },
-    { campo: 'categoria_nombre', label: 'Categoria' },
-    { campo: 'descripcion', label: 'Descripcion' },
-    { campo: 'especificaciones', label: 'Especificaciones tecnicas' },
+    { campo: 'categoria_nombre', label: 'Categoría' },
+    { campo: 'descripcion', label: 'Descripción' },
+    { campo: 'especificaciones', label: 'Especificaciones técnicas' },
   ]
 
   if (comparando && seleccionados.length >= 2) {
     return (
       <div>
         <Helmet>
-          <title>Comparador | GyG Puertas Automaticas</title>
+          <title>Comparador | GyG Puertas Automáticas</title>
         </Helmet>
 
         {/* HERO */}
@@ -62,14 +62,14 @@ function Comparador() {
             onClick={() => setComparando(false)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 font-medium transition"
           >
-            <FaArrowLeft size={14} /> Volver a seleccion
+            <FaArrowLeft size={14} /> Volver a selección
           </button>
 
           <div className="overflow-x-auto rounded-2xl shadow-sm border border-gray-100">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="text-left p-5 bg-gray-900 text-gray-400 text-xs uppercase tracking-wider w-44 rounded-tl-2xl">Caracteristica</th>
+                  <th className="text-left p-5 bg-gray-900 text-gray-400 text-xs uppercase tracking-wider w-44 rounded-tl-2xl">Característica</th>
                   {seleccionados.map((p, i) => (
                     <th key={p.id} className={`p-5 bg-gray-900 text-center ${i === seleccionados.length - 1 ? 'rounded-tr-2xl' : ''}`}>
                       <div style={{ height: '120px', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px', backgroundColor: '#1f2937' }}>
@@ -116,7 +116,7 @@ function Comparador() {
                     <td key={p.id} className="p-5 text-center border-r border-gray-100 last:border-r-0">
                       {p.destacado ? (
                         <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-bold">
-                          <FaCheck size={10} /> Si
+                          <FaCheck size={10} /> Sí
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full text-xs font-bold">
@@ -129,7 +129,7 @@ function Comparador() {
 
                 {/* FILA ACCION */}
                 <tr className="bg-gray-900">
-                  <td className="p-5 text-gray-400 font-bold text-sm rounded-bl-2xl">Accion</td>
+                  <td className="p-5 text-gray-400 font-bold text-sm rounded-bl-2xl">Acción</td>
                   {seleccionados.map((p, i) => (
                     <td key={p.id} className={`p-5 text-center ${i === seleccionados.length - 1 ? 'rounded-br-2xl' : ''}`}>
                       <Link
@@ -152,7 +152,7 @@ function Comparador() {
   return (
     <div>
       <Helmet>
-        <title>Comparador | GyG Puertas Automaticas</title>
+        <title>Comparador | GyG Puertas Automáticas</title>
       </Helmet>
 
       {/* HERO */}
@@ -164,7 +164,7 @@ function Comparador() {
             Comparador de <span className="text-yellow-400">Productos</span>
           </h1>
           <p className="text-gray-300 max-w-xl mx-auto">
-            Selecciona hasta 3 productos para comparar sus caracteristicas y encontrar la puerta ideal.
+            Selecciona hasta 3 productos para comparar sus características y encontrar la puerta ideal.
           </p>
         </div>
       </section>
@@ -273,7 +273,7 @@ function Comparador() {
                       {selec ? (
                         <><FaCheck size={12} /> Seleccionado</>
                       ) : bloqueado ? (
-                        'Maximo 3 productos'
+                        'Máximo 3 productos'
                       ) : (
                         'Seleccionar'
                       )}

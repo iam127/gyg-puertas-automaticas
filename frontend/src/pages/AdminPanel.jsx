@@ -5,7 +5,8 @@ import {
   FaThLarge, FaBox, FaFileAlt, FaWrench,
   FaUsers, FaImages, FaChartBar, FaSignOutAlt,
   FaBars, FaTimes, FaCheckCircle, FaClock,
-  FaExclamationTriangle, FaWhatsapp, FaEnvelope
+  FaExclamationTriangle, FaWhatsapp, FaEnvelope,
+  FaArrowUp, FaArrowDown
 } from 'react-icons/fa'
 import logo from '../assets/Logo-gyg-Admin.png'
 import api from '../services/api'
@@ -22,22 +23,22 @@ const menuItems = [
   { id: 'productos', label: 'Productos', icon: <FaBox /> },
   { id: 'cotizaciones', label: 'Cotizaciones', icon: <FaFileAlt /> },
   { id: 'mantenimientos', label: 'Mantenimientos', icon: <FaWrench /> },
-  { id: 'tecnicos', label: 'Tecnicos', icon: <FaUsers /> },
+  { id: 'tecnicos', label: 'Técnicos', icon: <FaUsers /> },
   { id: 'contenido', label: 'Contenido', icon: <FaImages /> },
   { id: 'reportes', label: 'Reportes', icon: <FaChartBar /> },
 ]
 
 const estadoColor = {
-  recibido: 'bg-blue-100 text-blue-700',
-  en_revision: 'bg-yellow-100 text-yellow-700',
-  visita_agendada: 'bg-purple-100 text-purple-700',
-  cotizado: 'bg-orange-100 text-orange-700',
-  aceptado: 'bg-green-100 text-green-700',
-  rechazado: 'bg-red-100 text-red-700',
-  completado: 'bg-green-100 text-green-700',
-  cancelado: 'bg-red-100 text-red-700',
-  en_proceso: 'bg-orange-100 text-orange-700',
-  resuelto: 'bg-green-100 text-green-700',
+  recibido: 'bg-blue-50 text-blue-700 border-blue-200',
+  en_revision: 'bg-amber-50 text-amber-700 border-amber-200',
+  visita_agendada: 'bg-purple-50 text-purple-700 border-purple-200',
+  cotizado: 'bg-orange-50 text-orange-700 border-orange-200',
+  aceptado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  rechazado: 'bg-red-50 text-red-700 border-red-200',
+  completado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  cancelado: 'bg-red-50 text-red-700 border-red-200',
+  en_proceso: 'bg-orange-50 text-orange-700 border-orange-200',
+  resuelto: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 }
 
 function AdminPanel() {
@@ -68,15 +69,15 @@ function AdminPanel() {
       })
       const recientes = [
         ...cotRes.data.slice(0, 5).map(c => ({
-          tipo: 'Cotizacion',
+          tipo: 'Cotización',
           descripcion: `${c.nombre_cliente}`,
           detalle: c.distrito,
           estado: c.estado,
           fecha: c.creado_en,
           codigo: c.codigo,
           telefono: c.telefono,
-          color: 'bg-blue-500',
-          icono: <FaFileAlt size={12} />,
+          color: 'bg-slate-600',
+          icono: <FaFileAlt size={14} />,
         })),
         ...manRes.data.slice(0, 5).map(m => ({
           tipo: 'Mantenimiento',
@@ -86,8 +87,8 @@ function AdminPanel() {
           fecha: m.creado_en,
           codigo: m.codigo,
           telefono: m.telefono,
-          color: 'bg-green-500',
-          icono: <FaWrench size={12} />,
+          color: 'bg-slate-700',
+          icono: <FaWrench size={14} />,
         })),
       ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 8)
       setActividadReciente(recientes)
@@ -110,7 +111,7 @@ function AdminPanel() {
   }, {})
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       <Helmet>
         <title>Panel | GyG Admin</title>
       </Helmet>
@@ -130,7 +131,7 @@ function AdminPanel() {
 
         {sidebarAbierto && (
           <div className="px-4 py-3 border-b border-gray-800">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Menu principal</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Menú principal</p>
           </div>
         )}
 
@@ -158,7 +159,7 @@ function AdminPanel() {
             className={`w-full flex items-center gap-3 px-4 py-4 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition ${!sidebarAbierto ? 'justify-center' : ''}`}
           >
             <FaSignOutAlt size={16} className="flex-shrink-0" />
-            {sidebarAbierto && <span>Cerrar sesion</span>}
+            {sidebarAbierto && <span>Cerrar sesión</span>}
           </button>
         </div>
       </div>
@@ -170,7 +171,7 @@ function AdminPanel() {
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-lg font-bold text-gray-900 capitalize">{seccionActiva === 'dashboard' ? 'Dashboard' : seccionActiva}</h1>
-            <p className="text-xs text-gray-400">Panel de administracion - GyG Puertas Automaticas</p>
+            <p className="text-xs text-gray-400">Panel de administración - GyG Puertas Automáticas</p>
           </div>
           <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
             <div className="w-9 h-9 bg-gray-900 rounded-xl flex items-center justify-center font-bold text-yellow-400 text-sm flex-shrink-0">
@@ -178,113 +179,147 @@ function AdminPanel() {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">Administrador</p>
-              <p className="text-xs text-gray-400">GyG Puertas Automaticas</p>
+              <p className="text-xs text-gray-400">GyG Puertas Automáticas</p>
             </div>
           </div>
         </header>
 
         {/* MAIN */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
           {seccionActiva === 'dashboard' && (
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-7xl mx-auto">
 
               {/* KPIs */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: 'Cotizaciones', valor: kpis.cotizaciones, sub: `${pendientesCotizaciones} pendientes`, color: 'from-blue-500 to-blue-600', seccion: 'cotizaciones', icono: <FaFileAlt size={18} /> },
-                  { label: 'Mantenimientos', valor: kpis.mantenimientos, sub: `${pendientesMantenimientos} pendientes`, color: 'from-green-500 to-green-600', seccion: 'mantenimientos', icono: <FaWrench size={18} /> },
-                  { label: 'Productos', valor: kpis.productos, sub: 'en catalogo', color: 'from-yellow-500 to-yellow-600', seccion: 'productos', icono: <FaBox size={18} /> },
-                  { label: 'Tecnicos', valor: kpis.tecnicos, sub: 'registrados', color: 'from-purple-500 to-purple-600', seccion: 'tecnicos', icono: <FaUsers size={18} /> },
+                  { label: 'Cotizaciones', valor: kpis.cotizaciones, sub: `${pendientesCotizaciones} pendientes`, color: 'border-slate-200', bgIcon: 'bg-slate-600', seccion: 'cotizaciones', icono: <FaFileAlt size={20} /> },
+                  { label: 'Mantenimientos', valor: kpis.mantenimientos, sub: `${pendientesMantenimientos} pendientes`, color: 'border-slate-300', bgIcon: 'bg-slate-700', seccion: 'mantenimientos', icono: <FaWrench size={20} /> },
+                  { label: 'Productos', valor: kpis.productos, sub: 'en catálogo', color: 'border-slate-200', bgIcon: 'bg-slate-600', seccion: 'productos', icono: <FaBox size={20} /> },
+                  { label: 'Técnicos', valor: kpis.tecnicos, sub: 'registrados', color: 'border-slate-300', bgIcon: 'bg-slate-700', seccion: 'tecnicos', icono: <FaUsers size={20} /> },
                 ].map((kpi, i) => (
                   <div
                     key={i}
                     onClick={() => setSeccionActiva(kpi.seccion)}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:shadow-md transition group overflow-hidden relative"
+                    className={`bg-white rounded-lg border-l-4 ${kpi.color} shadow-sm hover:shadow-md transition-all cursor-pointer p-5`}
                   >
-                    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${kpi.color} opacity-10 rounded-full -mr-8 -mt-8`} />
-                    <div className={`w-11 h-11 bg-gradient-to-br ${kpi.color} rounded-xl flex items-center justify-center text-white mb-4 shadow-sm`}>
-                      {kpi.icono}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`${kpi.bgIcon} w-12 h-12 rounded-lg flex items-center justify-center text-white`}>
+                        {kpi.icono}
+                      </div>
+                      <div className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold flex items-center gap-1">
+                        <FaArrowUp size={10} /> 12%
+                      </div>
                     </div>
-                    <p className="text-3xl font-black text-gray-900 mb-1">{cargando ? '...' : kpi.valor}</p>
-                    <p className="text-sm font-bold text-gray-700">{kpi.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{kpi.sub}</p>
+                    <p className="text-3xl font-bold text-gray-900 mb-1">{cargando ? '...' : kpi.valor}</p>
+                    <p className="text-sm font-semibold text-gray-700">{kpi.label}</p>
+                    <p className="text-xs text-gray-500 mt-1">{kpi.sub}</p>
                   </div>
                 ))}
               </div>
 
               {/* ALERTAS */}
               {(pendientesCotizaciones > 0 || pendientesMantenimientos > 0) && (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {pendientesCotizaciones > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-4">
-                      <div className="bg-blue-500 w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                        <FaExclamationTriangle size={16} />
+                    <div className="bg-white border-l-4 border-blue-600 rounded-lg shadow-sm p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-blue-600 w-11 h-11 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                          <FaFileAlt size={18} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900 text-base mb-1">{pendientesCotizaciones} cotizaciones pendientes</p>
+                          <p className="text-gray-600 text-sm mb-3">Requieren revisión y respuesta inmediata</p>
+                          <button 
+                            onClick={() => setSeccionActiva('cotizaciones')} 
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
+                          >
+                            Revisar ahora
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-blue-800 text-sm">{pendientesCotizaciones} cotizaciones pendientes</p>
-                        <p className="text-blue-600 text-xs">Requieren atencion inmediata</p>
-                      </div>
-                      <button onClick={() => setSeccionActiva('cotizaciones')} className="bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition">
-                        Ver ahora
-                      </button>
                     </div>
                   )}
                   {pendientesMantenimientos > 0 && (
-                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-4">
-                      <div className="bg-green-500 w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                        <FaExclamationTriangle size={16} />
+                    <div className="bg-white border-l-4 border-amber-600 rounded-lg shadow-sm p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-amber-600 w-11 h-11 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                          <FaWrench size={18} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900 text-base mb-1">{pendientesMantenimientos} mantenimientos pendientes</p>
+                          <p className="text-gray-600 text-sm mb-3">Requieren asignación de técnico</p>
+                          <button 
+                            onClick={() => setSeccionActiva('mantenimientos')} 
+                            className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-700 transition"
+                          >
+                            Revisar ahora
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-green-800 text-sm">{pendientesMantenimientos} mantenimientos pendientes</p>
-                        <p className="text-green-600 text-xs">Requieren atencion inmediata</p>
-                      </div>
-                      <button onClick={() => setSeccionActiva('mantenimientos')} className="bg-green-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-600 transition">
-                        Ver ahora
-                      </button>
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* ACTIVIDAD RECIENTE */}
-                <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                    <div>
-                      <h3 className="font-bold text-gray-900">Actividad reciente</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">{actividadReciente.length} ultimos registros</p>
+                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-lg">Actividad reciente</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">{actividadReciente.length} registros más recientes</p>
+                      </div>
+                      <button 
+                        onClick={() => setSeccionActiva('cotizaciones')} 
+                        className="text-sm text-slate-600 font-semibold hover:text-slate-900 transition"
+                      >
+                        Ver todo →
+                      </button>
                     </div>
-                    <button onClick={() => setSeccionActiva('cotizaciones')} className="text-xs text-yellow-500 font-bold hover:underline">
-                      Ver todos
-                    </button>
                   </div>
-                  <div className="divide-y divide-gray-50">
+                  <div className="divide-y divide-gray-100">
                     {cargando ? (
-                      <div className="flex items-center justify-center py-12">
-                        <div className="w-6 h-6 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                      <div className="flex items-center justify-center py-16">
+                        <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
                       </div>
                     ) : actividadReciente.length === 0 ? (
-                      <div className="text-center py-12">
-                        <FaClock size={24} className="text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-400 text-sm">No hay actividad reciente.</p>
+                      <div className="text-center py-16">
+                        <FaClock size={32} className="text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500 text-sm font-medium">No hay actividad reciente</p>
+                        <p className="text-gray-400 text-xs mt-1">Los nuevos registros aparecerán aquí</p>
                       </div>
                     ) : actividadReciente.map((item, i) => (
-                      <div key={i} className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 transition">
-                        <div className={`${item.color} w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm`}>
-                          {item.icono}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-gray-900 truncate">{item.descripcion}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{item.codigo} · {item.detalle}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${estadoColor[item.estado] || 'bg-gray-100 text-gray-600'}`}>
-                            {item.estado?.replace(/_/g, ' ')}
-                          </span>
-                          <a href={`https://wa.me/51${item.telefono}`} target="_blank" rel="noreferrer" className="w-7 h-7 bg-green-100 text-green-600 rounded-lg flex items-center justify-center hover:bg-green-200 transition">
-                            <FaWhatsapp size={13} />
-                          </a>
+                      <div key={i} className="px-6 py-4 hover:bg-gray-50 transition">
+                        <div className="flex items-start gap-4">
+                          <div className={`${item.color} w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0`}>
+                            {item.icono}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3 mb-1">
+                              <p className="text-sm font-semibold text-gray-900">{item.descripcion}</p>
+                              <span className={`text-xs px-2.5 py-1 rounded-md font-medium border whitespace-nowrap ${estadoColor[item.estado] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                                {item.estado?.replace(/_/g, ' ')}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              <span className="font-medium text-gray-700">{item.codigo}</span> · {item.detalle}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs text-gray-400">
+                                {new Date(item.fecha).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <a 
+                                href={`https://wa.me/51${item.telefono}`} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="ml-auto bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-green-700 transition flex items-center gap-1.5"
+                              >
+                                <FaWhatsapp size={13} /> Contactar
+                              </a>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -292,26 +327,27 @@ function AdminPanel() {
                 </div>
 
                 {/* PANEL DERECHO */}
-                <div className="space-y-4">
+                <div className="space-y-6">
 
                   {/* ESTADOS */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-gray-100">
-                      <h3 className="font-bold text-gray-900 text-sm">Estados de cotizaciones</h3>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="px-5 py-4 border-b border-gray-200">
+                      <h3 className="font-bold text-gray-900">Estados de cotizaciones</h3>
+                      <p className="text-xs text-gray-500 mt-0.5">Distribución actual</p>
                     </div>
-                    <div className="p-5 space-y-3">
+                    <div className="p-5 space-y-3.5">
                       {Object.keys(estadosCotizaciones).length === 0 ? (
-                        <p className="text-gray-400 text-xs text-center py-2">Sin datos</p>
+                        <p className="text-gray-400 text-sm text-center py-4">Sin datos disponibles</p>
                       ) : Object.entries(estadosCotizaciones).map(([estado, count]) => (
                         <div key={estado}>
-                          <div className="flex justify-between text-xs mb-1.5">
-                            <span className="text-gray-600 capitalize font-medium">{estado.replace(/_/g, ' ')}</span>
-                            <span className="font-bold text-gray-900 bg-gray-100 px-1.5 py-0.5 rounded-md">{count}</span>
+                          <div className="flex justify-between items-center text-xs mb-1.5">
+                            <span className="text-gray-700 capitalize font-medium">{estado.replace(/_/g, ' ')}</span>
+                            <span className="font-bold text-gray-900">{count}</span>
                           </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                             <div
-                              className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
-                              style={{ width: `${Math.max((count / kpis.cotizaciones) * 100, 8)}%` }}
+                              className="bg-slate-600 h-2.5 rounded-full transition-all duration-700"
+                              style={{ width: `${Math.max((count / kpis.cotizaciones) * 100, 5)}%` }}
                             />
                           </div>
                         </div>
@@ -319,59 +355,80 @@ function AdminPanel() {
                     </div>
                   </div>
 
+                  {/* RESUMEN */}
+                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-5 text-white shadow-lg">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="bg-white/10 p-2 rounded-lg">
+                        <FaChartBar size={16} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">Resumen del día</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs text-gray-300">Cotizaciones completadas</span>
+                          <span className="text-emerald-400 font-bold text-lg">{completadosCotizaciones}</span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-1.5">
+                          <div 
+                            className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" 
+                            style={{ width: kpis.cotizaciones > 0 ? `${(completadosCotizaciones / kpis.cotizaciones) * 100}%` : '0%' }} 
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs text-gray-300">Mantenimientos resueltos</span>
+                          <span className="text-emerald-400 font-bold text-lg">{completadosMantenimientos}</span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-1.5">
+                          <div 
+                            className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" 
+                            style={{ width: kpis.mantenimientos > 0 ? `${(completadosMantenimientos / kpis.mantenimientos) * 100}%` : '0%' }} 
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="border-t border-white/10 pt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-300">Total pendientes</span>
+                          <span className="text-amber-400 font-bold text-lg">{pendientesCotizaciones + pendientesMantenimientos}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* ACCESOS RAPIDOS */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                    <h3 className="font-bold text-gray-900 text-sm mb-3">Accesos rapidos</h3>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                    <h3 className="font-bold text-gray-900 text-sm mb-3">Accesos rápidos</h3>
                     <div className="space-y-2">
                       {[
-                        { label: 'Ver cotizaciones', seccion: 'cotizaciones', color: 'bg-blue-50 text-blue-700 hover:bg-blue-100', icono: <FaFileAlt size={11} /> },
-                        { label: 'Ver mantenimientos', seccion: 'mantenimientos', color: 'bg-green-50 text-green-700 hover:bg-green-100', icono: <FaWrench size={11} /> },
-                        { label: 'Gestionar productos', seccion: 'productos', color: 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100', icono: <FaBox size={11} /> },
-                        { label: 'Gestionar contenido', seccion: 'contenido', color: 'bg-purple-50 text-purple-700 hover:bg-purple-100', icono: <FaImages size={11} /> },
+                        { label: 'Ver cotizaciones', seccion: 'cotizaciones', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaFileAlt size={12} /> },
+                        { label: 'Ver mantenimientos', seccion: 'mantenimientos', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaWrench size={12} /> },
+                        { label: 'Gestionar productos', seccion: 'productos', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaBox size={12} /> },
+                        { label: 'Gestionar contenido', seccion: 'contenido', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaImages size={12} /> },
                       ].map((acc, i) => (
                         <button
                           key={i}
                           onClick={() => setSeccionActiva(acc.seccion)}
-                          className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${acc.color}`}
+                          className={`w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${acc.color}`}
                         >
                           {acc.icono} {acc.label}
                         </button>
                       ))}
                       <a
                         href="mailto:gygpuertasautomaticas@gmail.com"
-                        className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold bg-gray-50 text-gray-700 hover:bg-gray-100 transition flex items-center gap-2"
+                        className="w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 transition flex items-center gap-2"
                       >
-                        <FaEnvelope size={11} /> Correo empresa
+                        <FaEnvelope size={12} /> Correo empresa
                       </a>
-                    </div>
-                  </div>
-
-                  {/* RESUMEN */}
-                  <div className="bg-gray-900 rounded-2xl p-5 text-white">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FaCheckCircle size={13} className="text-yellow-400" />
-                      <p className="text-sm font-bold">Resumen general</p>
-                    </div>
-                    <p className="text-gray-500 text-xs mb-4">{new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-xs">Cotizaciones completadas</span>
-                        <span className="text-green-400 font-black text-lg">{completadosCotizaciones}</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-1">
-                        <div className="bg-green-400 h-1 rounded-full" style={{ width: kpis.cotizaciones > 0 ? `${(completadosCotizaciones / kpis.cotizaciones) * 100}%` : '0%' }} />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-xs">Mantenimientos resueltos</span>
-                        <span className="text-green-400 font-black text-lg">{completadosMantenimientos}</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-1">
-                        <div className="bg-green-400 h-1 rounded-full" style={{ width: kpis.mantenimientos > 0 ? `${(completadosMantenimientos / kpis.mantenimientos) * 100}%` : '0%' }} />
-                      </div>
-                      <div className="border-t border-gray-800 pt-3 flex justify-between items-center">
-                        <span className="text-gray-400 text-xs">Pendientes total</span>
-                        <span className="text-yellow-400 font-black text-lg">{pendientesCotizaciones + pendientesMantenimientos}</span>
-                      </div>
                     </div>
                   </div>
 

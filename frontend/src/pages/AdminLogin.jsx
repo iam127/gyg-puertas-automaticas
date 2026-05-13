@@ -24,7 +24,7 @@ function AdminLogin() {
         setTokens(res.data.access, res.data.refresh)
         navigate('/admin-panel')
       })
-      .catch(() => setError('Usuario o contrasena incorrectos.'))
+      .catch(() => setError('Usuario o contraseña incorrectos.'))
       .finally(() => setCargando(false))
   }
 
@@ -43,7 +43,7 @@ function AdminLogin() {
         backgroundSize: '60px 60px'
       }} />
 
-      {/* CIRCULO DECORATIVO SUPERIOR */}
+      {/* CÍRCULO DECORATIVO SUPERIOR */}
       <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #facc15, transparent)' }} />
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
 
@@ -55,19 +55,19 @@ function AdminLogin() {
             <img src={logo} alt="GyG" className="h-16 object-contain mb-8" />
             <h1 className="text-5xl font-black text-white leading-tight mb-4">
               Panel de<br />
-              <span style={{ color: '#facc15' }}>Administracion</span>
+              <span style={{ color: '#facc15' }}>Administración</span>
             </h1>
             <p className="text-gray-500 text-base leading-relaxed max-w-sm">
-              Gestiona cotizaciones, mantenimientos, productos y tecnicos desde un solo lugar.
+              Gestiona cotizaciones, mantenimientos, productos y técnicos desde un solo lugar.
             </p>
           </div>
 
           <div className="space-y-3">
             {[
-              'Gestion completa de cotizaciones y mantenimientos',
-              'Control de productos y catalogo en tiempo real',
-              'Reportes y exportacion de datos en Excel',
-              'Notificaciones automaticas por WhatsApp y Email',
+              'Gestión completa de cotizaciones y mantenimientos',
+              'Control de productos y catálogo en tiempo real',
+              'Reportes y exportación de datos en Excel',
+              'Notificaciones automáticas por WhatsApp y Email',
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
                 <FaCheckCircle size={14} style={{ color: '#facc15' }} className="flex-shrink-0" />
@@ -78,7 +78,7 @@ function AdminLogin() {
 
           <div className="flex items-center gap-4">
             <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, rgba(250,204,21,0.3), transparent)' }} />
-            <span className="text-gray-600 text-xs">GyG Puertas Automaticas © 2026</span>
+            <span className="text-gray-600 text-xs">GyG Puertas Automáticas © 2026</span>
           </div>
         </div>
 
@@ -134,7 +134,7 @@ function AdminLogin() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contrasena</label>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contraseña</label>
                 <div className="relative">
                   <FaLock className="absolute left-4 top-1/2 -translate-y-1/2" size={13} style={{ color: '#6b7280' }} />
                   <input

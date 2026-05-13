@@ -9,8 +9,8 @@ function Navbar() {
   const links = [
     { to: '/', label: 'Inicio' },
     { to: '/nosotros', label: 'Nosotros' },
-    { to: '/catalogo', label: 'Catalogo' },
-    { to: '/galeria', label: 'Galeria' },
+    { to: '/catalogo', label: 'Catálogo' },
+    { to: '/galeria', label: 'Galería' },
     { to: '/blog', label: 'Blog' },
     { to: '/seguimiento', label: 'Seguimiento' },
     { to: '/mantenimiento', label: 'Mantenimiento' },
@@ -34,7 +34,7 @@ function Navbar() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 text-yellow-400">
               <FaClock size={11} />
-              <span className="font-medium">Atencion 24/7</span>
+              <span className="font-medium">Atención 24/7</span>
             </div>
             <a
               href="https://wa.me/51947316874"
@@ -52,7 +52,7 @@ function Navbar() {
       <nav className="bg-white text-gray-900 shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-stretch h-20">
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="GyG Puertas Automaticas" className="h-14 object-contain" />
+            <img src={logo} alt="GyG Puertas Automáticas" className="h-14 object-contain" />
           </Link>
 
           <div className="hidden md:flex text-sm font-medium items-stretch">
@@ -70,7 +70,7 @@ function Navbar() {
                 to="/cotizar"
                 className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition text-sm my-auto"
               >
-                Solicitar Cotizacion
+                Solicitar Cotización
               </Link>
             </div>
           </div>
@@ -101,7 +101,7 @@ function Navbar() {
                 className="bg-yellow-400 text-gray-900 px-4 py-3 rounded-xl font-bold text-center block hover:bg-yellow-300 transition"
                 onClick={() => setMenuAbierto(false)}
               >
-                Solicitar Cotizacion
+                Solicitar Cotización
               </Link>
             </div>
           </div>

@@ -59,8 +59,8 @@ const preguntas = [
 const recomendaciones = {
   residencial: {
     pequeno: { tipo: 'Puerta Corrediza', uso: 'residencial', palabraClave: 'corrediza', desc: 'Ideal para cocheras pequeñas de viviendas. Motor silencioso y apertura suave.' },
-    mediano: { tipo: 'Porton Levadizo', uso: 'residencial', palabraClave: 'levadizo', desc: 'Perfecta para accesos medianos en viviendas. No invade la vereda al abrir.' },
-    grande: { tipo: 'Porton Corredizo', uso: 'residencial', palabraClave: 'corredizo', desc: 'Ideal para accesos grandes en viviendas con espacio lateral disponible.' },
+    mediano: { tipo: 'Portón Levadizo', uso: 'residencial', palabraClave: 'levadizo', desc: 'Perfecta para accesos medianos en viviendas. No invade la vereda al abrir.' },
+    grande: { tipo: 'Portón Corredizo', uso: 'residencial', palabraClave: 'corredizo', desc: 'Ideal para accesos grandes en viviendas con espacio lateral disponible.' },
   },
   comercial: {
     pequeno: { tipo: 'Puerta Batiente', uso: 'comercial', palabraClave: 'batiente', desc: 'Ideal para locales comerciales con accesos pequeños y tráfico peatonal.' },
@@ -69,7 +69,7 @@ const recomendaciones = {
   },
   industrial: {
     pequeno: { tipo: 'Puerta Enrollable', uso: 'industrial', palabraClave: 'enrollable', desc: 'Robusta y duradera para uso industrial intensivo.' },
-    mediano: { tipo: 'Porton Levadizo Seccional', uso: 'industrial', palabraClave: 'seccional', desc: 'Perfecta para almacenes y plantas industriales de tamaño mediano.' },
+    mediano: { tipo: 'Portón Levadizo Seccional', uso: 'industrial', palabraClave: 'seccional', desc: 'Perfecta para almacenes y plantas industriales de tamaño mediano.' },
     grande: { tipo: 'Barrera Vehicular', uso: 'comercial', palabraClave: 'barrera', desc: 'Ideal para grandes accesos industriales con alto tráfico vehicular.' },
   },
 }
@@ -129,7 +129,7 @@ function GuiaPuerta() {
     return (
       <div>
         <Helmet>
-          <title>Que puerta necesito | GyG Puertas Automaticas</title>
+          <title>¿Qué puerta necesito? | GyG Puertas Automáticas</title>
         </Helmet>
 
         <section className="bg-gray-900 text-white py-16 px-4 text-center relative overflow-hidden">
@@ -156,7 +156,7 @@ function GuiaPuerta() {
           ) : productosRecomendados.length > 0 ? (
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Productos disponibles para ti</h2>
-              <p className="text-gray-500 mb-6">Estos son los productos de nuestro catalogo que mejor se adaptan a tus necesidades</p>
+              <p className="text-gray-500 mb-6">Estos son los productos de nuestro catálogo que mejor se adaptan a tus necesidades</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {productosRecomendados.map(p => (
                   <div key={p.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition">
@@ -209,13 +209,13 @@ function GuiaPuerta() {
               to={`/catalogo`}
               className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-yellow-300 transition"
             >
-              Ver catalogo completo
+              Ver catálogo completo
             </Link>
             <Link
               to="/cotizar"
               className="bg-gray-900 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition"
             >
-              Solicitar cotizacion
+              Solicitar cotización
             </Link>
             <button
               onClick={reiniciar}
@@ -234,7 +234,7 @@ function GuiaPuerta() {
   return (
     <div>
       <Helmet>
-        <title>Que puerta necesito | GyG Puertas Automaticas</title>
+        <title>¿Qué puerta necesito? | GyG Puertas Automáticas</title>
       </Helmet>
 
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
@@ -245,7 +245,7 @@ function GuiaPuerta() {
             ¿Qué puerta <span className="text-yellow-400">necesito?</span>
           </h1>
           <p className="text-gray-300 max-w-xl mx-auto">
-            Responde estas preguntas y te recomendaremos el producto ideal de nuestro catalogo.
+            Responde estas preguntas y te recomendaremos el producto ideal de nuestro catálogo.
           </p>
         </div>
       </section>

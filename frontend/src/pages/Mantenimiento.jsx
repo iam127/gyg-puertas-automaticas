@@ -9,7 +9,7 @@ const TIPOS = [
     value: 'preventivo',
     icon: <FaTools size={28} />,
     titulo: 'Mantenimiento Preventivo',
-    desc: 'Revision periodica para evitar fallas y prolongar la vida util de tu puerta.',
+    desc: 'Revisión periódica para evitar fallas y prolongar la vida útil de tu puerta.',
     colorActivo: 'border-blue-500 bg-blue-50',
     iconColor: 'text-blue-500',
     badge: 'bg-blue-100 text-blue-700',
@@ -18,7 +18,7 @@ const TIPOS = [
     value: 'correctivo',
     icon: <FaWrench size={28} />,
     titulo: 'Mantenimiento Correctivo',
-    desc: 'Diagnostico y reparacion de fallas en tu puerta automatica.',
+    desc: 'Diagnóstico y reparación de fallas en tu puerta automática.',
     colorActivo: 'border-orange-500 bg-orange-50',
     iconColor: 'text-orange-500',
     badge: 'bg-orange-100 text-orange-700',
@@ -26,8 +26,8 @@ const TIPOS = [
   {
     value: 'garantia',
     icon: <FaShieldAlt size={28} />,
-    titulo: 'Garantia',
-    desc: 'Cobertura de garantia para trabajos realizados por GyG.',
+    titulo: 'Garantía',
+    desc: 'Cobertura de garantía para trabajos realizados por GyG.',
     colorActivo: 'border-green-500 bg-green-50',
     iconColor: 'text-green-500',
     badge: 'bg-green-100 text-green-700',
@@ -65,7 +65,7 @@ function Mantenimiento() {
         setCodigo(res.data.codigo)
         setEnviado(true)
       })
-      .catch(() => setError('Ocurrio un error al enviar la solicitud. Intentalo de nuevo.'))
+      .catch(() => setError('Ocurrió un error al enviar la solicitud. Inténtalo de nuevo.'))
       .finally(() => setCargando(false))
   }
 
@@ -73,20 +73,20 @@ function Mantenimiento() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <Helmet>
-        <title>Mantenimiento | GyG Puertas Automaticas</title>
+        <title>Mantenimiento | GyG Puertas Automáticas</title>
       </Helmet>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 max-w-lg w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaCheckCircle size={40} className="text-green-500" />
           </div>
           <h2 className="text-2xl font-bold mb-2 text-gray-900">Solicitud enviada correctamente</h2>
-          <p className="text-gray-500 mb-6">Tu codigo de seguimiento es:</p>
+          <p className="text-gray-500 mb-6">Tu código de seguimiento es:</p>
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl px-8 py-6 mb-6">
-            <p className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Codigo de seguimiento</p>
+            <p className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Código de seguimiento</p>
             <p className="text-3xl font-bold text-gray-900 tracking-widest">{codigo}</p>
           </div>
           <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-            Guarda este codigo para hacer seguimiento de tu solicitud. tambien te lo enviamos por correo y WhatsApp.
+            Guarda este código para hacer seguimiento de tu solicitud. También te lo enviamos por correo y WhatsApp.
           </p>
           <div className="flex justify-center gap-3">
             <Link to="/seguimiento" className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-bold hover:bg-yellow-300 transition">
@@ -104,18 +104,18 @@ function Mantenimiento() {
   return (
     <div>
       <Helmet>
-        <title>Mantenimiento | GyG Puertas Automaticas</title>
+        <title>Mantenimiento | GyG Puertas Automáticas</title>
       </Helmet>
       {/* HERO */}
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
         <div className="relative z-10">
-          <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Servicio tecnico</span>
+          <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Servicio técnico</span>
           <h1 className="text-5xl font-bold mt-2 mb-4">
             Solicitar <span className="text-yellow-400">Mantenimiento</span>
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Completa el formulario y nuestro equipo tecnico te atendera a la brevedad.
+            Completa el formulario y nuestro equipo técnico te atenderá a la brevedad.
           </p>
         </div>
       </section>
@@ -174,7 +174,7 @@ function Mantenimiento() {
 
             {!form.tipo && (
               <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
-                <span className="font-bold">Atencion:</span>
+                <span className="font-bold">Atención:</span>
                 Por favor selecciona un tipo de servicio arriba antes de continuar.
               </div>
             )}
@@ -191,7 +191,7 @@ function Mantenimiento() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
                   <input
                     name="telefono"
                     onChange={handleChange}
@@ -202,7 +202,7 @@ function Mantenimiento() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
                 <input
                   name="correo"
                   type="email"
@@ -214,7 +214,7 @@ function Mantenimiento() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Direccion *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
                   <input
                     name="direccion"
                     onChange={handleChange}
@@ -244,7 +244,7 @@ function Mantenimiento() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha aproximada de instalacion</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha aproximada de instalación</label>
                   <input
                     name="fecha_instalacion_aprox"
                     type="date"
@@ -255,7 +255,7 @@ function Mantenimiento() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion del problema *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción del problema *</label>
                 <textarea
                   name="descripcion_problema"
                   onChange={handleChange}
@@ -266,7 +266,7 @@ function Mantenimiento() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad para visita tecnica *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad para visita técnica *</label>
                 <input
                   name="disponibilidad"
                   onChange={handleChange}
@@ -276,7 +276,7 @@ function Mantenimiento() {
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500 border border-gray-100">
-                Al enviar tu solicitud, nuestro equipo tecnico se comunicara contigo en menos de 24 horas para coordinar la visita.
+                Al enviar tu solicitud, nuestro equipo técnico se comunicará contigo en menos de 24 horas para coordinar la visita.
               </div>
 
               <button

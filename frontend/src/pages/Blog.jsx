@@ -20,12 +20,12 @@ function Blog() {
     return (
       <div>
         <Helmet>
-          <title>{seleccionado.titulo} | GyG Puertas Automaticas</title>
+          <title>{seleccionado.titulo} | GyG Puertas Automáticas</title>
         </Helmet>
         <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
           <div className="relative z-10 max-w-3xl mx-auto">
-            <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Articulo</span>
+            <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Artículo</span>
             <h1 className="text-3xl md:text-4xl font-bold mt-3 mb-5 leading-tight">{seleccionado.titulo}</h1>
             <div className="flex items-center justify-center gap-6 text-gray-400 text-sm">
               <div className="flex items-center gap-2">
@@ -52,9 +52,9 @@ function Blog() {
             <p className="text-gray-700 leading-relaxed whitespace-pre-line text-base">{seleccionado.contenido}</p>
           </div>
           <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
-            <p className="text-gray-700 font-medium mb-3">Necesitas una puerta automatica?</p>
+            <p className="text-gray-700 font-medium mb-3">¿Necesitas una puerta automática?</p>
             <a href="/cotizar" className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-yellow-300 transition inline-block">
-              Solicitar Cotizacion
+              Solicitar Cotización
             </a>
           </div>
         </section>
@@ -65,7 +65,7 @@ function Blog() {
   return (
     <div>
       <Helmet>
-        <title>Blog | GyG Puertas Automaticas</title>
+        <title>Blog | GyG Puertas Automáticas</title>
       </Helmet>
       <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
@@ -93,7 +93,7 @@ function Blog() {
           ) : (
             <>
               <p className="text-gray-500 text-sm mb-8">
-                <span className="font-bold text-gray-900">{posts.length}</span> articulo{posts.length !== 1 ? 's' : ''} publicado{posts.length !== 1 ? 's' : ''}
+                <span className="font-bold text-gray-900">{posts.length}</span> artículo{posts.length !== 1 ? 's' : ''} publicado{posts.length !== 1 ? 's' : ''}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {posts.map((post, index) => (
@@ -111,7 +111,7 @@ function Blog() {
                       ) : (
                         <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center gap-2">
                           <span className="text-yellow-400 font-bold text-3xl">GyG</span>
-                          <span className="text-gray-500 text-sm">Puertas Automaticas</span>
+                          <span className="text-gray-500 text-sm">Puertas Automáticas</span>
                         </div>
                       )}
                       {index === 0 && (
@@ -143,7 +143,7 @@ function Blog() {
                         onClick={() => setSeleccionado(post)}
                         className={`mt-5 bg-yellow-400 text-gray-900 rounded-xl font-bold hover:bg-yellow-300 transition text-sm ${index === 0 ? 'py-3 px-8 w-fit' : 'py-2.5 w-full'}`}
                       >
-                        Leer articulo completo
+                        Leer artículo completo
                       </button>
                     </div>
                   </div>

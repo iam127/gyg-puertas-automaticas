@@ -30,7 +30,7 @@ function DetalleProducto() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <Helmet>
-        <title>{producto.nombre} | GyG Puertas Automaticas</title>
+        <title>{producto.nombre} | GyG Puertas Automáticas</title>
       </Helmet>
       <div className="mb-6">
         <Link to="/catalogo" className="text-yellow-500 hover:underline text-sm">
