@@ -1,20 +1,20 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from groq import Groq
+from google import genai
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 
 SYSTEM_PROMPT = """
 Eres un asistente virtual de GyG Puertas Automáticas, una empresa peruana especializada en instalación y mantenimiento de puertas automáticas.
 
 INFORMACIÓN DE LA EMPRESA:
 - Nombre: GyG Puertas Automáticas
-- Fundación: Más de 10 años de experiencia en el mercado peruano
+- Fundación: Más de 4 años de experiencia en el mercado peruano
 - Rubro: Fabricación, instalación y mantenimiento de puertas automáticas
 - Cobertura: Todos los distritos de Lima Metropolitana
 - Horario: Lunes a Sábado de 8am a 6pm
@@ -45,26 +45,10 @@ PROCESO DE COTIZACIÓN:
 4. Se envía la cotización formal en 24-48 horas
 - Los precios NO se dan por teléfono o chat, siempre requieren visita técnica
 
-PROCESO DE MANTENIMIENTO:
-1. El cliente solicita mantenimiento por la web
-2. Se asigna un técnico especializado
-3. El técnico visita en la fecha acordada
-4. Se emite informe del servicio realizado
-
-SEGUIMIENTO DE SOLICITUDES:
-- El cliente recibe un código único al registrar su solicitud
-- Puede hacer seguimiento en la sección Seguimiento de la web ingresando su código
-- También puede consultar por WhatsApp con su código
-
 GARANTÍA:
 - Todas las instalaciones tienen garantía de 12 a 24 meses según el producto
 - La garantía cubre defectos de instalación y fallas del motor
 - No cubre daños por mal uso o accidentes
-
-MARCAS Y MATERIALES:
-- Trabajamos con motores de marcas reconocidas internacionalmente
-- Materiales: acero galvanizado, aluminio anodizado, vidrio templado
-- Acabados: pintura electroestática, anodizado, lacado
 
 INSTRUCCIONES DE RESPUESTA:
 - Responde siempre en español
@@ -85,24 +69,27 @@ def chatbot(request):
         return Response({'error': 'Mensaje requerido'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        mensajes = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+        historial_gemini = []
         for msg in historial[-10:]:
-            mensajes.append({'role': msg['rol'], 'content': msg['contenido']})
-        mensajes.append({'role': 'user', 'content': mensaje})
+            rol = 'user' if msg['rol'] == 'user' else 'model'
+            historial_gemini.append(
+                genai.types.Content(role=rol, parts=[genai.types.Part(text=msg['contenido'])])
+            )
 
-        respuesta = client.chat.completions.create(
-            model='llama-3.3-70b-versatile',
-            messages=mensajes,
-            max_tokens=500,
-            temperature=0.7,
+        prompt_completo = f"{SYSTEM_PROMPT}\n\nUsuario: {mensaje}"
+
+        respuesta = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=historial_gemini + [genai.types.Content(role='user', parts=[genai.types.Part(text=prompt_completo)])],
         )
 
-        texto = respuesta.choices[0].message.content
+        texto = respuesta.text
         return Response({'respuesta': texto})
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET'])
 def buscar_inteligente(request):
@@ -129,14 +116,12 @@ Ejemplo: 1,3,5
 Si ninguno es relevante responde: ninguno
 """
 
-        respuesta = client.chat.completions.create(
-            model='llama-3.3-70b-versatile',
-            messages=[{'role': 'user', 'content': prompt}],
-            max_tokens=100,
-            temperature=0,
+        respuesta = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt,
         )
 
-        texto = respuesta.choices[0].message.content.strip()
+        texto = respuesta.text.strip()
 
         if texto == 'ninguno':
             return Response({'productos': []})
