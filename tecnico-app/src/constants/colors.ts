@@ -1,0 +1,21 @@
+export const COLORS = {
+  PRIMARY_GOLD: '#facc15',
+  SECONDARY_GOLD: '#eab308',
+  BG_DARK: '#111827',
+  CARD_DARK: '#1f2937',
+  TEXT_PRIMARY: '#ffffff',
+  TEXT_SECONDARY: '#9ca3af',
+  WHATSAPP_GREEN: '#22c55e',
+  PREVENTIVE_BLUE: '#3b82f6',
+  PREVENTIVE_BLUE_BG: '#eff6ff',
+  CORRECTIVE_ORANGE: '#f97316',
+  CORRECTIVE_ORANGE_BG: '#fff7ed',
+  WARRANTY_GREEN: '#10b981',
+  ERROR_RED: '#ef4444',
+  BORDER_DARK: '#374151',
+  WHITE: '#ffffff',
+  MUTED: '#6b7280',
+  CARD_LIGHT: '#374151',
+};
+
+export default COLORS;

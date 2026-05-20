@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "GyG Técnicos",
+    "slug": "gyg-tecnicos-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.gyg.tecnicos"
+    },
+    "android": {
+      "package": "com.gyg.tecnicos"
+    }
+  }
+}
