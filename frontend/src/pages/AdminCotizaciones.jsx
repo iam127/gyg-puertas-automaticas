@@ -17,15 +17,15 @@ const ESTADOS = [
 ]
 
 const estadoColor = {
-  recibido: 'bg-blue-50 text-blue-700 border-blue-200',
-  en_revision: 'bg-amber-50 text-amber-700 border-amber-200',
-  visita_agendada: 'bg-purple-50 text-purple-700 border-purple-200',
-  cotizado: 'bg-orange-50 text-orange-700 border-orange-200',
-  aceptado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  rechazado: 'bg-red-50 text-red-700 border-red-200',
-  instalacion_agendada: 'bg-purple-50 text-purple-700 border-purple-200',
-  completado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  cancelado: 'bg-red-50 text-red-700 border-red-200',
+  recibido: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  en_revision: 'bg-gray-100 text-gray-700 border-gray-300',
+  visita_agendada: 'bg-gray-100 text-gray-700 border-gray-300',
+  cotizado: 'bg-gray-100 text-gray-700 border-gray-300',
+  aceptado: 'bg-gray-900 text-white border-gray-900',
+  rechazado: 'bg-gray-100 text-gray-600 border-gray-300',
+  instalacion_agendada: 'bg-gray-100 text-gray-700 border-gray-300',
+  completado: 'bg-gray-900 text-white border-gray-900',
+  cancelado: 'bg-gray-100 text-gray-600 border-gray-300',
 }
 
 function AdminCotizaciones() {
@@ -74,8 +74,8 @@ function AdminCotizaciones() {
 
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-slate-600 rounded-lg flex items-center justify-center">
-            <FaFileAlt size={18} className="text-white" />
+          <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+            <FaFileAlt size={18} className="text-yellow-400" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">Gestión de cotizaciones</h2>
@@ -87,11 +87,8 @@ function AdminCotizaciones() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-slate-100 rounded-lg flex items-center justify-center">
-              <FaFileAlt size={18} className="text-slate-700" />
-            </div>
-            <div className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Total
+            <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaFileAlt size={18} className="text-yellow-400" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{cotizaciones.length}</p>
@@ -100,11 +97,8 @@ function AdminCotizaciones() {
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-amber-100 rounded-lg flex items-center justify-center">
-              <FaFileAlt size={18} className="text-amber-700" />
-            </div>
-            <div className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Pendientes
+            <div className="w-11 h-11 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <FaFileAlt size={18} className="text-gray-900" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{pendientes}</p>
@@ -113,11 +107,8 @@ function AdminCotizaciones() {
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <FaFileAlt size={18} className="text-emerald-700" />
-            </div>
-            <div className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Completadas
+            <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaFileAlt size={18} className="text-yellow-400" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{completados}</p>
@@ -154,7 +145,7 @@ function AdminCotizaciones() {
 
       {cargando ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-3 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
         </div>
       ) : cotizacionesFiltradas.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-lg border border-gray-200">
@@ -180,7 +171,7 @@ function AdminCotizaciones() {
               {cotizacionesFiltradas.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition">
                   <td className="px-5 py-4">
-                    <span className="font-bold text-slate-700">{c.codigo}</span>
+                    <span className="font-bold text-gray-900">{c.codigo}</span>
                   </td>
                   <td className="px-5 py-4">
                     <p className="font-semibold text-gray-900">{c.nombre_cliente}</p>
@@ -188,7 +179,7 @@ function AdminCotizaciones() {
                   <td className="px-5 py-4 text-gray-600">{c.telefono}</td>
                   <td className="px-5 py-4 text-gray-600">{c.distrito}</td>
                   <td className="px-5 py-4">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${estadoColor[c.estado] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${estadoColor[c.estado] || 'bg-gray-100 text-gray-700 border-gray-300'}`}>
                       {c.estado?.replace(/_/g, ' ')}
                     </span>
                   </td>
@@ -198,7 +189,7 @@ function AdminCotizaciones() {
                   <td className="px-5 py-4">
                     <button
                       onClick={() => { setSeleccionada(c); setNuevoEstado(c.estado) }}
-                      className="bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-slate-800 transition flex items-center gap-1.5"
+                      className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-800 transition flex items-center gap-1.5"
                     >
                       <FaEdit size={12} />
                       Gestionar
@@ -216,8 +207,8 @@ function AdminCotizaciones() {
           <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-y-auto" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <FaFileAlt size={18} className="text-white" />
+                <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+                  <FaFileAlt size={18} className="text-yellow-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{seleccionada.codigo}</h3>
@@ -233,8 +224,8 @@ function AdminCotizaciones() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center">
-                      <FaFileAlt size={11} className="text-slate-700" />
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center">
+                      <FaFileAlt size={11} className="text-gray-700" />
                     </div>
                     <p className="text-xs text-gray-500 font-medium">Cliente</p>
                   </div>
@@ -243,8 +234,8 @@ function AdminCotizaciones() {
                 
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center">
-                      <FaPhone size={11} className="text-slate-700" />
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center">
+                      <FaPhone size={11} className="text-gray-700" />
                     </div>
                     <p className="text-xs text-gray-500 font-medium">Teléfono</p>
                   </div>
@@ -253,8 +244,8 @@ function AdminCotizaciones() {
                 
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center">
-                      <FaEnvelope size={11} className="text-slate-700" />
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center">
+                      <FaEnvelope size={11} className="text-gray-700" />
                     </div>
                     <p className="text-xs text-gray-500 font-medium">Correo</p>
                   </div>
@@ -263,8 +254,8 @@ function AdminCotizaciones() {
                 
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center">
-                      <FaMapMarkerAlt size={11} className="text-slate-700" />
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center">
+                      <FaMapMarkerAlt size={11} className="text-gray-700" />
                     </div>
                     <p className="text-xs text-gray-500 font-medium">Distrito</p>
                   </div>
@@ -273,8 +264,8 @@ function AdminCotizaciones() {
                 
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center">
-                      <FaFileAlt size={11} className="text-slate-700" />
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center">
+                      <FaFileAlt size={11} className="text-gray-700" />
                     </div>
                     <p className="text-xs text-gray-500 font-medium">Tipo de uso</p>
                   </div>
@@ -283,8 +274,8 @@ function AdminCotizaciones() {
                 
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center">
-                      <FaFileAlt size={11} className="text-slate-700" />
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center">
+                      <FaFileAlt size={11} className="text-gray-700" />
                     </div>
                     <p className="text-xs text-gray-500 font-medium">Disponibilidad</p>
                   </div>
@@ -304,13 +295,13 @@ function AdminCotizaciones() {
                   href={`https://wa.me/51${seleccionada.telefono}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold text-sm hover:bg-green-700 transition flex items-center justify-center gap-2"
+                  className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm hover:bg-gray-800 transition flex items-center justify-center gap-2"
                 >
                   <FaWhatsapp size={16} /> Contactar por WhatsApp
                 </a>
                 <a
                   href={`tel:+51${seleccionada.telefono}`}
-                  className="flex-1 bg-slate-700 text-white py-3 rounded-lg font-semibold text-sm hover:bg-slate-800 transition flex items-center justify-center gap-2"
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold text-sm hover:bg-gray-200 transition flex items-center justify-center gap-2 border border-gray-200"
                 >
                   <FaPhone size={14} /> Llamar ahora
                 </a>
@@ -321,7 +312,7 @@ function AdminCotizaciones() {
                 <select
                   value={nuevoEstado}
                   onChange={e => setNuevoEstado(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 bg-white text-sm font-medium mb-4"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-200 bg-white text-sm font-medium mb-4"
                 >
                   {ESTADOS.filter(e => e.value !== '').map(e => (
                     <option key={e.value} value={e.value}>{e.label}</option>
@@ -336,7 +327,7 @@ function AdminCotizaciones() {
                   </button>
                   <button
                     onClick={() => cambiarEstado(seleccionada.id)}
-                    className="flex-1 bg-slate-700 text-white py-3 rounded-lg font-semibold text-sm hover:bg-slate-800 transition"
+                    className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm hover:bg-gray-800 transition"
                   >
                     Guardar cambios
                   </button>

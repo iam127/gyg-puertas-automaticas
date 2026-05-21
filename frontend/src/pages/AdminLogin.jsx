@@ -2,17 +2,20 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, setTokens } from '../services/auth'
 import logo from '../assets/Logo-gyg-Admin.png'
+import fondoAdmin from '../assets/Fondo-Admin.jpg'
 import { Helmet } from 'react-helmet-async'
-import { FaUser, FaLock, FaShieldAlt, FaCheckCircle } from 'react-icons/fa'
+import { FaUser, FaLock, FaArrowRight } from 'react-icons/fa'
 
 function AdminLogin() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [focused, setFocused] = useState(null)
   const navigate = useNavigate()
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    if (error) setError('')
   }
 
   const handleSubmit = (e) => {
@@ -29,164 +32,307 @@ function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+    <>
       <Helmet>
         <title>Login | GyG Admin</title>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+        <style>{`
+          html, body, #root { height: 100%; margin: 0; padding: 0; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @media (max-width: 900px) {
+            .admin-left { display: none !important; }
+            .admin-right { width: 100% !important; max-width: 100% !important; }
+            .admin-root { display: block !important; }
+          }
+        `}</style>
       </Helmet>
 
-      {/* FONDO DECORATIVO */}
-      <div className="absolute inset-0" style={{
-        background: 'radial-gradient(ellipse at 20% 50%, rgba(250,204,21,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(59,130,246,0.04) 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, rgba(250,204,21,0.03) 0%, transparent 50%)'
-      }} />
-      <div className="absolute inset-0 opacity-30" style={{
-        backgroundImage: 'linear-gradient(rgba(250,204,21,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(250,204,21,0.03) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
+      {/* ROOT — fixed fullscreen, no scroll */}
+      <div
+        className="admin-root"
+        style={{
+          position: 'fixed', inset: 0,
+          display: 'flex',
+          fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+          overflow: 'hidden',
+        }}
+      >
+        {/* BACKGROUND */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url(${fondoAdmin})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          filter: 'brightness(0.32) saturate(0.7)',
+          zIndex: 0,
+        }} />
 
-      {/* CÍRCULO DECORATIVO SUPERIOR */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #facc15, transparent)' }} />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
+        {/* GRID OVERLAY */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),' +
+            'linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }} />
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 flex items-center gap-16">
+        {/* LEFT YELLOW STRIPE */}
+        <div style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', zIndex: 2,
+          background: 'linear-gradient(to bottom, #FACC15, #F59E0B, #FACC15)',
+        }} />
 
-        {/* LADO IZQUIERDO */}
-        <div className="hidden lg:flex flex-1 flex-col gap-10">
-          <div>
-            <img src={logo} alt="GyG" className="h-16 object-contain mb-8" />
-            <h1 className="text-5xl font-black text-white leading-tight mb-4">
-              Panel de<br />
-              <span style={{ color: '#facc15' }}>Administración</span>
+        {/* ── LEFT PANEL ── */}
+        <div
+          className="admin-left"
+          style={{
+            position: 'relative', zIndex: 1,
+            width: '50%',
+            flexShrink: 0,
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            padding: '40px 56px',
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {/* Logo */}
+            <img
+              src={logo}
+              alt="GyG Puertas Automáticas"
+              style={{ height: '145px', marginBottom: '32px', objectFit: 'contain', objectPosition: 'left' }}
+            />
+
+            <h1 style={{
+              fontFamily: "'DM Serif Display', Georgia, serif",
+              fontSize: 'clamp(36px, 4vw, 62px)',
+              fontWeight: 400, lineHeight: 1.05, color: '#FFFFFF',
+              margin: '0 0 4px',
+            }}>
+              Sistema de
             </h1>
-            <p className="text-gray-500 text-base leading-relaxed max-w-sm">
-              Gestiona cotizaciones, mantenimientos, productos y técnicos desde un solo lugar.
+            <h1 style={{
+              fontFamily: "'DM Serif Display', Georgia, serif",
+              fontSize: 'clamp(36px, 4vw, 62px)',
+              fontWeight: 400, fontStyle: 'italic',
+              lineHeight: 1.05, color: '#FACC15',
+              margin: '0 0 18px',
+            }}>
+              Administración
+            </h1>
+
+            <p style={{
+              fontSize: '14px', fontWeight: 300,
+              color: 'rgba(255,255,255,0.58)', lineHeight: 1.65,
+              maxWidth: '420px', marginBottom: '24px',
+            }}>
+              Plataforma integral para la gestión de operaciones de GyG Puertas Automáticas.
             </p>
+
+            {/* Features */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                'Control de cotizaciones y mantenimientos',
+                'Gestión de productos y catálogo',
+                'Reportes y análisis de datos',
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
+                    border: '1.5px solid rgba(250,204,21,0.38)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#FACC15' }} />
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 300, color: 'rgba(255,255,255,0.65)' }}>
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {[
-              'Gestión completa de cotizaciones y mantenimientos',
-              'Control de productos y catálogo en tiempo real',
-              'Reportes y exportación de datos en Excel',
-              'Notificaciones automáticas por WhatsApp y Email',
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <FaCheckCircle size={14} style={{ color: '#facc15' }} className="flex-shrink-0" />
-                <span className="text-gray-400 text-sm">{item}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, rgba(250,204,21,0.3), transparent)' }} />
-            <span className="text-gray-600 text-xs">GyG Puertas Automáticas © 2026</span>
-          </div>
+          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', marginTop: '0' }}>
+            © 2026 GyG Puertas Automáticas. Todos los derechos reservados.
+          </p>
         </div>
 
-        {/* FORMULARIO */}
-        <div className="w-full lg:w-96 flex-shrink-0">
-          <div className="rounded-2xl p-8 border" style={{
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(20px)',
-            borderColor: 'rgba(255,255,255,0.08)',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)'
+        {/* ── RIGHT PANEL ── */}
+        <div
+          className="admin-right"
+          style={{
+            position: 'relative', zIndex: 1,
+            width: '50%',
+            flexShrink: 0,
+            background: '#FAFAF8',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            padding: 'clamp(32px, 5vh, 64px) clamp(28px, 4vw, 56px)',
+            overflow: 'hidden',
+          }}
+        >
+          {/* TOP ACCENT BAR */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+            background: 'linear-gradient(90deg, #FACC15, #F59E0B)',
+          }} />
+
+          {/* Heading */}
+          <div style={{ marginBottom: 'clamp(28px, 4vh, 48px)' }}>
+            <h2 style={{
+              fontFamily: "'DM Serif Display', Georgia, serif",
+              fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 400,
+              color: '#111', margin: '0 0 8px', letterSpacing: '-0.02em',
+            }}>
+              Iniciar Sesión
+            </h2>
+
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div style={{
+              marginBottom: '24px', padding: '13px 16px',
+              background: '#FEF2F2', borderLeft: '3px solid #EF4444',
+              borderRadius: '0 6px 6px 0',
+            }}>
+              <span style={{ fontSize: '13px', color: '#B91C1C', fontWeight: 500 }}>{error}</span>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 2.5vh, 26px)' }}>
+
+            {/* Username */}
+            <div>
+              <label style={{
+                display: 'block', fontSize: '10px', fontWeight: 700,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: '#666', marginBottom: '8px',
+              }}>Usuario</label>
+              <div style={{ position: 'relative' }}>
+                <FaUser style={{
+                  position: 'absolute', left: '16px', top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: focused === 'username' ? '#F59E0B' : '#C0C0BC',
+                  fontSize: '13px', transition: 'color 0.2s',
+                }} />
+                <input
+                  name="username"
+                  onChange={handleChange}
+                  onFocus={() => setFocused('username')}
+                  onBlur={() => setFocused(null)}
+                  required
+                  autoComplete="username"
+                  placeholder="Ingresa tu usuario"
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    paddingLeft: '44px', paddingRight: '16px',
+                    paddingTop: '13px', paddingBottom: '13px',
+                    border: focused === 'username' ? '1.5px solid #FACC15' : '1.5px solid #E8E8E5',
+                    borderRadius: '8px',
+                    background: focused === 'username' ? '#FFFDF0' : '#FFFFFF',
+                    fontSize: '14px', color: '#111', outline: 'none',
+                    transition: 'all 0.2s', fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label style={{
+                display: 'block', fontSize: '10px', fontWeight: 700,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: '#666', marginBottom: '8px',
+              }}>Contraseña</label>
+              <div style={{ position: 'relative' }}>
+                <FaLock style={{
+                  position: 'absolute', left: '16px', top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: focused === 'password' ? '#F59E0B' : '#C0C0BC',
+                  fontSize: '13px', transition: 'color 0.2s',
+                }} />
+                <input
+                  name="password"
+                  type="password"
+                  onChange={handleChange}
+                  onFocus={() => setFocused('password')}
+                  onBlur={() => setFocused(null)}
+                  required
+                  autoComplete="current-password"
+                  placeholder="Ingresa tu contraseña"
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    paddingLeft: '44px', paddingRight: '16px',
+                    paddingTop: '13px', paddingBottom: '13px',
+                    border: focused === 'password' ? '1.5px solid #FACC15' : '1.5px solid #E8E8E5',
+                    borderRadius: '8px',
+                    background: focused === 'password' ? '#FFFDF0' : '#FFFFFF',
+                    fontSize: '14px', color: '#111', outline: 'none',
+                    transition: 'all 0.2s', fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Button */}
+            <button
+              type="submit"
+              disabled={cargando}
+              style={{
+                marginTop: '4px',
+                width: '100%', padding: '15px 24px',
+                background: cargando ? '#444' : '#111111',
+                color: '#FFFFFF', border: 'none', borderRadius: '8px',
+                fontSize: '14px', fontWeight: 600, fontFamily: 'inherit',
+                letterSpacing: '0.02em',
+                cursor: cargando ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                transition: 'background 0.2s, transform 0.1s',
+                position: 'relative', overflow: 'hidden',
+              }}
+              onMouseEnter={e => { if (!cargando) e.currentTarget.style.background = '#222' }}
+              onMouseLeave={e => { if (!cargando) e.currentTarget.style.background = '#111111' }}
+              onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.985)' }}
+              onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+            >
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px',
+                background: 'linear-gradient(90deg, #FACC15, #F59E0B)',
+              }} />
+              {cargando ? (
+                <>
+                  <div style={{
+                    width: '16px', height: '16px',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderTopColor: '#fff', borderRadius: '50%',
+                    animation: 'spin 0.7s linear infinite',
+                  }} />
+                  <span>Verificando...</span>
+                </>
+              ) : (
+                <>
+                  <span>Iniciar Sesión</span>
+                  <FaArrowRight size={12} />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div style={{
+            marginTop: 'clamp(24px, 3.5vh, 40px)',
+            paddingTop: 'clamp(16px, 2vh, 24px)',
+            borderTop: '1px solid #EEEDE9',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
           }}>
-
-            <div className="lg:hidden text-center mb-6">
-              <img src={logo} alt="GyG" className="h-12 object-contain mx-auto" />
-            </div>
-
-            <div className="mb-8">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.2)' }}>
-                <FaShieldAlt size={20} style={{ color: '#facc15' }} />
-              </div>
-              <h2 className="text-2xl font-black text-white mb-1">Bienvenido</h2>
-              <p className="text-gray-500 text-sm">Ingresa tus credenciales para acceder</p>
-            </div>
-
-            {error && (
-              <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
-                <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">!</span>
-                </div>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Usuario</label>
-                <div className="relative">
-                  <FaUser className="absolute left-4 top-1/2 -translate-y-1/2" size={13} style={{ color: '#6b7280' }} />
-                  <input
-                    name="username"
-                    onChange={handleChange}
-                    required
-                    autoComplete="username"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white focus:outline-none transition"
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                    }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(250,204,21,0.5)'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contraseña</label>
-                <div className="relative">
-                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2" size={13} style={{ color: '#6b7280' }} />
-                  <input
-                    name="password"
-                    type="password"
-                    onChange={handleChange}
-                    required
-                    autoComplete="current-password"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white focus:outline-none transition"
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                    }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(250,204,21,0.5)'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={cargando}
-                className="w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition mt-2"
-                style={{
-                  background: cargando ? 'rgba(250,204,21,0.5)' : '#facc15',
-                  color: '#111827',
-                  boxShadow: '0 4px 15px rgba(250,204,21,0.2)'
-                }}
-              >
-                {cargando ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-                    Verificando...
-                  </>
-                ) : (
-                  <>
-                    <FaShieldAlt size={13} />
-                    Ingresar al panel
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-center text-xs" style={{ color: '#4b5563' }}>
-                Acceso restringido solo para administradores
-              </p>
-            </div>
+            <div style={{ width: '5px', height: '5px', background: '#D4D4D0', borderRadius: '50%' }} />
+            <p style={{ fontSize: '11px', color: '#BBBBB7', margin: 0 }}>
+              Acceso restringido para personal autorizado
+            </p>
+            <div style={{ width: '5px', height: '5px', background: '#D4D4D0', borderRadius: '50%' }} />
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

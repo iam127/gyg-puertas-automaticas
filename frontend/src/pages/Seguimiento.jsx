@@ -6,18 +6,33 @@ import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 
 const estadoColor = {
-  recibido: 'bg-blue-100 text-blue-700 border-blue-200',
-  en_revision: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  visita_agendada: 'bg-purple-100 text-purple-700 border-purple-200',
-  cotizado: 'bg-orange-100 text-orange-700 border-orange-200',
-  aceptado: 'bg-green-100 text-green-700 border-green-200',
-  rechazado: 'bg-red-100 text-red-700 border-red-200',
-  instalacion_agendada: 'bg-purple-100 text-purple-700 border-purple-200',
-  en_instalacion: 'bg-orange-100 text-orange-700 border-orange-200',
-  completado: 'bg-green-100 text-green-700 border-green-200',
-  cancelado: 'bg-red-100 text-red-700 border-red-200',
-  en_proceso: 'bg-orange-100 text-orange-700 border-orange-200',
-  resuelto: 'bg-green-100 text-green-700 border-green-200',
+  recibido: '#DBEAFE',
+  en_revision: '#FEF3C7',
+  visita_agendada: '#E9D5FF',
+  cotizado: '#FED7AA',
+  aceptado: '#D1FAE5',
+  rechazado: '#FEE2E2',
+  instalacion_agendada: '#E9D5FF',
+  en_instalacion: '#FED7AA',
+  completado: '#D1FAE5',
+  cancelado: '#FEE2E2',
+  en_proceso: '#FED7AA',
+  resuelto: '#D1FAE5',
+}
+
+const estadoTexto = {
+  recibido: '#1E40AF',
+  en_revision: '#B45309',
+  visita_agendada: '#7C3AED',
+  cotizado: '#EA580C',
+  aceptado: '#047857',
+  rechazado: '#DC2626',
+  instalacion_agendada: '#7C3AED',
+  en_instalacion: '#EA580C',
+  completado: '#047857',
+  cancelado: '#DC2626',
+  en_proceso: '#EA580C',
+  resuelto: '#047857',
 }
 
 const pasosCotizacion = [
@@ -41,27 +56,40 @@ const pasosMantenimiento = [
 function BarraProgreso({ pasos, estadoActual }) {
   const indexActual = pasos.findIndex(p => p.estado === estadoActual)
   return (
-    <div className="flex items-start justify-between mb-8 overflow-x-auto pb-2">
+    <div style={{ 
+      display: 'flex', alignItems: 'flex-start', 
+      justifyContent: 'space-between', marginBottom: '32px',
+      overflowX: 'auto', paddingBottom: '8px',
+    }}>
       {pasos.map((paso, i) => (
-        <div key={paso.estado} className="flex items-start">
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 shadow-sm ${
-                i < indexActual
-                  ? 'bg-green-500 border-green-500 text-white'
-                  : i === indexActual
-                  ? 'bg-yellow-400 border-yellow-400 text-gray-900'
-                  : 'bg-white border-gray-200 text-gray-400'
-              }`}
-            >
+        <div key={paso.estado} style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+              width: '36px', height: '36px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '12px', fontWeight: 700, border: '2px solid',
+              flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              background: i < indexActual ? '#10B981' : (i === indexActual ? '#FACC15' : '#fff'),
+              borderColor: i < indexActual ? '#10B981' : (i === indexActual ? '#FACC15' : '#E8E5E0'),
+              color: i < indexActual ? '#fff' : (i === indexActual ? '#111' : '#CCC'),
+            }}>
               {i < indexActual ? <FaCheckCircle size={14} /> : i + 1}
             </div>
-            <p className={`text-xs mt-1 text-center w-16 leading-tight ${i <= indexActual ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+            <p style={{
+              fontSize: '11px', marginTop: '6px', textAlign: 'center',
+              width: '64px', lineHeight: 1.3,
+              color: i <= indexActual ? '#111' : '#BBB',
+              fontWeight: i <= indexActual ? 600 : 400,
+            }}>
               {paso.label}
             </p>
           </div>
           {i < pasos.length - 1 && (
-            <div className={`h-1 w-8 md:w-12 mx-1 mt-4 rounded flex-shrink-0 ${i < indexActual ? 'bg-green-500' : 'bg-gray-200'}`} />
+            <div style={{
+              height: '4px', width: '32px', marginLeft: '4px',
+              marginRight: '4px', marginTop: '16px', borderRadius: '10px',
+              flexShrink: 0, background: i < indexActual ? '#10B981' : '#E8E5E0',
+            }} />
           )}
         </div>
       ))}
@@ -97,48 +125,132 @@ function Seguimiento() {
   }
 
   return (
-    <div>
+    <div style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: '#fff' }}>
       <Helmet>
         <title>Seguimiento | GyG Puertas Automáticas</title>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+        <style>{`
+          @keyframes fadeUp { from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)} }
+          .a1{animation:fadeUp .9s .05s cubic-bezier(.22,1,.36,1) both}
+          .a2{animation:fadeUp .9s .18s cubic-bezier(.22,1,.36,1) both}
+          .a3{animation:fadeUp .9s .30s cubic-bezier(.22,1,.36,1) both}
+          .a4{animation:fadeUp .9s .42s cubic-bezier(.22,1,.36,1) both}
+          
+          .input-buscar:focus{outline:none;border-color:#FACC15!important}
+          .btn-buscar:hover{background:#FDE047!important}
+          .btn-buscar{transition:background .2s}
+          .btn-whatsapp:hover{background:#16A34A!important}
+          .btn-whatsapp{transition:background .2s}
+          .btn-llamar:hover{background:#222!important}
+          .btn-llamar{transition:background .2s}
+          .btn-contacto:hover{background:#E8E5E0!important}
+          .btn-contacto{transition:background .2s}
+        `}</style>
       </Helmet>
-      <section className="bg-gray-900 text-white py-20 px-4 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #facc15 0, #facc15 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
-        <div className="relative z-10">
-          <span className="text-yellow-400 font-bold text-sm uppercase tracking-wider">Estado de tu pedido</span>
-          <h1 className="text-5xl font-bold mt-2 mb-4">
-            Seguimiento de <span className="text-yellow-400">Solicitud</span>
+
+      <section style={{
+        background: '#111',
+        padding: 'clamp(90px, 14vh, 140px) clamp(24px, 8vw, 120px) clamp(72px, 10vh, 112px)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0,
+          width: '4px', background: 'linear-gradient(to bottom, #FACC15, #F59E0B)',
+          zIndex: 3,
+        }} />
+
+        <div style={{
+          position: 'absolute', right: '-100px', top: '-100px',
+          width: '480px', height: '480px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(250,204,21,0.09) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', left: '-60px', bottom: '-60px',
+          width: '320px', height: '320px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(250,204,21,0.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 2, textAlign: 'center' }}>
+          <p className="a1" style={{
+            fontSize: '11px', fontWeight: 700, letterSpacing: '0.22em',
+            textTransform: 'uppercase', color: '#FACC15', marginBottom: '20px',
+          }}>
+            Estado de tu pedido
+          </p>
+
+          <h1 className="a2" style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: 'clamp(3rem, 7vw, 5.8rem)',
+            fontWeight: 400, lineHeight: 1.0,
+            color: '#fff', margin: '0 0 20px', letterSpacing: '-0.025em',
+          }}>
+            Seguimiento de<br />
+            <span style={{ color: '#FACC15' }}>Solicitud</span>
           </h1>
-          <p className="text-gray-300 max-w-xl mx-auto mb-10">
+
+          <div style={{ width: '52px', height: '3px', background: '#FACC15', margin: '0 auto 28px' }} />
+
+          <p className="a3" style={{
+            fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 300,
+            color: 'rgba(255,255,255,0.6)', lineHeight: 1.75,
+            maxWidth: '560px', margin: '0 auto 40px',
+          }}>
             Ingresa tu código de seguimiento para ver el estado de tu solicitud en tiempo real.
           </p>
-          <form onSubmit={handleBuscar} className="max-w-xl mx-auto">
-            <div className="flex gap-3">
-              <div className="flex-1 relative">
-                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+
+          <form onSubmit={handleBuscar} style={{ maxWidth: '640px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <FaSearch style={{
+                  position: 'absolute', left: '16px', top: '50%',
+                  transform: 'translateY(-50%)', color: '#888',
+                  pointerEvents: 'none',
+                }} size={16} />
                 <input
                   type="text"
                   placeholder="Ej: GYG-2026-0001 o MANT-2026-0001"
                   value={codigo}
                   onChange={(e) => setCodigo(e.target.value.toUpperCase())}
                   required
-                  className="w-full rounded-xl pl-10 pr-4 py-3 text-gray-900 bg-white focus:outline-none border-2 border-gray-300 focus:border-yellow-400"
+                  className="input-buscar"
+                  style={{
+                    width: '100%', borderRadius: '8px', paddingLeft: '44px',
+                    paddingRight: '16px', paddingTop: '14px', paddingBottom: '14px',
+                    fontSize: '15px', background: '#fff', color: '#111',
+                    border: '2px solid #E8E5E0', boxSizing: 'border-box',
+                    transition: 'border-color .2s',
+                  }}
                 />
               </div>
               <button
                 type="submit"
                 disabled={cargando}
-                className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-xl font-bold hover:bg-yellow-300 transition disabled:opacity-50"
+                className="btn-buscar"
+                style={{
+                  background: '#FACC15', color: '#111',
+                  padding: '14px 32px', borderRadius: '8px',
+                  fontWeight: 700, fontSize: '15px',
+                  border: 'none', cursor: 'pointer',
+                  opacity: cargando ? 0.6 : 1,
+                  whiteSpace: 'nowrap',
+                }}
               >
                 {cargando ? 'Buscando...' : 'Buscar'}
               </button>
             </div>
-            <div className="flex gap-6 mt-4 text-sm text-gray-400 justify-center">
-              <span className="flex items-center gap-1">
-                <FaFileAlt size={12} className="text-blue-400" />
+            <div style={{
+              display: 'flex', gap: '24px', fontSize: '13px',
+              color: 'rgba(255,255,255,0.5)', justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FaFileAlt size={12} style={{ color: '#60A5FA' }} />
                 Cotizaciones: GYG-2026-XXXX
               </span>
-              <span className="flex items-center gap-1">
-                <FaTools size={12} className="text-green-400" />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FaTools size={12} style={{ color: '#34D399' }} />
                 Mantenimientos: MANT-2026-XXXX
               </span>
             </div>
@@ -147,120 +259,244 @@ function Seguimiento() {
       </section>
 
       {error && (
-        <section className="py-8 px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3">
-              <FaTimesCircle size={20} className="flex-shrink-0" />
-              <p className="font-medium">{error}</p>
+        <section style={{ padding: 'clamp(32px, 5vw, 48px) clamp(24px, 8vw, 120px)' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{
+              background: '#FEE2E2', border: '1px solid #FCA5A5',
+              color: '#DC2626', padding: '20px 24px', borderRadius: '12px',
+              display: 'flex', alignItems: 'center', gap: '12px',
+            }}>
+              <FaTimesCircle size={20} style={{ flexShrink: 0 }} />
+              <p style={{ fontWeight: 600, margin: 0, fontSize: '15px' }}>{error}</p>
             </div>
           </div>
         </section>
       )}
 
       {resultado && (
-        <section className="py-10 px-4 bg-gray-50">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="bg-gray-900 px-6 py-6">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-yellow-400 p-2.5 rounded-xl">
+        <section style={{
+          padding: 'clamp(48px, 7vw, 80px) clamp(24px, 8vw, 120px)',
+          background: '#FAFAF8',
+        }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{
+              background: '#fff', borderRadius: '16px',
+              border: '1px solid #EEECEA', overflow: 'hidden',
+            }}>
+              <div style={{ background: '#111', padding: '28px 32px' }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  alignItems: 'center', flexWrap: 'wrap', gap: '16px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{
+                      background: '#FACC15', padding: '12px',
+                      borderRadius: '12px', display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                    }}>
                       {resultado.tipo === 'cotizacion'
-                        ? <FaFileAlt size={18} className="text-gray-900" />
-                        : <FaTools size={18} className="text-gray-900" />
+                        ? <FaFileAlt size={20} color="#111" />
+                        : <FaTools size={20} color="#111" />
                       }
                     </div>
                     <div>
-                      <p className="text-gray-400 text-xs uppercase tracking-wider">
+                      <p style={{
+                        color: 'rgba(255,255,255,0.5)', fontSize: '11px',
+                        textTransform: 'uppercase', letterSpacing: '0.1em',
+                        margin: '0 0 4px',
+                      }}>
                         {resultado.tipo === 'cotizacion' ? 'Cotización' : 'Mantenimiento'}
                       </p>
-                      <p className="text-yellow-400 font-bold text-2xl">{resultado.data.codigo}</p>
+                      <p style={{
+                        color: '#FACC15', fontWeight: 700,
+                        fontSize: '24px', margin: 0,
+                      }}>
+                        {resultado.data.codigo}
+                      </p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-bold border ${estadoColor[resultado.data.estado] || 'bg-gray-100 text-gray-700'}`}>
+                  <span style={{
+                    padding: '6px 16px', borderRadius: '20px',
+                    fontSize: '11px', fontWeight: 700,
+                    background: estadoColor[resultado.data.estado] || '#F3F3F1',
+                    color: estadoTexto[resultado.data.estado] || '#666',
+                    border: `1px solid ${estadoTexto[resultado.data.estado] || '#E8E5E0'}`,
+                  }}>
                     {resultado.data.estado?.replace(/_/g, ' ').toUpperCase()}
                   </span>
                 </div>
               </div>
 
-              <div className="px-6 pt-8 pb-2">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Progreso de tu solicitud</p>
+              <div style={{ padding: '32px 32px 8px' }}>
+                <p style={{
+                  fontSize: '11px', fontWeight: 700,
+                  color: '#888', textTransform: 'uppercase',
+                  letterSpacing: '0.1em', marginBottom: '20px',
+                }}>
+                  Progreso de tu solicitud
+                </p>
                 <BarraProgreso
                   pasos={resultado.tipo === 'cotizacion' ? pasosCotizacion : pasosMantenimiento}
                   estadoActual={resultado.data.estado}
                 />
               </div>
 
-              <div className="px-6 pb-6">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Información de la solicitud</p>
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-gray-400 text-xs mb-1">Cliente</p>
-                    <p className="font-bold text-gray-900">{resultado.data.nombre_cliente}</p>
+              <div style={{ padding: '0 32px 32px' }}>
+                <p style={{
+                  fontSize: '11px', fontWeight: 700,
+                  color: '#888', textTransform: 'uppercase',
+                  letterSpacing: '0.1em', marginBottom: '16px',
+                }}>
+                  Información de la solicitud
+                </p>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '12px', marginBottom: '12px',
+                }}>
+                  <div style={{
+                    background: '#FAFAF8', borderRadius: '12px',
+                    padding: '16px', border: '1px solid #EEECEA',
+                  }}>
+                    <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Cliente</p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
+                      {resultado.data.nombre_cliente}
+                    </p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-gray-400 text-xs mb-1">Teléfono</p>
-                    <p className="font-bold text-gray-900">{resultado.data.telefono}</p>
+                  <div style={{
+                    background: '#FAFAF8', borderRadius: '12px',
+                    padding: '16px', border: '1px solid #EEECEA',
+                  }}>
+                    <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Teléfono</p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
+                      {resultado.data.telefono}
+                    </p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-gray-400 text-xs mb-1">Distrito</p>
-                    <p className="font-bold text-gray-900">{resultado.data.distrito}</p>
+                  <div style={{
+                    background: '#FAFAF8', borderRadius: '12px',
+                    padding: '16px', border: '1px solid #EEECEA',
+                  }}>
+                    <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Distrito</p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
+                      {resultado.data.distrito}
+                    </p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-gray-400 text-xs mb-1">Fecha de solicitud</p>
-                    <p className="font-bold text-gray-900">
+                  <div style={{
+                    background: '#FAFAF8', borderRadius: '12px',
+                    padding: '16px', border: '1px solid #EEECEA',
+                  }}>
+                    <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Fecha de solicitud</p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
                       {new Date(resultado.data.creado_en).toLocaleDateString('es-PE')}
                     </p>
                   </div>
                 </div>
 
                 {resultado.data.descripcion && (
-                  <div className="bg-gray-50 rounded-xl p-4 mb-3">
-                    <p className="text-gray-400 text-xs mb-1">Descripción</p>
-                    <p className="font-medium text-gray-900 text-sm">{resultado.data.descripcion}</p>
+                  <div style={{
+                    background: '#FAFAF8', borderRadius: '12px',
+                    padding: '16px', marginBottom: '12px',
+                    border: '1px solid #EEECEA',
+                  }}>
+                    <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 8px' }}>Descripción</p>
+                    <p style={{
+                      fontWeight: 500, color: '#111',
+                      fontSize: '14px', lineHeight: 1.6, margin: 0,
+                    }}>
+                      {resultado.data.descripcion}
+                    </p>
                   </div>
                 )}
 
                 {resultado.data.descripcion_problema && (
-                  <div className="bg-gray-50 rounded-xl p-4 mb-3">
-                    <p className="text-gray-400 text-xs mb-1">Problema reportado</p>
-                    <p className="font-medium text-gray-900 text-sm">{resultado.data.descripcion_problema}</p>
+                  <div style={{
+                    background: '#FAFAF8', borderRadius: '12px',
+                    padding: '16px', marginBottom: '12px',
+                    border: '1px solid #EEECEA',
+                  }}>
+                    <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 8px' }}>Problema reportado</p>
+                    <p style={{
+                      fontWeight: 500, color: '#111',
+                      fontSize: '14px', lineHeight: 1.6, margin: 0,
+                    }}>
+                      {resultado.data.descripcion_problema}
+                    </p>
                   </div>
                 )}
 
                 {resultado.data.motivo_rechazo && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-3">
-                    <p className="text-red-400 text-xs mb-1">Motivo</p>
-                    <p className="font-medium text-red-700 text-sm">{resultado.data.motivo_rechazo}</p>
+                  <div style={{
+                    background: '#FEE2E2', border: '1px solid #FCA5A5',
+                    borderRadius: '12px', padding: '16px', marginBottom: '12px',
+                  }}>
+                    <p style={{ color: '#DC2626', fontSize: '11px', margin: '0 0 8px', fontWeight: 700 }}>Motivo de rechazo</p>
+                    <p style={{
+                      fontWeight: 500, color: '#DC2626',
+                      fontSize: '14px', lineHeight: 1.6, margin: 0,
+                    }}>
+                      {resultado.data.motivo_rechazo}
+                    </p>
                   </div>
                 )}
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4 mt-2">
-                  <p className="text-yellow-700 text-sm font-medium text-center">
+                <div style={{
+                  background: '#FFFBEB', border: '1px solid #FDE68A',
+                  borderRadius: '12px', padding: '20px',
+                  marginBottom: '20px', marginTop: '8px', textAlign: 'center',
+                }}>
+                  <p style={{
+                    color: '#92400E', fontSize: '14px',
+                    fontWeight: 600, margin: 0,
+                  }}>
                     ¿Necesitas ayuda con tu solicitud? Contáctanos directamente.
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   <a
                     href="https://wa.me/51947316874"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600 transition text-center text-sm flex items-center justify-center gap-2"
+                    className="btn-whatsapp"
+                    style={{
+                      flex: 1, minWidth: '140px',
+                      background: '#22C55E', color: '#fff',
+                      padding: '14px 0', borderRadius: '8px',
+                      fontWeight: 700, textAlign: 'center',
+                      fontSize: '14px', textDecoration: 'none',
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', gap: '8px',
+                    }}
                   >
                     <FaWhatsapp size={16} />
                     WhatsApp
                   </a>
                   <a
                     href="tel:+51947316864"
-                    className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition text-center text-sm flex items-center justify-center gap-2"
+                    className="btn-llamar"
+                    style={{
+                      flex: 1, minWidth: '140px',
+                      background: '#111', color: '#fff',
+                      padding: '14px 0', borderRadius: '8px',
+                      fontWeight: 700, textAlign: 'center',
+                      fontSize: '14px', textDecoration: 'none',
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', gap: '8px',
+                    }}
                   >
                     <FaPhone size={14} />
                     Llamar
                   </a>
                   <Link
                     to="/contacto"
-                    className="flex-1 bg-gray-100 text-gray-900 py-3 rounded-xl font-bold hover:bg-gray-200 transition text-center text-sm"
+                    className="btn-contacto"
+                    style={{
+                      flex: 1, minWidth: '140px',
+                      background: '#FAFAF8', color: '#111',
+                      padding: '14px 0', borderRadius: '8px',
+                      fontWeight: 700, textAlign: 'center',
+                      fontSize: '14px', textDecoration: 'none',
+                      display: 'block',
+                    }}
                   >
                     Contacto
                   </Link>

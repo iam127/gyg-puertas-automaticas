@@ -133,8 +133,8 @@ function AdminProductos() {
 
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-slate-700 rounded-lg flex items-center justify-center">
-            <FaBox size={18} className="text-white" />
+          <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+            <FaBox size={18} className="text-yellow-400" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">Gestión de productos</h2>
@@ -143,7 +143,7 @@ function AdminProductos() {
         </div>
         <button
           onClick={() => abrirModal()}
-          className="bg-slate-700 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-slate-800 transition flex items-center gap-2 shadow-sm"
+          className="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition flex items-center gap-2 shadow-sm"
         >
           <FaPlus size={14} />
           Nuevo producto
@@ -153,11 +153,8 @@ function AdminProductos() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-slate-100 rounded-lg flex items-center justify-center">
-              <FaBox size={18} className="text-slate-700" />
-            </div>
-            <div className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Total
+            <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaBox size={18} className="text-yellow-400" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{productos.length}</p>
@@ -166,11 +163,8 @@ function AdminProductos() {
         
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <FaCheckCircle size={18} className="text-emerald-700" />
-            </div>
-            <div className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Activos
+            <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaCheckCircle size={18} className="text-yellow-400" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{productos.filter(p => p.activo).length}</p>
@@ -179,11 +173,8 @@ function AdminProductos() {
         
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-amber-100 rounded-lg flex items-center justify-center">
-              <FaBox size={18} className="text-amber-700" />
-            </div>
-            <div className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Destacados
+            <div className="w-11 h-11 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <FaBox size={18} className="text-gray-900" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{productos.filter(p => p.destacado).length}</p>
@@ -209,7 +200,7 @@ function AdminProductos() {
 
       {cargando ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-3 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
         </div>
       ) : productosFiltrados.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-lg border border-gray-200">
@@ -251,18 +242,18 @@ function AdminProductos() {
                     <p className="font-semibold text-gray-900">{p.nombre}</p>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-medium capitalize border border-slate-200">
+                    <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-medium capitalize border border-gray-200">
                       {p.uso}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-gray-600">{p.material || '-'}</td>
                   <td className="px-5 py-4">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${p.activo ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${p.activo ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-100 text-gray-600 border-gray-300'}`}>
                       {p.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${p.destacado ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${p.destacado ? 'bg-yellow-400 text-gray-900 border-yellow-400' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                       {p.destacado ? 'Sí' : 'No'}
                     </span>
                   </td>
@@ -270,13 +261,13 @@ function AdminProductos() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => abrirModal(p)}
-                        className="bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-slate-100 transition flex items-center gap-1.5 border border-slate-200"
+                        className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-200 transition flex items-center gap-1.5 border border-gray-200"
                       >
                         <FaEdit size={12} /> Editar
                       </button>
                       <button
                         onClick={() => eliminar(p.id)}
-                        className="bg-red-50 text-red-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-100 transition flex items-center gap-1.5 border border-red-200"
+                        className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-200 transition flex items-center gap-1.5 border border-gray-200"
                       >
                         <FaTrash size={12} /> Eliminar
                       </button>
@@ -294,8 +285,8 @@ function AdminProductos() {
           <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <FaBox size={18} className="text-white" />
+                <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+                  <FaBox size={18} className="text-yellow-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{editando ? 'Editar producto' : 'Nuevo producto'}</h3>
@@ -312,7 +303,7 @@ function AdminProductos() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Imagen del producto</label>
                 {previstaImagen ? (
                   <div
-                    style={{ position: 'relative', borderRadius: '8px', border: '2px solid #475569', cursor: 'pointer' }}
+                    style={{ position: 'relative', borderRadius: '8px', border: '2px solid #111827', cursor: 'pointer' }}
                     onClick={() => document.getElementById('input-imagen-producto').click()}
                   >
                     <img
@@ -320,17 +311,17 @@ function AdminProductos() {
                       alt="preview"
                       style={{ width: '100%', height: '200px', objectFit: 'contain', display: 'block', backgroundColor: '#f9fafb', borderRadius: '6px' }}
                     />
-                    <div style={{ position: 'absolute', bottom: 8, left: 8, background: '#475569', color: '#fff', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: '6px' }}>
+                    <div style={{ position: 'absolute', bottom: 8, left: 8, background: '#111827', color: '#fbbf24', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: '6px' }}>
                       Imagen principal
                     </div>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setImagen(null); setPrevistaImagen(null) }}
-                      style={{ position: 'absolute', top: 8, right: 8, background: '#ef4444', color: '#fff', width: 30, height: 30, borderRadius: '6px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      style={{ position: 'absolute', top: 8, right: 8, background: '#111827', color: '#fff', width: 30, height: 30, borderRadius: '6px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <FaTimes size={13} />
                     </button>
-                    <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: 5 }}>
                       <FaUpload size={11} /> Cambiar
                     </div>
                   </div>
@@ -339,8 +330,8 @@ function AdminProductos() {
                     onClick={() => document.getElementById('input-imagen-producto').click()}
                     style={{ border: '2px dashed #d1d5db', borderRadius: '8px', padding: '40px 16px', textAlign: 'center', cursor: 'pointer', background: '#f9fafb' }}
                   >
-                    <div style={{ width: 52, height: 52, background: '#e5e7eb', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
-                      <FaImage size={22} color="#9ca3af" />
+                    <div style={{ width: 52, height: 52, background: '#111827', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
+                      <FaImage size={22} color="#fbbf24" />
                     </div>
                     <p style={{ fontSize: '14px', color: '#374151', fontWeight: '600' }}>Haz clic para subir una imagen</p>
                     <p style={{ fontSize: '12px', color: '#6b7280', marginTop: 4 }}>JPG, PNG hasta 5MB</p>
@@ -363,7 +354,7 @@ function AdminProductos() {
                     value={form.nombre}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 bg-white text-sm"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-200 bg-white text-sm"
                     placeholder="Ej: Puerta seccional industrial"
                   />
                 </div>
@@ -376,7 +367,7 @@ function AdminProductos() {
                     onChange={handleChange}
                     required
                     rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 bg-white text-sm"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-200 bg-white text-sm"
                     placeholder="Describe el producto brevemente"
                   />
                 </div>
@@ -388,7 +379,7 @@ function AdminProductos() {
                     value={form.especificaciones}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 bg-white text-sm"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-200 bg-white text-sm"
                     placeholder="Detalles técnicos, dimensiones, características especiales"
                   />
                 </div>
@@ -401,7 +392,7 @@ function AdminProductos() {
                       value={form.uso}
                       onChange={handleChange}
                       required
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-slate-500 bg-white text-sm"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray-900 bg-white text-sm"
                     >
                       <option value="">Selecciona...</option>
                       <option value="residencial">Residencial</option>
@@ -415,7 +406,7 @@ function AdminProductos() {
                       name="material"
                       value={form.material}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-slate-500 bg-white text-sm"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray-900 bg-white text-sm"
                       placeholder="Ej: Acero galvanizado"
                     />
                   </div>
@@ -427,7 +418,7 @@ function AdminProductos() {
                     name="categoria_id"
                     value={form.categoria_id}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-slate-500 bg-white text-sm"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray-900 bg-white text-sm"
                   >
                     <option value="">Sin categoría</option>
                     {categorias.map(c => (
@@ -438,11 +429,11 @@ function AdminProductos() {
 
                 <div className="flex gap-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <label className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
-                    <input type="checkbox" name="activo" checked={form.activo} onChange={handleChange} className="w-4 h-4 accent-slate-700 cursor-pointer" />
+                    <input type="checkbox" name="activo" checked={form.activo} onChange={handleChange} className="w-4 h-4 accent-gray-900 cursor-pointer" />
                     Activo en la web
                   </label>
                   <label className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
-                    <input type="checkbox" name="destacado" checked={form.destacado} onChange={handleChange} className="w-4 h-4 accent-slate-700 cursor-pointer" />
+                    <input type="checkbox" name="destacado" checked={form.destacado} onChange={handleChange} className="w-4 h-4 accent-gray-900 cursor-pointer" />
                     Destacado en inicio
                   </label>
                 </div>
@@ -458,7 +449,7 @@ function AdminProductos() {
                   <button
                     type="submit"
                     disabled={subiendoImagen}
-                    className="flex-1 bg-slate-700 text-white py-3 rounded-lg font-semibold hover:bg-slate-800 transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {subiendoImagen ? (
                       <>

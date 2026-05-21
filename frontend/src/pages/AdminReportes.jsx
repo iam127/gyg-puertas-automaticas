@@ -109,7 +109,7 @@ function AdminReportes() {
     const tituloCell = ws.getCell('A1')
     tituloCell.value = 'GyG Puertas Automáticas'
     tituloCell.font = { bold: true, size: 18, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }
-    tituloCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF334155' } }
+    tituloCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111827' } }
     tituloCell.alignment = { horizontal: 'center', vertical: 'middle' }
     ws.getRow(1).height = 35
 
@@ -117,8 +117,8 @@ function AdminReportes() {
     ws.mergeCells(2, 1, 2, numCols)
     const subtituloCell = ws.getCell('A2')
     subtituloCell.value = `Reporte de ${nombre}`
-    subtituloCell.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }
-    subtituloCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF475569' } }
+    subtituloCell.font = { bold: true, size: 13, color: { argb: 'FF111827' }, name: 'Calibri' }
+    subtituloCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFBBF24' } }
     subtituloCell.alignment = { horizontal: 'center', vertical: 'middle' }
     ws.getRow(2).height = 25
 
@@ -126,8 +126,8 @@ function AdminReportes() {
     ws.mergeCells(3, 1, 3, numCols)
     const fechaCell = ws.getCell('A3')
     fechaCell.value = `Exportado el: ${fechaHoy}`
-    fechaCell.font = { italic: true, size: 10, color: { argb: 'FF475569' }, name: 'Calibri' }
-    fechaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }
+    fechaCell.font = { italic: true, size: 10, color: { argb: 'FF6B7280' }, name: 'Calibri' }
+    fechaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAFB' } }
     fechaCell.alignment = { horizontal: 'center', vertical: 'middle' }
     ws.getRow(3).height = 18
 
@@ -135,8 +135,8 @@ function AdminReportes() {
     ws.mergeCells(4, 1, 4, numCols)
     const totalCell = ws.getCell('A4')
     totalCell.value = `Total de registros: ${datos.length}`
-    totalCell.font = { bold: true, size: 10, color: { argb: 'FF1E293B' }, name: 'Calibri' }
-    totalCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }
+    totalCell.font = { bold: true, size: 10, color: { argb: 'FF111827' }, name: 'Calibri' }
+    totalCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE5E7EB' } }
     totalCell.alignment = { horizontal: 'center', vertical: 'middle' }
     ws.getRow(4).height = 18
 
@@ -149,13 +149,13 @@ function AdminReportes() {
     headerRow.height = 28
     headerRow.eachCell(cell => {
       cell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111827' } }
       cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
       cell.border = {
-        top: { style: 'medium', color: { argb: 'FF475569' } },
-        bottom: { style: 'medium', color: { argb: 'FF475569' } },
-        left: { style: 'thin', color: { argb: 'FF64748B' } },
-        right: { style: 'thin', color: { argb: 'FF64748B' } },
+        top: { style: 'medium', color: { argb: 'FF374151' } },
+        bottom: { style: 'medium', color: { argb: 'FF374151' } },
+        left: { style: 'thin', color: { argb: 'FF6B7280' } },
+        right: { style: 'thin', color: { argb: 'FF6B7280' } },
       }
     })
 
@@ -166,11 +166,11 @@ function AdminReportes() {
       const esPar = rowIdx % 2 === 0
       row.eachCell((cell, colNumber) => {
         if (colNumber === 1) {
-          cell.font = { bold: true, size: 10, color: { argb: 'FF475569' }, name: 'Calibri' }
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } }
+          cell.font = { bold: true, size: 10, color: { argb: 'FF111827' }, name: 'Calibri' }
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }
           cell.alignment = { horizontal: 'center', vertical: 'middle' }
         } else {
-          cell.font = { size: 10, color: { argb: 'FF1E293B' }, name: 'Calibri' }
+          cell.font = { size: 10, color: { argb: 'FF111827' }, name: 'Calibri' }
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: esPar ? 'FFF9FAFB' : 'FFFFFFFF' } }
           cell.alignment = { vertical: 'middle' }
         }
@@ -188,27 +188,9 @@ function AdminReportes() {
     saveAs(blob, `GyG_${nombre}_${new Date().toLocaleDateString('es-PE').replace(/\//g, '-')}.xlsx`)
   }
 
-  const colorEstado = {
-    recibido: 'bg-blue-600',
-    en_revision: 'bg-amber-600',
-    visita_agendada: 'bg-purple-600',
-    cotizado: 'bg-orange-600',
-    aceptado: 'bg-emerald-600',
-    rechazado: 'bg-red-600',
-    completado: 'bg-emerald-700',
-    cancelado: 'bg-red-700',
-    en_proceso: 'bg-orange-500',
-    preventivo: 'bg-blue-600',
-    correctivo: 'bg-orange-600',
-    garantia: 'bg-emerald-600',
-    residencial: 'bg-blue-600',
-    comercial: 'bg-amber-600',
-    industrial: 'bg-slate-600',
-  }
-
   if (cargando) return (
     <div className="flex items-center justify-center py-20">
-      <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+      <div className="w-8 h-8 border-3 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
     </div>
   )
 
@@ -220,8 +202,8 @@ function AdminReportes() {
 
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-slate-700 rounded-lg flex items-center justify-center">
-            <FaChartBar size={18} className="text-white" />
+          <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+            <FaChartBar size={18} className="text-yellow-400" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">Reportes y estadísticas</h2>
@@ -231,14 +213,14 @@ function AdminReportes() {
         <div className="flex gap-3">
           <button
             onClick={() => exportarExcel(stats.cotizaciones, 'Cotizaciones')}
-            className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-emerald-700 transition flex items-center gap-2 text-sm shadow-sm"
+            className="bg-gray-900 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition flex items-center gap-2 text-sm shadow-sm"
           >
             <FaFileExcel size={14} />
             Exportar Cotizaciones
           </button>
           <button
             onClick={() => exportarExcel(stats.mantenimientos, 'Mantenimientos')}
-            className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-emerald-700 transition flex items-center gap-2 text-sm shadow-sm"
+            className="bg-gray-900 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition flex items-center gap-2 text-sm shadow-sm"
           >
             <FaFileExcel size={14} />
             Exportar Mantenimientos
@@ -248,24 +230,20 @@ function AdminReportes() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Cotizaciones', valor: stats.cotizaciones.length, color: 'border-blue-200', bgIcon: 'bg-blue-600', icono: <FaFileAlt size={18} /> },
-          { label: 'Total Mantenimientos', valor: stats.mantenimientos.length, color: 'border-slate-200', bgIcon: 'bg-slate-700', icono: <FaWrench size={18} /> },
-          { label: 'Total Productos', valor: stats.productos.length, color: 'border-slate-300', bgIcon: 'bg-slate-600', icono: <FaBox size={18} /> },
+          { label: 'Total Cotizaciones', valor: stats.cotizaciones.length, bgIcon: 'bg-gray-900', icono: <FaFileAlt size={18} className="text-yellow-400" /> },
+          { label: 'Total Mantenimientos', valor: stats.mantenimientos.length, bgIcon: 'bg-gray-900', icono: <FaWrench size={18} className="text-yellow-400" /> },
+          { label: 'Total Productos', valor: stats.productos.length, bgIcon: 'bg-gray-900', icono: <FaBox size={18} className="text-yellow-400" /> },
           {
             label: 'Completados',
             valor: stats.cotizaciones.filter(c => c.estado === 'completado').length + stats.mantenimientos.filter(m => m.estado === 'completado').length,
-            color: 'border-emerald-200',
-            bgIcon: 'bg-emerald-600',
-            icono: <FaCheckCircle size={18} />
+            bgIcon: 'bg-yellow-400',
+            icono: <FaCheckCircle size={18} className="text-gray-900" />
           },
         ].map((kpi, i) => (
-          <div key={i} className={`bg-white rounded-lg border-l-4 ${kpi.color} shadow-sm p-5`}>
+          <div key={i} className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className={`${kpi.bgIcon} w-12 h-12 rounded-lg flex items-center justify-center text-white`}>
+              <div className={`${kpi.bgIcon} w-12 h-12 rounded-lg flex items-center justify-center`}>
                 {kpi.icono}
-              </div>
-              <div className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-semibold">
-                Total
               </div>
             </div>
             <p className="text-3xl font-bold text-gray-900 mb-1">{kpi.valor}</p>
@@ -278,8 +256,8 @@ function AdminReportes() {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaChartBar size={16} className="text-blue-700" />
+            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaChartBar size={16} className="text-yellow-400" />
             </div>
             <div>
               <h3 className="font-bold text-gray-900">Cotizaciones por Estado</h3>
@@ -298,7 +276,7 @@ function AdminReportes() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-3">
                     <div
-                      className={`${colorEstado[estado] || 'bg-gray-500'} h-3 rounded-full transition-all duration-700`}
+                      className="bg-gray-900 h-3 rounded-full transition-all duration-700"
                       style={{ width: `${Math.max((count / stats.cotizaciones.length) * 100, 5)}%` }}
                     />
                   </div>
@@ -310,8 +288,8 @@ function AdminReportes() {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
-              <FaChartBar size={16} className="text-slate-700" />
+            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaChartBar size={16} className="text-yellow-400" />
             </div>
             <div>
               <h3 className="font-bold text-gray-900">Mantenimientos por Estado</h3>
@@ -330,7 +308,7 @@ function AdminReportes() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-3">
                     <div
-                      className={`${colorEstado[estado] || 'bg-gray-500'} h-3 rounded-full transition-all duration-700`}
+                      className="bg-gray-900 h-3 rounded-full transition-all duration-700"
                       style={{ width: `${Math.max((count / stats.mantenimientos.length) * 100, 5)}%` }}
                     />
                   </div>
@@ -342,8 +320,8 @@ function AdminReportes() {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-              <FaChartPie size={16} className="text-orange-700" />
+            <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <FaChartPie size={16} className="text-gray-900" />
             </div>
             <div>
               <h3 className="font-bold text-gray-900">Mantenimientos por Tipo</h3>
@@ -362,7 +340,7 @@ function AdminReportes() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-3">
                     <div
-                      className={`${colorEstado[tipo] || 'bg-gray-500'} h-3 rounded-full transition-all duration-700`}
+                      className="bg-yellow-400 h-3 rounded-full transition-all duration-700"
                       style={{ width: `${Math.max((count / stats.mantenimientos.length) * 100, 5)}%` }}
                     />
                   </div>
@@ -374,8 +352,8 @@ function AdminReportes() {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
-              <FaChartPie size={16} className="text-slate-700" />
+            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaChartPie size={16} className="text-yellow-400" />
             </div>
             <div>
               <h3 className="font-bold text-gray-900">Productos por Tipo de Uso</h3>
@@ -394,7 +372,7 @@ function AdminReportes() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-3">
                     <div
-                      className={`${colorEstado[uso] || 'bg-gray-500'} h-3 rounded-full transition-all duration-700`}
+                      className="bg-gray-900 h-3 rounded-full transition-all duration-700"
                       style={{ width: `${Math.max((count / stats.productos.length) * 100, 5)}%` }}
                     />
                   </div>

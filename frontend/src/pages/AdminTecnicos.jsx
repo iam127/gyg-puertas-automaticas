@@ -61,8 +61,8 @@ function AdminTecnicos() {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-slate-700 rounded-lg flex items-center justify-center">
-            <FaUsers size={18} className="text-white" />
+          <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+            <FaUsers size={18} className="text-yellow-400" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">Gestión de técnicos</h2>
@@ -71,7 +71,7 @@ function AdminTecnicos() {
         </div>
         <button
           onClick={() => setModalAbierto(true)}
-          className="bg-slate-700 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-slate-800 transition flex items-center gap-2 shadow-sm"
+          className="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition flex items-center gap-2 shadow-sm"
         >
           <FaPlus size={14} />
           Generar código
@@ -82,11 +82,8 @@ function AdminTecnicos() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-slate-100 rounded-lg flex items-center justify-center">
-              <FaUsers size={18} className="text-slate-700" />
-            </div>
-            <div className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Total
+            <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaUsers size={18} className="text-yellow-400" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{tecnicos.length}</p>
@@ -95,11 +92,8 @@ function AdminTecnicos() {
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <FaUserCheck size={18} className="text-emerald-700" />
-            </div>
-            <div className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Activos
+            <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+              <FaUserCheck size={18} className="text-yellow-400" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{tecnicos.filter(t => t.activo).length}</p>
@@ -108,11 +102,8 @@ function AdminTecnicos() {
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-amber-100 rounded-lg flex items-center justify-center">
-              <FaKey size={18} className="text-amber-700" />
-            </div>
-            <div className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs font-semibold">
-              Disponibles
+            <div className="w-11 h-11 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <FaKey size={18} className="text-gray-900" />
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{codigosDisponibles}</p>
@@ -142,18 +133,18 @@ function AdminTecnicos() {
                 className={`rounded-lg p-4 flex justify-between items-center border-2 ${
                   c.usado
                     ? 'border-gray-200 bg-gray-50'
-                    : 'border-slate-300 bg-slate-50'
+                    : 'border-gray-900 bg-gray-50'
                 }`}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className={`w-7 h-7 rounded flex items-center justify-center ${c.usado ? 'bg-gray-200' : 'bg-slate-700'}`}>
-                      <FaKey size={12} className={c.usado ? 'text-gray-500' : 'text-white'} />
+                    <div className={`w-7 h-7 rounded flex items-center justify-center ${c.usado ? 'bg-gray-200' : 'bg-gray-900'}`}>
+                      <FaKey size={12} className={c.usado ? 'text-gray-500' : 'text-yellow-400'} />
                     </div>
                     <p className="font-black text-base tracking-wider text-gray-900">{c.codigo}</p>
                   </div>
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-md inline-block border ${
-                    c.usado ? 'bg-gray-100 text-gray-600 border-gray-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    c.usado ? 'bg-gray-100 text-gray-600 border-gray-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                   }`}>
                     {c.usado ? 'Usado' : 'Disponible'}
                   </span>
@@ -164,7 +155,7 @@ function AdminTecnicos() {
                       onClick={() => copiarCodigo(c.codigo)}
                       className={`p-2 rounded-lg transition border ${
                         copiado === c.codigo
-                          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                          ? 'bg-gray-900 text-white border-gray-900'
                           : 'bg-white text-gray-600 hover:bg-gray-100 border-gray-300'
                       }`}
                       title="Copiar código"
@@ -174,7 +165,7 @@ function AdminTecnicos() {
                   )}
                   <button
                     onClick={() => eliminarCodigo(c.id)}
-                    className="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition border border-red-200"
+                    className="bg-gray-100 text-gray-600 p-2 rounded-lg hover:bg-gray-200 transition border border-gray-300"
                     title="Eliminar código"
                   >
                     <FaTrash size={14} />
@@ -211,7 +202,7 @@ function AdminTecnicos() {
         </div>
         {cargando ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-3 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
           </div>
         ) : tecnicosFiltrados.length === 0 ? (
           <div className="text-center py-20">
@@ -235,8 +226,8 @@ function AdminTecnicos() {
                 <tr key={t.id} className="hover:bg-gray-50 transition">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <FaUsers size={13} className="text-slate-700" />
+                      <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <FaUsers size={13} className="text-yellow-400" />
                       </div>
                       <span className="font-semibold text-gray-900">{t.usuario?.username}</span>
                     </div>
@@ -245,7 +236,7 @@ function AdminTecnicos() {
                   <td className="px-5 py-4 text-gray-600">{t.usuario?.email}</td>
                   <td className="px-5 py-4 text-gray-600">{t.telefono || '-'}</td>
                   <td className="px-5 py-4">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${t.activo ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${t.activo ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-100 text-gray-600 border-gray-300'}`}>
                       {t.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
@@ -262,8 +253,8 @@ function AdminTecnicos() {
           <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
             <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <FaKey size={18} className="text-white" />
+                <div className="w-11 h-11 bg-gray-900 rounded-lg flex items-center justify-center">
+                  <FaKey size={18} className="text-yellow-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">Generar código de invitación</h3>
@@ -275,14 +266,14 @@ function AdminTecnicos() {
               </button>
             </div>
             <div className="p-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FaKey size={16} className="text-blue-700" />
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FaKey size={16} className="text-gray-700" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-blue-900 mb-1">Código único de registro</p>
-                    <p className="text-sm text-blue-700 leading-relaxed">
+                    <p className="text-sm font-semibold text-gray-900 mb-1">Código único de registro</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">
                       Se generará un código único que podrás compartir con el técnico para que se registre en la app móvil.
                     </p>
                   </div>
@@ -297,7 +288,7 @@ function AdminTecnicos() {
                 </button>
                 <button
                   onClick={generarCodigo}
-                  className="flex-1 bg-slate-700 text-white py-3 rounded-lg font-semibold text-sm hover:bg-slate-800 transition"
+                  className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm hover:bg-gray-800 transition"
                 >
                   Generar código
                 </button>

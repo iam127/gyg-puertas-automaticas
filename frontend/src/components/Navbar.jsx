@@ -50,6 +50,12 @@ function Navbar() {
       </div>
 
       <nav className="bg-white text-gray-900 shadow-sm border-b border-gray-200">
+        <style>{`
+          .nav-link:hover { background: #FACC15 !important; color: #111 !important; }
+          .nav-link { transition: all .2s; }
+          .btn-cotizar-nav:hover { background: #FDE047 !important; }
+          .btn-cotizar-nav { transition: background .2s; }
+        `}</style>
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-stretch h-20">
           <Link to="/" className="flex items-center">
             <img src={logo} alt="GyG Puertas Automáticas" className="h-14 object-contain" />
@@ -60,7 +66,7 @@ function Navbar() {
               <Link
                 key={i}
                 to={item.to}
-                className="flex items-center px-3 hover:bg-yellow-400 hover:text-gray-900 transition"
+                className="nav-link flex items-center px-3"
               >
                 {item.label}
               </Link>
@@ -68,7 +74,7 @@ function Navbar() {
             <div className="flex items-center ml-4">
               <Link
                 to="/cotizar"
-                className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition text-sm my-auto"
+                className="btn-cotizar-nav bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-bold text-sm my-auto"
               >
                 Solicitar Cotización
               </Link>

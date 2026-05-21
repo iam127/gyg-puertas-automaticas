@@ -4,9 +4,8 @@ import { removeTokens } from '../services/auth'
 import {
   FaThLarge, FaBox, FaFileAlt, FaWrench,
   FaUsers, FaImages, FaChartBar, FaSignOutAlt,
-  FaBars, FaTimes, FaCheckCircle, FaClock,
-  FaExclamationTriangle, FaWhatsapp, FaEnvelope,
-  FaArrowUp, FaArrowDown
+  FaBars, FaTimes, FaClock, FaWhatsapp, FaEnvelope,
+  FaArrowUp
 } from 'react-icons/fa'
 import logo from '../assets/Logo-gyg-Admin.png'
 import api from '../services/api'
@@ -30,15 +29,15 @@ const menuItems = [
 
 const estadoColor = {
   recibido: 'bg-blue-50 text-blue-700 border-blue-200',
-  en_revision: 'bg-amber-50 text-amber-700 border-amber-200',
-  visita_agendada: 'bg-purple-50 text-purple-700 border-purple-200',
-  cotizado: 'bg-orange-50 text-orange-700 border-orange-200',
-  aceptado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  rechazado: 'bg-red-50 text-red-700 border-red-200',
-  completado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  cancelado: 'bg-red-50 text-red-700 border-red-200',
-  en_proceso: 'bg-orange-50 text-orange-700 border-orange-200',
-  resuelto: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  en_revision: 'bg-slate-50 text-slate-700 border-slate-200',
+  visita_agendada: 'bg-slate-50 text-slate-700 border-slate-200',
+  cotizado: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  aceptado: 'bg-blue-50 text-blue-700 border-blue-200',
+  rechazado: 'bg-slate-100 text-slate-700 border-slate-300',
+  completado: 'bg-blue-50 text-blue-700 border-blue-200',
+  cancelado: 'bg-slate-100 text-slate-700 border-slate-300',
+  en_proceso: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  resuelto: 'bg-blue-50 text-blue-700 border-blue-200',
 }
 
 function AdminPanel() {
@@ -76,7 +75,7 @@ function AdminPanel() {
           fecha: c.creado_en,
           codigo: c.codigo,
           telefono: c.telefono,
-          color: 'bg-slate-600',
+          color: 'bg-slate-700',
           icono: <FaFileAlt size={14} />,
         })),
         ...manRes.data.slice(0, 5).map(m => ({
@@ -116,7 +115,7 @@ function AdminPanel() {
         <title>Panel | GyG Admin</title>
       </Helmet>
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR ORIGINAL */}
       <div className={`${sidebarAbierto ? 'w-64' : 'w-16'} bg-gray-950 text-white transition-all duration-300 flex flex-col flex-shrink-0`}>
         <div className="flex items-center justify-center px-4 py-5 border-b border-gray-800">
           {sidebarAbierto && (
@@ -170,7 +169,14 @@ function AdminPanel() {
         {/* HEADER */}
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-lg font-bold text-gray-900 capitalize">{seccionActiva === 'dashboard' ? 'Dashboard' : seccionActiva}</h1>
+            <h1 className="text-lg font-bold text-gray-900 capitalize flex items-center gap-3">
+              {seccionActiva === 'dashboard' ? 'Dashboard' : seccionActiva}
+              {(pendientesCotizaciones > 0 || pendientesMantenimientos > 0) && seccionActiva === 'dashboard' && (
+                <span className="bg-yellow-400 text-gray-900 text-xs px-2.5 py-1 rounded-full font-bold">
+                  {pendientesCotizaciones + pendientesMantenimientos}
+                </span>
+              )}
+            </h1>
             <p className="text-xs text-gray-400">Panel de administración - GyG Puertas Automáticas</p>
           </div>
           <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
@@ -189,25 +195,46 @@ function AdminPanel() {
           {seccionActiva === 'dashboard' && (
             <div className="space-y-6 max-w-7xl mx-auto">
 
-              {/* KPIs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* KPIs PROFESIONALES */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {[
-                  { label: 'Cotizaciones', valor: kpis.cotizaciones, sub: `${pendientesCotizaciones} pendientes`, color: 'border-slate-200', bgIcon: 'bg-slate-600', seccion: 'cotizaciones', icono: <FaFileAlt size={20} /> },
-                  { label: 'Mantenimientos', valor: kpis.mantenimientos, sub: `${pendientesMantenimientos} pendientes`, color: 'border-slate-300', bgIcon: 'bg-slate-700', seccion: 'mantenimientos', icono: <FaWrench size={20} /> },
-                  { label: 'Productos', valor: kpis.productos, sub: 'en catálogo', color: 'border-slate-200', bgIcon: 'bg-slate-600', seccion: 'productos', icono: <FaBox size={20} /> },
-                  { label: 'Técnicos', valor: kpis.tecnicos, sub: 'registrados', color: 'border-slate-300', bgIcon: 'bg-slate-700', seccion: 'tecnicos', icono: <FaUsers size={20} /> },
+                  { 
+                    label: 'Cotizaciones', 
+                    valor: kpis.cotizaciones, 
+                    sub: `${pendientesCotizaciones} pendientes`, 
+                    seccion: 'cotizaciones', 
+                    icono: <FaFileAlt size={20} />
+                  },
+                  { 
+                    label: 'Mantenimientos', 
+                    valor: kpis.mantenimientos, 
+                    sub: `${pendientesMantenimientos} pendientes`, 
+                    seccion: 'mantenimientos', 
+                    icono: <FaWrench size={20} />
+                  },
+                  { 
+                    label: 'Productos', 
+                    valor: kpis.productos, 
+                    sub: 'en catálogo', 
+                    seccion: 'productos', 
+                    icono: <FaBox size={20} />
+                  },
+                  { 
+                    label: 'Técnicos', 
+                    valor: kpis.tecnicos, 
+                    sub: 'registrados', 
+                    seccion: 'tecnicos', 
+                    icono: <FaUsers size={20} />
+                  },
                 ].map((kpi, i) => (
                   <div
                     key={i}
                     onClick={() => setSeccionActiva(kpi.seccion)}
-                    className={`bg-white rounded-lg border-l-4 ${kpi.color} shadow-sm hover:shadow-md transition-all cursor-pointer p-5`}
+                    className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer p-6"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className={`${kpi.bgIcon} w-12 h-12 rounded-lg flex items-center justify-center text-white`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center text-yellow-400">
                         {kpi.icono}
-                      </div>
-                      <div className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold flex items-center gap-1">
-                        <FaArrowUp size={10} /> 12%
                       </div>
                     </div>
                     <p className="text-3xl font-bold text-gray-900 mb-1">{cargando ? '...' : kpi.valor}</p>
@@ -219,11 +246,11 @@ function AdminPanel() {
 
               {/* ALERTAS */}
               {(pendientesCotizaciones > 0 || pendientesMantenimientos > 0) && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   {pendientesCotizaciones > 0 && (
-                    <div className="bg-white border-l-4 border-blue-600 rounded-lg shadow-sm p-5">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
                       <div className="flex items-start gap-4">
-                        <div className="bg-blue-600 w-11 h-11 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                        <div className="bg-yellow-400 w-11 h-11 rounded-lg flex items-center justify-center text-gray-900 flex-shrink-0">
                           <FaFileAlt size={18} />
                         </div>
                         <div className="flex-1">
@@ -231,7 +258,7 @@ function AdminPanel() {
                           <p className="text-gray-600 text-sm mb-3">Requieren revisión y respuesta inmediata</p>
                           <button 
                             onClick={() => setSeccionActiva('cotizaciones')} 
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
+                            className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
                           >
                             Revisar ahora
                           </button>
@@ -240,9 +267,9 @@ function AdminPanel() {
                     </div>
                   )}
                   {pendientesMantenimientos > 0 && (
-                    <div className="bg-white border-l-4 border-amber-600 rounded-lg shadow-sm p-5">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
                       <div className="flex items-start gap-4">
-                        <div className="bg-amber-600 w-11 h-11 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                        <div className="bg-yellow-400 w-11 h-11 rounded-lg flex items-center justify-center text-gray-900 flex-shrink-0">
                           <FaWrench size={18} />
                         </div>
                         <div className="flex-1">
@@ -250,7 +277,7 @@ function AdminPanel() {
                           <p className="text-gray-600 text-sm mb-3">Requieren asignación de técnico</p>
                           <button 
                             onClick={() => setSeccionActiva('mantenimientos')} 
-                            className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-700 transition"
+                            className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
                           >
                             Revisar ahora
                           </button>
@@ -264,7 +291,7 @@ function AdminPanel() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* ACTIVIDAD RECIENTE */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
                   <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
                       <div>
@@ -273,7 +300,7 @@ function AdminPanel() {
                       </div>
                       <button 
                         onClick={() => setSeccionActiva('cotizaciones')} 
-                        className="text-sm text-slate-600 font-semibold hover:text-slate-900 transition"
+                        className="text-sm text-gray-700 font-semibold hover:text-gray-900 transition"
                       >
                         Ver todo →
                       </button>
@@ -282,7 +309,7 @@ function AdminPanel() {
                   <div className="divide-y divide-gray-100">
                     {cargando ? (
                       <div className="flex items-center justify-center py-16">
-                        <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-3 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
                       </div>
                     ) : actividadReciente.length === 0 ? (
                       <div className="text-center py-16">
@@ -314,7 +341,7 @@ function AdminPanel() {
                                 href={`https://wa.me/51${item.telefono}`} 
                                 target="_blank" 
                                 rel="noreferrer" 
-                                className="ml-auto bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-green-700 transition flex items-center gap-1.5"
+                                className="ml-auto bg-gray-900 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 transition flex items-center gap-1.5"
                               >
                                 <FaWhatsapp size={13} /> Contactar
                               </a>
@@ -330,7 +357,7 @@ function AdminPanel() {
                 <div className="space-y-6">
 
                   {/* ESTADOS */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200">
                     <div className="px-5 py-4 border-b border-gray-200">
                       <h3 className="font-bold text-gray-900">Estados de cotizaciones</h3>
                       <p className="text-xs text-gray-500 mt-0.5">Distribución actual</p>
@@ -346,7 +373,7 @@ function AdminPanel() {
                           </div>
                           <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                             <div
-                              className="bg-slate-600 h-2.5 rounded-full transition-all duration-700"
+                              className="bg-gray-900 h-2.5 rounded-full transition-all duration-700"
                               style={{ width: `${Math.max((count / kpis.cotizaciones) * 100, 5)}%` }}
                             />
                           </div>
@@ -356,10 +383,10 @@ function AdminPanel() {
                   </div>
 
                   {/* RESUMEN */}
-                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-5 text-white shadow-lg">
+                  <div className="bg-gray-900 rounded-xl p-5 text-white shadow-lg">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="bg-white/10 p-2 rounded-lg">
-                        <FaChartBar size={16} className="text-white" />
+                      <div className="bg-yellow-400 p-2 rounded-lg">
+                        <FaChartBar size={16} className="text-gray-900" />
                       </div>
                       <div>
                         <p className="text-sm font-bold">Resumen del día</p>
@@ -373,11 +400,11 @@ function AdminPanel() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-xs text-gray-300">Cotizaciones completadas</span>
-                          <span className="text-emerald-400 font-bold text-lg">{completadosCotizaciones}</span>
+                          <span className="text-yellow-400 font-bold text-lg">{completadosCotizaciones}</span>
                         </div>
-                        <div className="w-full bg-white/10 rounded-full h-1.5">
+                        <div className="w-full bg-gray-800 rounded-full h-1.5">
                           <div 
-                            className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" 
+                            className="bg-yellow-400 h-1.5 rounded-full transition-all duration-500" 
                             style={{ width: kpis.cotizaciones > 0 ? `${(completadosCotizaciones / kpis.cotizaciones) * 100}%` : '0%' }} 
                           />
                         </div>
@@ -386,46 +413,46 @@ function AdminPanel() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-xs text-gray-300">Mantenimientos resueltos</span>
-                          <span className="text-emerald-400 font-bold text-lg">{completadosMantenimientos}</span>
+                          <span className="text-yellow-400 font-bold text-lg">{completadosMantenimientos}</span>
                         </div>
-                        <div className="w-full bg-white/10 rounded-full h-1.5">
+                        <div className="w-full bg-gray-800 rounded-full h-1.5">
                           <div 
-                            className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" 
+                            className="bg-yellow-400 h-1.5 rounded-full transition-all duration-500" 
                             style={{ width: kpis.mantenimientos > 0 ? `${(completadosMantenimientos / kpis.mantenimientos) * 100}%` : '0%' }} 
                           />
                         </div>
                       </div>
                       
-                      <div className="border-t border-white/10 pt-3">
+                      <div className="border-t border-gray-800 pt-3">
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-300">Total pendientes</span>
-                          <span className="text-amber-400 font-bold text-lg">{pendientesCotizaciones + pendientesMantenimientos}</span>
+                          <span className="text-yellow-400 font-bold text-lg">{pendientesCotizaciones + pendientesMantenimientos}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* ACCESOS RAPIDOS */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                     <h3 className="font-bold text-gray-900 text-sm mb-3">Accesos rápidos</h3>
                     <div className="space-y-2">
                       {[
-                        { label: 'Ver cotizaciones', seccion: 'cotizaciones', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaFileAlt size={12} /> },
-                        { label: 'Ver mantenimientos', seccion: 'mantenimientos', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaWrench size={12} /> },
-                        { label: 'Gestionar productos', seccion: 'productos', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaBox size={12} /> },
-                        { label: 'Gestionar contenido', seccion: 'contenido', color: 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200', icono: <FaImages size={12} /> },
+                        { label: 'Ver cotizaciones', seccion: 'cotizaciones', icono: <FaFileAlt size={12} /> },
+                        { label: 'Ver mantenimientos', seccion: 'mantenimientos', icono: <FaWrench size={12} /> },
+                        { label: 'Gestionar productos', seccion: 'productos', icono: <FaBox size={12} /> },
+                        { label: 'Gestionar contenido', seccion: 'contenido', icono: <FaImages size={12} /> },
                       ].map((acc, i) => (
                         <button
                           key={i}
                           onClick={() => setSeccionActiva(acc.seccion)}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${acc.color}`}
+                          className="w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition flex items-center gap-2"
                         >
                           {acc.icono} {acc.label}
                         </button>
                       ))}
                       <a
                         href="mailto:gygpuertasautomaticas@gmail.com"
-                        className="w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 transition flex items-center gap-2"
+                        className="w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition flex items-center gap-2"
                       >
                         <FaEnvelope size={12} /> Correo empresa
                       </a>
