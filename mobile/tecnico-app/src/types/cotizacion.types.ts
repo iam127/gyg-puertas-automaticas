@@ -18,6 +18,7 @@ export interface VisitaTecnica {
   hora: string;
   estado: 'programada' | 'completada' | 'cancelada' | 'reprogramada';
   medidas: string;
+  materiales_necesarios: string;
   observaciones: string;
   dificultad: string;
   tiempo_estimado: string;

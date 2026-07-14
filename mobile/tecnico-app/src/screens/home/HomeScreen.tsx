@@ -1,109 +1,68 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  StyleSheet, 
-  SafeAreaView, 
-  RefreshControl, 
-  TouchableOpacity, 
-  Alert 
+import {
+  View, Text, ScrollView, StyleSheet, SafeAreaView,
+  RefreshControl, TouchableOpacity, Alert, StatusBar as RNStatusBar,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 import MantenimientoService from '../../api/mantenimientos';
 import CotizacionService from '../../api/cotizaciones';
-import Card from '../../components/common/Card';
 import Loader from '../../components/common/Loader';
 import Badge from '../../components/common/Badge';
+
+interface Metrics { pendingMant: number; inProgressMant: number; completedMant: number; activeQuotes: number; }
+interface MetricConfig { key: keyof Metrics; label: string; icon: React.ComponentProps<typeof MaterialIcons>['name']; color: string; bg: string; }
+
+const METRIC_CONFIGS: MetricConfig[] = [
+  { key: 'pendingMant',    label: 'Mants. Pendientes',    icon: 'pending-actions', color: COLORS.PREVENTIVE_BLUE,   bg: COLORS.PREVENTIVE_BLUE_BG   },
+  { key: 'inProgressMant', label: 'En Proceso',           icon: 'construction',    color: COLORS.PRIMARY_GOLD_DARK, bg: COLORS.PRIMARY_GOLD_MUTED   },
+  { key: 'completedMant',  label: 'Resueltos Hoy',        icon: 'check-circle',    color: COLORS.SUCCESS,           bg: COLORS.SUCCESS_BG           },
+  { key: 'activeQuotes',   label: 'Cotizaciones Activas', icon: 'description',     color: COLORS.CORRECTIVE_ORANGE, bg: COLORS.CORRECTIVE_ORANGE_BG },
+];
+
+const MetricCard: React.FC<{ config: MetricConfig; value: number }> = ({ config, value }) => (
+  <View style={[styles.metricCard, { borderColor: config.color + '33' }]}>
+    <View style={[styles.metricIconWrap, { backgroundColor: config.bg }]}>
+      <MaterialIcons name={config.icon} size={22} color={config.color} />
+    </View>
+    <Text style={styles.metricNumber}>{value}</Text>
+    <Text style={styles.metricLabel}>{config.label}</Text>
+  </View>
+);
 
 export const HomeScreen: React.FC<any> = ({ navigation }) => {
   const { tecnico } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  // Metrics state
-  const [metrics, setMetrics] = useState({
-    pendingMant: 0,
-    inProgressMant: 0,
-    completedMant: 0,
-    activeQuotes: 0,
-  });
-
-  // Top 3 upcoming assignments
+  const [metrics, setMetrics] = useState<Metrics>({ pendingMant: 0, inProgressMant: 0, completedMant: 0, activeQuotes: 0 });
   const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
 
   const fetchDashboardData = async () => {
     if (!tecnico) return;
-
     try {
-      // Fetch both datasets concurrently
       const [mantenimientos, cotizaciones] = await Promise.all([
         MantenimientoService.getMyMantenimientos(tecnico.id),
         CotizacionService.getMyCotizaciones(tecnico.id),
       ]);
-
-      // Calculate maintenance metrics
-      let pendingMant = 0;
-      let inProgressMant = 0;
-      let completedMant = 0;
-
-      mantenimientos.forEach((m) => {
-        if (m.estado === 'resuelto') {
-          completedMant++;
-        } else if (
-          m.estado === 'en_proceso' || 
-          m.estado === 'en_revision' || 
-          m.estado === 'diagnostico_remoto' ||
-          m.estado === 'esperando_repuestos'
-        ) {
-          inProgressMant++;
-        } else if (m.estado === 'recibido' || m.estado === 'visita_agendada') {
-          pendingMant++;
-        }
+      let pendingMant = 0, inProgressMant = 0, completedMant = 0;
+      mantenimientos.forEach((m: any) => {
+        if (m.estado === 'resuelto') completedMant++;
+        else if (['en_proceso','en_revision','diagnostico_remoto','esperando_repuestos'].includes(m.estado)) inProgressMant++;
+        else if (['recibido','visita_agendada'].includes(m.estado)) pendingMant++;
       });
+      const activeQuotes = cotizaciones.filter((c: any) => !['completado','cancelado','rechazado'].includes(c.estado)).length;
+      setMetrics({ pendingMant, inProgressMant, completedMant, activeQuotes });
 
-      // Calculate cotizacion metrics (excluding completado, cancelado, rechazado)
-      const activeQuotes = cotizaciones.filter(
-        (c) => c.estado !== 'completado' && c.estado !== 'cancelado' && c.estado !== 'rechazado'
-      ).length;
-
-      setMetrics({
-        pendingMant,
-        inProgressMant,
-        completedMant,
-        activeQuotes,
-      });
-
-      // Combine and filter upcoming tasks (with programada status or future visits)
-      const formattedMants = mantenimientos
-        .filter((m) => m.estado !== 'resuelto' && m.estado !== 'cancelado')
-        .map((m) => ({
-          ...m,
-          taskType: 'mantenimiento',
-          date: m.visitas?.[0]?.fecha || '9999-12-31',
-          time: m.visitas?.[0]?.hora || '23:59',
-        }));
-
-      const formattedQuotes = cotizaciones
-        .filter((c) => c.estado !== 'completado' && c.estado !== 'cancelado' && c.estado !== 'rechazado')
-        .map((c) => ({
-          ...c,
-          taskType: 'cotizacion',
-          date: c.visitas?.[0]?.fecha || '9999-12-31',
-          time: c.visitas?.[0]?.hora || '23:59',
-        }));
-
-      const combined = [...formattedMants, ...formattedQuotes]
-        .sort((a, b) => {
-          if (a.date !== b.date) return a.date.localeCompare(b.date);
-          return a.time.localeCompare(b.time);
-        })
-        .slice(0, 3); // Take top 3 upcoming
+      const combined = [
+        ...mantenimientos.filter((m: any) => !['resuelto','cancelado'].includes(m.estado))
+          .map((m: any) => ({ ...m, taskType: 'mantenimiento', date: m.visitas?.[0]?.fecha || '9999-12-31', time: m.visitas?.[0]?.hora || '23:59' })),
+        ...cotizaciones.filter((c: any) => !['completado','cancelado','rechazado'].includes(c.estado))
+          .map((c: any) => ({ ...c, taskType: 'cotizacion', date: c.visitas?.[0]?.fecha || '9999-12-31', time: c.visitas?.[0]?.hora || '23:59' })),
+      ].sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : a.time.localeCompare(b.time)).slice(0, 3);
 
       setUpcomingTasks(combined);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudieron sincronizar los datos del servidor.');
     } finally {
       setLoading(false);
@@ -111,307 +70,168 @@ export const HomeScreen: React.FC<any> = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [tecnico]);
+  useEffect(() => { fetchDashboardData(); }, [tecnico]);
+  const onRefresh = useCallback(() => { setRefreshing(true); fetchDashboardData(); }, [tecnico]);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchDashboardData();
-  }, [tecnico]);
+  if (loading) return <Loader message="Sincronizando panel..." />;
 
-  if (loading) {
-    return <Loader message="Sincronizando panel..." />;
-  }
-
-  // Get current date representation in Spanish
   const today = new Date();
-  const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const formattedToday = today.toLocaleDateString('es-ES', options);
-
-  const technicianName = tecnico?.usuario.first_name || 'Técnico';
+  const formattedDate = today.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const dateDisplay = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+  const techName = tecnico?.usuario.first_name || 'Técnico';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
-            tintColor={COLORS.PRIMARY_GOLD}
-            colors={[COLORS.PRIMARY_GOLD]}
-          />
-        }
-      >
-        {/* Personalized Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.welcomeText}>Hola, {technicianName}</Text>
-            <Text style={styles.dateText}>{formattedToday.charAt(0).toUpperCase() + formattedToday.slice(1)}</Text>
+    <View style={styles.root}>
+      <RNStatusBar barStyle="dark-content" backgroundColor={COLORS.BG_BASE} />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.PRIMARY_GOLD} colors={[COLORS.PRIMARY_GOLD]} />}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Header ── */}
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.welcomeText}>Hola, {techName} 👋</Text>
+              <Text style={styles.dateText}>{dateDisplay}</Text>
+            </View>
+            <View style={styles.onlineBadge}>
+              <View style={styles.onlineDot} />
+              <Text style={styles.onlineText}>En línea</Text>
+            </View>
           </View>
-          <View style={styles.statusDotWrapper}>
-            <View style={styles.statusDot} />
-            <Text style={styles.onlineText}>En Línea</Text>
+
+          {/* ── Métricas ── */}
+          <Text style={styles.sectionTitle}>Métricas de hoy</Text>
+          <View style={styles.metricsGrid}>
+            {METRIC_CONFIGS.map(cfg => <MetricCard key={cfg.key} config={cfg} value={metrics[cfg.key]} />)}
           </View>
-        </View>
 
-        {/* KPI Grid */}
-        <Text style={styles.sectionTitle}>Métricas de Hoy</Text>
-        <View style={styles.grid}>
-          <Card style={[styles.kpiCard, { borderLeftColor: COLORS.PREVENTIVE_BLUE }]} hasBorder>
-            <Text style={styles.kpiEmoji}>🔵</Text>
-            <Text style={styles.kpiNumber}>{metrics.pendingMant}</Text>
-            <Text style={styles.kpiLabel}>Mants. Pendientes</Text>
-          </Card>
+          {/* ── Próximos trabajos ── */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionTitle}>Próximos trabajos</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('AssignmentsTab')} style={styles.viewAllBtn} activeOpacity={0.7}>
+              <Text style={styles.viewAllText}>Ver todo</Text>
+              <MaterialIcons name="arrow-forward" size={15} color={COLORS.PRIMARY_GOLD_DARK} />
+            </TouchableOpacity>
+          </View>
 
-          <Card style={[styles.kpiCard, { borderLeftColor: COLORS.PRIMARY_GOLD }]} hasBorder>
-            <Text style={styles.kpiEmoji}>🟡</Text>
-            <Text style={styles.kpiNumber}>{metrics.inProgressMant}</Text>
-            <Text style={styles.kpiLabel}>En Proceso</Text>
-          </Card>
-
-          <Card style={[styles.kpiCard, { borderLeftColor: COLORS.WARRANTY_GREEN }]} hasBorder>
-            <Text style={styles.kpiEmoji}>🟢</Text>
-            <Text style={styles.kpiNumber}>{metrics.completedMant}</Text>
-            <Text style={styles.kpiLabel}>Resueltos Hoy</Text>
-          </Card>
-
-          <Card style={[styles.kpiCard, { borderLeftColor: COLORS.CORRECTIVE_ORANGE }]} hasBorder>
-            <Text style={styles.kpiEmoji}>💼</Text>
-            <Text style={styles.kpiNumber}>{metrics.activeQuotes}</Text>
-            <Text style={styles.kpiLabel}>Cotizaciones Activas</Text>
-          </Card>
-        </View>
-
-        {/* Upcoming Tasks Section */}
-        <View style={styles.upcomingHeader}>
-          <Text style={styles.sectionTitle}>Próximos Trabajos</Text>
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('AssignmentsTab')}
-            accessibilityRole="button"
-            accessibilityLabel="Ver todas las asignaciones"
-          >
-            <Text style={styles.viewAllText}>Ver todo →</Text>
-          </TouchableOpacity>
-        </View>
-
-        {upcomingTasks.length === 0 ? (
-          <Card style={styles.emptyCard} hasBorder>
-            <Text style={styles.emptyEmoji}>🎉</Text>
-            <Text style={styles.emptyText}>¡No tienes tareas programadas pendientes!</Text>
-            <Text style={styles.emptySubtext}>Arrastra la pantalla hacia abajo para refrescar.</Text>
-          </Card>
-        ) : (
-          upcomingTasks.map((task) => {
-            const visit = task.visitas && task.visitas.length > 0 ? task.visitas[0] : null;
-            const dateStr = visit ? `${visit.fecha} - ${visit.hora}` : 'Sin programar';
-            return (
-              <TouchableOpacity
-                key={`${task.taskType}-${task.id}`}
-                onPress={() => navigation.navigate('AssignmentsTab', {
-                  screen: 'AssignmentDetail',
-                  params: { id: task.id, type: task.taskType }
-                })}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel={`Tarea ${task.codigo}. Cliente ${task.nombre_cliente}. Estado ${task.estado}`}
-              >
-                <Card style={styles.taskCard} hasBorder>
-                  <View style={styles.taskHeader}>
-                    <Text style={styles.taskCode}>{task.codigo}</Text>
-                    <Badge status={task.estado} type={task.taskType} />
+          {upcomingTasks.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <View style={styles.emptyIconWrap}>
+                <MaterialIcons name="celebration" size={30} color={COLORS.PRIMARY_GOLD} />
+              </View>
+              <Text style={styles.emptyTitle}>¡Sin tareas pendientes!</Text>
+              <Text style={styles.emptySubtext}>Arrastra hacia abajo para refrescar</Text>
+            </View>
+          ) : (
+            upcomingTasks.map((task) => {
+              const isMant = task.taskType === 'mantenimiento';
+              const visit = task.visitas?.[0] ?? null;
+              const dateStr = visit ? `${visit.fecha}  ${visit.hora}` : 'Sin programar';
+              return (
+                <TouchableOpacity
+                  key={`${task.taskType}-${task.id}`}
+                  onPress={() => navigation.navigate('AssignmentsTab', { screen: 'AssignmentDetail', params: { id: task.id, type: task.taskType } })}
+                  activeOpacity={0.76}
+                >
+                  <View style={styles.taskCard}>
+                    <View style={[styles.taskStripe, { backgroundColor: isMant ? COLORS.PREVENTIVE_BLUE_BG : COLORS.CORRECTIVE_ORANGE_BG }]}>
+                      <MaterialIcons name={isMant ? 'build' : 'request-quote'} size={12} color={isMant ? COLORS.PREVENTIVE_BLUE : COLORS.CORRECTIVE_ORANGE} />
+                      <Text style={[styles.taskStripeText, { color: isMant ? COLORS.PREVENTIVE_BLUE : COLORS.CORRECTIVE_ORANGE }]}>
+                        {isMant ? 'MANTENIMIENTO' : 'COTIZACIÓN'}
+                      </Text>
+                    </View>
+                    <View style={styles.taskBody}>
+                      <View style={styles.taskHeaderRow}>
+                        <Text style={styles.taskCode}>{task.codigo}</Text>
+                        <Badge status={task.estado} type={task.taskType} />
+                      </View>
+                      <Text style={styles.taskClient}>{task.nombre_cliente}</Text>
+                      <View style={styles.taskMeta}>
+                        <MaterialIcons name="location-on" size={13} color={COLORS.TEXT_TERTIARY} />
+                        <Text style={styles.taskMetaText} numberOfLines={1}>{task.distrito} — {task.direccion}</Text>
+                      </View>
+                      <View style={styles.taskFooter}>
+                        <View style={styles.taskMeta}>
+                          <MaterialIcons name="event" size={13} color={COLORS.PRIMARY_GOLD} />
+                          <Text style={styles.taskDate}>{dateStr}</Text>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={18} color={COLORS.TEXT_MUTED} />
+                      </View>
+                    </View>
                   </View>
-                  <Text style={styles.taskClient}>{task.nombre_cliente}</Text>
-                  <Text style={styles.taskAddress} numberOfLines={1}>📍 {task.distrito} - {task.direccion}</Text>
-                  
-                  <View style={styles.taskFooter}>
-                    <Text style={styles.taskDate}>📅 {dateStr}</Text>
-                    <Text style={styles.taskTag}>
-                      {task.taskType === 'mantenimiento' ? '🔧 Mantenimiento' : '📏 Visita Técnica'}
-                    </Text>
-                  </View>
-                </Card>
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
-    </SafeAreaView>
+                </TouchableOpacity>
+              );
+            })
+          )}
+          <View style={{ height: 16 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BG_DARK,
+  root: { flex: 1, backgroundColor: COLORS.BG_BASE },
+  safe: { flex: 1 },
+  scroll: { padding: 16, paddingTop: 20 },
+
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
+  headerLeft: { flex: 1 },
+  welcomeText: { fontSize: 24, fontWeight: '800', color: COLORS.TEXT_PRIMARY, letterSpacing: 0.2, marginBottom: 4 },
+  dateText: { fontSize: 12, color: COLORS.TEXT_SECONDARY, fontWeight: '500', textTransform: 'capitalize' },
+  onlineBadge: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: COLORS.SUCCESS_BG, paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 20, borderWidth: 1, borderColor: COLORS.SUCCESS_BORDER, gap: 6, marginLeft: 12,
   },
-  scrollContent: {
-    padding: LAYOUT.spacing.md,
+  onlineDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLORS.SUCCESS },
+  onlineText: { fontSize: 11, fontWeight: '700', color: COLORS.SUCCESS },
+
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 12, letterSpacing: 0.2 },
+  sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  viewAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  viewAllText: { fontSize: 13, fontWeight: '600', color: COLORS.PRIMARY_GOLD_DARK },
+
+  metricsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 24, gap: 10 },
+  metricCard: {
+    width: '47.5%', backgroundColor: COLORS.BG_SURFACE, borderRadius: 16, padding: 16, borderWidth: 1,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.lg,
-    paddingVertical: LAYOUT.spacing.sm,
-  },
-  welcomeText: {
-    fontSize: LAYOUT.typography.sizes.h1,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-  },
-  dateText: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-    marginTop: LAYOUT.spacing.xs,
-  },
-  statusDotWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.CARD_DARK,
-    paddingHorizontal: LAYOUT.spacing.sm,
-    paddingVertical: LAYOUT.spacing.xs,
-    borderRadius: LAYOUT.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER_DARK,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: LAYOUT.borderRadius.round,
-    backgroundColor: COLORS.WARRANTY_GREEN,
-    marginRight: 6,
-  },
-  onlineText: {
-    fontSize: LAYOUT.typography.sizes.xs,
-    fontWeight: 'bold',
-    color: COLORS.WARRANTY_GREEN,
-    fontFamily: 'System',
-  },
-  sectionTitle: {
-    fontSize: LAYOUT.typography.sizes.h2,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: LAYOUT.spacing.md,
-    marginTop: LAYOUT.spacing.sm,
-    fontFamily: 'System',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: LAYOUT.spacing.lg,
-  },
-  kpiCard: {
-    width: '48%',
-    padding: LAYOUT.spacing.md,
-    borderLeftWidth: 4,
-  },
-  kpiEmoji: {
-    fontSize: 24,
-    marginBottom: LAYOUT.spacing.xs,
-  },
-  kpiNumber: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: COLORS.TEXT_PRIMARY,
-    fontFamily: 'System',
-  },
-  kpiLabel: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    marginTop: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-    fontWeight: '600',
-  },
-  upcomingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.sm,
-  },
-  viewAllText: {
-    fontSize: LAYOUT.typography.sizes.body,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-  },
+  metricIconWrap: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  metricNumber: { fontSize: 30, fontWeight: '900', color: COLORS.TEXT_PRIMARY, lineHeight: 34, marginBottom: 4 },
+  metricLabel: { fontSize: 11, color: COLORS.TEXT_SECONDARY, fontWeight: '600', lineHeight: 15 },
+
   emptyCard: {
-    padding: LAYOUT.spacing.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: COLORS.BG_SURFACE, borderRadius: 16, padding: 32, alignItems: 'center',
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD,
   },
-  emptyEmoji: {
-    fontSize: 36,
-    marginBottom: LAYOUT.spacing.sm,
+  emptyIconWrap: {
+    width: 60, height: 60, borderRadius: 18, backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD, justifyContent: 'center', alignItems: 'center', marginBottom: 16,
   },
-  emptyText: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    color: COLORS.TEXT_PRIMARY,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontFamily: 'System',
-  },
-  emptySubtext: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    textAlign: 'center',
-    marginTop: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-  },
+  emptyTitle: { fontSize: 15, fontWeight: '700', color: COLORS.TEXT_PRIMARY, textAlign: 'center', marginBottom: 6 },
+  emptySubtext: { fontSize: 12, color: COLORS.TEXT_SECONDARY, textAlign: 'center' },
+
   taskCard: {
-    padding: LAYOUT.spacing.md,
-    marginVertical: LAYOUT.spacing.xs,
+    backgroundColor: COLORS.BG_SURFACE, borderRadius: 16, marginBottom: 10,
+    borderWidth: 1, borderColor: COLORS.BORDER_DARK, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
-  taskHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.xs,
-  },
-  taskCode: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-  },
-  taskClient: {
-    fontSize: LAYOUT.typography.sizes.h3,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-  },
-  taskAddress: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    marginBottom: LAYOUT.spacing.sm,
-    fontFamily: 'System',
-  },
+  taskStripe: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 6 },
+  taskStripeText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  taskBody: { padding: 14, paddingTop: 10 },
+  taskHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  taskCode: { fontSize: 14, fontWeight: '700', color: COLORS.TEXT_PRIMARY, letterSpacing: 0.3 },
+  taskClient: { fontSize: 15, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 8 },
+  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
+  taskMetaText: { flex: 1, fontSize: 12, color: COLORS.TEXT_SECONDARY, fontWeight: '500' },
   taskFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER_DARK,
-    paddingTop: LAYOUT.spacing.sm,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    borderTopWidth: 1, borderTopColor: COLORS.BORDER_SUBTLE, paddingTop: 10, marginTop: 6,
   },
-  taskDate: {
-    fontSize: LAYOUT.typography.sizes.small,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-  },
-  taskTag: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_SECONDARY,
-    textTransform: 'uppercase',
-    fontFamily: 'System',
-  },
+  taskDate: { fontSize: 12, color: COLORS.PRIMARY_GOLD_DARK, fontWeight: '600' },
 });
 
 export default HomeScreen;

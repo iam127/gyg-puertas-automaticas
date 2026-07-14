@@ -21,6 +21,7 @@ export interface VisitaMantenimiento {
   trabajos_realizados: string;
   repuestos_utilizados: string;
   costo_total: string | number | null;
+  foto_mantenimiento?: string | null;
   creado_en?: string;
 }
 

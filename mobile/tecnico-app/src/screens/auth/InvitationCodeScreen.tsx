@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView, 
-  Alert 
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+  Image,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { MaterialIcons } from '@expo/vector-icons';
 import { AuthStackParamList } from '../../types/navigation.types';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import AuthService from '../../api/auth';
@@ -23,15 +25,13 @@ interface InvitationCodeScreenProps {
   navigation: StackNavigationProp<AuthStackParamList, 'InvitationCode'>;
 }
 
+type Mode = 'code' | 'login';
+
 export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navigation }) => {
-  const [mode, setMode] = useState<'code' | 'login'>('code');
-  
-  // Code verification state
+  const [mode, setMode] = useState<Mode>('code');
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-
-  // Direct login state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState('');
@@ -43,358 +43,289 @@ export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navi
   const handleDemoAccess = async () => {
     try {
       await enableDemoMode();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudo activar el modo de demostración.');
     }
   };
 
   const handleVerifyCode = async () => {
-    if (!code.trim()) {
-      setCodeError('Por favor, ingrese el código de invitación.');
-      return;
-    }
+    if (!code.trim()) { setCodeError('Por favor, ingrese el código de invitación.'); return; }
     setCodeError('');
     setIsVerifying(true);
-
     try {
       const result = await AuthService.verifyInvitationCode(code.trim());
       setIsVerifying(false);
-
       if (result.valido) {
-        // Navigate to registration, passing the verified invitation code
         navigation.navigate('Register', { codigo: code.trim() });
       } else {
-        // If it's already used or registered
         if (result.registrado) {
-          Alert.alert(
-            'Código Utilizado',
-            'Este código ya ha sido utilizado para registrar un técnico. Si ya tiene cuenta, por favor inicie sesión.',
-            [{ text: 'Iniciar Sesión', onPress: () => setMode('login') }]
-          );
+          Alert.alert('Código ya utilizado', 'Este código fue usado previamente. Si ya tiene cuenta, inicie sesión.',
+            [{ text: 'Iniciar sesión', onPress: () => setMode('login') }]);
         } else {
           setCodeError(result.mensaje);
         }
       }
-    } catch (error) {
+    } catch {
       setIsVerifying(false);
-      Alert.alert('Error', 'Hubo un error de conexión al verificar el código.');
+      Alert.alert('Error de conexión', 'Verifique su red e intente nuevamente.');
     }
   };
 
   const handleLogin = async () => {
     let hasError = false;
-    if (!username.trim()) {
-      setUsernameError('Por favor, ingrese su usuario.');
-      hasError = true;
-    } else {
-      setUsernameError('');
-    }
-
-    if (!password.trim()) {
-      setPasswordError('Por favor, ingrese su contraseña.');
-      hasError = true;
-    } else {
-      setPasswordError('');
-    }
-
+    if (!username.trim()) { setUsernameError('Ingrese su usuario.'); hasError = true; } else setUsernameError('');
+    if (!password.trim()) { setPasswordError('Ingrese su contraseña.'); hasError = true; } else setPasswordError('');
     if (hasError) return;
-
     setIsLoggingIn(true);
     try {
-      // 1. Get simplejwt tokens
-      const credentials = { username: username.trim(), password: password.trim() };
-      const tokens = await AuthService.login(credentials);
-
-      // 2. Decode user ID from access token
-      // Simple base64 decoding of the JWT payload to avoid heavy dependency issues
-      const tokenParts = tokens.access.split('.');
-      if (tokenParts.length !== 3) {
-        throw new Error('Formato de token no válido.');
-      }
-      
-      const base64Url = tokenParts[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      // Polyfill base64 decode for react native
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      const decoded = JSON.parse(jsonPayload);
-      const userId = decoded.user_id;
-
-      if (!userId) {
-        throw new Error('ID de usuario no encontrado en el token.');
-      }
-
-      // 3. Set tokens first to authorize subsequent request
+      const tokens = await AuthService.login({ username: username.trim(), password: password.trim() });
+      const { user_id } = decodeJwtPayload(tokens.access);
+      if (!user_id) throw new Error('ID de usuario no encontrado en el token.');
       await setTokens(tokens.access, tokens.refresh);
-
-      // 4. Fetch the associated technician profile
-      const profile = await TecnicoService.getMyProfile(userId);
+      const profile = await TecnicoService.getMyProfile(user_id);
       await setTecnico(profile);
-
       setIsLoggingIn(false);
     } catch (error: any) {
       setIsLoggingIn(false);
-      const status = error.response?.status;
-      if (status === 401) {
-        Alert.alert('Acceso Fallido', 'Credenciales incorrectas. Verifique e intente de nuevo.');
+      if (error.response?.status === 401) {
+        Alert.alert('Credenciales incorrectas', 'Verifique su usuario y contraseña.');
       } else {
-        Alert.alert('Error', error.message || 'No se pudo iniciar sesión. Verifique su red.');
+        Alert.alert('Error', error.message || 'No se pudo iniciar sesión.');
       }
     }
   };
 
-  // Polyfill atob if not present (safeguard for React Native environments)
-  const atob = (input: string): string => {
+  // Decodifica el payload de un JWT sin dependencias externas.
+  // Usa la técnica de escape/unescape que maneja UTF-8 correctamente en RN.
+  const decodeJwtPayload = (token: string): any => {
+    const part = token.split('.')[1];
+    if (!part) throw new Error('Token JWT inválido.');
+    // base64url → base64 estándar con padding correcto
+    const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '=='.slice(0, (4 - (base64.length % 4)) % 4);
+    // Decodificar: convertir cada byte a %XX y luego decodeURIComponent para UTF-8
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    let str = input.replace(/=+$/, '');
-    let output = '';
-    let bc = 0;
-    let r1 = 0;
-    let r2 = 0;
-    let idx = 0;
-    while (idx < str.length) {
-      r2 = chars.indexOf(str.charAt(idx++));
-      if (r2 === -1) continue;
-      r1 = bc % 4 ? r1 * 64 + r2 : r2;
-      if (bc++ % 4) {
-        output += String.fromCharCode(255 & (r1 >> ((-2 * bc) & 6)));
-      }
+    let binary = '';
+    let i = 0;
+    while (i < padded.length) {
+      const c1 = chars.indexOf(padded[i++]);
+      const c2 = chars.indexOf(padded[i++]);
+      const c3 = chars.indexOf(padded[i++]);
+      const c4 = chars.indexOf(padded[i++]);
+      const b1 = (c1 << 2) | (c2 >> 4);
+      const b2 = ((c2 & 15) << 4) | (c3 >> 2);
+      const b3 = ((c3 & 3) << 6) | c4;
+      binary += String.fromCharCode(b1);
+      if (c3 !== 64) binary += String.fromCharCode(b2);
+      if (c4 !== 64) binary += String.fromCharCode(b3);
     }
-    return output;
+    // Convertir string de bytes a URI-encoded para manejar UTF-8
+    const encoded = binary
+      .split('')
+      .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+      .join('');
+    return JSON.parse(decodeURIComponent(encoded));
   };
+
+  const isCodeMode = mode === 'code';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoBadge}>🛠️</Text>
-            <Text style={styles.logoText}>GyG</Text>
-            <Text style={styles.logoSubtext}>PUERTAS AUTOMÁTICAS</Text>
-            <View style={styles.divider} />
-            <Text style={styles.appTitle}>TÉCNICOS DE CAMPO</Text>
-          </View>
+    <View style={styles.root}>
+      <RNStatusBar barStyle="dark-content" backgroundColor={COLORS.BG_BASE} />
+      <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
+          <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
-          {mode === 'code' ? (
-            <View style={styles.formContainer}>
-              <Text style={styles.sectionTitle}>Código de Invitación</Text>
-              <Text style={styles.sectionDescription}>
-                Ingrese el código único generado por administración para activar su cuenta.
-              </Text>
-              
-              <Input
-                label="Código de Acceso"
-                placeholder="Ej. GYG-TEC-XXXX"
-                value={code}
-                onChangeText={(text) => {
-                  setCode(text);
-                  if (text) setCodeError('');
-                }}
-                error={codeError}
-                autoCapitalize="characters"
-                autoCorrect={false}
-              />
-
-              <Button
-                title="Verificar Código"
-                onPress={handleVerifyCode}
-                loading={isVerifying}
-                style={styles.actionBtn}
-              />
-
-              <Button
-                title="Ya tengo una cuenta registrada"
-                onPress={() => setMode('login')}
-                variant="outline"
-                style={styles.switchBtn}
-              />
-
-              <View style={styles.demoSeparatorContainer}>
-                <View style={styles.demoLine} />
-                <Text style={styles.demoSeparatorText}>O TAMBIÉN</Text>
-                <View style={styles.demoLine} />
+            {/* ── Logo ──────────────────────────────────────────────────── */}
+            <View style={styles.logoSection}>
+              <View style={styles.logoCard}>
+                <Image
+                  source={require('../../../assets/Logo-gyg.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
               </View>
-
-              <Button
-                title="Entrar como Invitado (Modo Demo) ✨"
-                onPress={handleDemoAccess}
-                variant="outline"
-                style={styles.demoBtn}
-              />
-            </View>
-          ) : (
-            <View style={styles.formContainer}>
-              <Text style={styles.sectionTitle}>Iniciar Sesión</Text>
-              <Text style={styles.sectionDescription}>
-                Ingrese su usuario y contraseña asignados durante el registro.
-              </Text>
-
-              <Input
-                label="Nombre de Usuario"
-                placeholder="Ingrese su usuario"
-                value={username}
-                onChangeText={(text) => {
-                  setUsername(text);
-                  if (text) setUsernameError('');
-                }}
-                error={usernameError}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <Input
-                label="Contraseña"
-                placeholder="Ingrese su contraseña"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (text) setPasswordError('');
-                }}
-                error={passwordError}
-                secureTextEntry
-              />
-
-              <Button
-                title="Iniciar Sesión"
-                onPress={handleLogin}
-                loading={isLoggingIn}
-                style={styles.actionBtn}
-              />
-
-              <Button
-                title="Tengo un código de invitación"
-                onPress={() => setMode('code')}
-                variant="outline"
-                style={styles.switchBtn}
-              />
-
-              <View style={styles.demoSeparatorContainer}>
-                <View style={styles.demoLine} />
-                <Text style={styles.demoSeparatorText}>O TAMBIÉN</Text>
-                <View style={styles.demoLine} />
+              <View style={styles.tagRow}>
+                <View style={styles.tagLine} />
+                <Text style={styles.tagText}>TÉCNICOS DE CAMPO</Text>
+                <View style={styles.tagLine} />
               </View>
-
-              <Button
-                title="Entrar como Invitado (Modo Demo) ✨"
-                onPress={handleDemoAccess}
-                variant="outline"
-                style={styles.demoBtn}
-              />
             </View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+            {/* ── Tabs ──────────────────────────────────────────────────── */}
+            <View style={styles.tabRow}>
+              <View style={[styles.tab, isCodeMode && styles.tabActive]}>
+                <Text style={[styles.tabLabel, isCodeMode && styles.tabLabelActive]}>Código</Text>
+              </View>
+              <View style={[styles.tab, !isCodeMode && styles.tabActive]}>
+                <Text style={[styles.tabLabel, !isCodeMode && styles.tabLabelActive]}>Iniciar sesión</Text>
+              </View>
+            </View>
+
+            {/* ── Formulario ────────────────────────────────────────────── */}
+            <View style={styles.formCard}>
+              {isCodeMode ? (
+                <>
+                  <View style={styles.formHeader}>
+                    <View style={styles.formIconBadge}>
+                      <MaterialIcons name="vpn-key" size={20} color={COLORS.PRIMARY_GOLD_DARK} />
+                    </View>
+                    <View style={styles.formHeaderText}>
+                      <Text style={styles.formTitle}>Código de invitación</Text>
+                      <Text style={styles.formDesc}>Ingrese el código único generado por administración.</Text>
+                    </View>
+                  </View>
+                  <Input label="Código de acceso" placeholder="Ingrese su código"
+                    value={code} onChangeText={(t) => { setCode(t); if (t) setCodeError(''); }}
+                    error={codeError} autoCapitalize="characters" autoCorrect={false} />
+                  <Button title="Verificar código" onPress={handleVerifyCode} loading={isVerifying} style={styles.primaryAction} />
+                  <Button title="Ya tengo cuenta registrada" onPress={() => setMode('login')} variant="ghost" style={styles.secondaryAction} />
+                </>
+              ) : (
+                <>
+                  <View style={styles.formHeader}>
+                    <View style={styles.formIconBadge}>
+                      <MaterialIcons name="person" size={20} color={COLORS.PRIMARY_GOLD_DARK} />
+                    </View>
+                    <View style={styles.formHeaderText}>
+                      <Text style={styles.formTitle}>Iniciar sesión</Text>
+                      <Text style={styles.formDesc}>Use sus credenciales asignadas durante el registro.</Text>
+                    </View>
+                  </View>
+                  <Input label="Nombre de usuario" placeholder="Su nombre de usuario"
+                    value={username} onChangeText={(t) => { setUsername(t); if (t) setUsernameError(''); }}
+                    error={usernameError} autoCapitalize="none" autoCorrect={false} />
+                  <Input label="Contraseña" placeholder="Su contraseña"
+                    value={password} onChangeText={(t) => { setPassword(t); if (t) setPasswordError(''); }}
+                    error={passwordError} secureTextEntry />
+                  <Button title="Ingresar" onPress={handleLogin} loading={isLoggingIn} style={styles.primaryAction} />
+                  <Button title="Tengo un código de invitación" onPress={() => setMode('code')} variant="ghost" style={styles.secondaryAction} />
+                </>
+              )}
+
+              {/* ── Divisor demo ─────────────────────────────────────────── */}
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>o también</Text>
+                <View style={styles.dividerLine} />
+              </View>
+              <Button title="Entrar como invitado (Modo demo)" onPress={handleDemoAccess} variant="outline" />
+            </View>
+
+            <Text style={styles.footer}>GyG Puertas Automáticas © 2024</Text>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BG_DARK,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
+  root: { flex: 1, backgroundColor: COLORS.BG_BASE },
+  safe: { flex: 1 },
+  kav: { flex: 1 },
+  scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: LAYOUT.spacing.lg,
+    paddingHorizontal: 20,
+    paddingTop: 32,
+    paddingBottom: 40,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.xxl,
+
+  // ── Logo ────────────────────────────────────────────────────────────────
+  logoSection: { alignItems: 'center', marginBottom: 28 },
+  logoCard: {
+    backgroundColor: COLORS.BG_SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_GOLD,
+    borderRadius: 18,
+    paddingHorizontal: 32,
+    paddingVertical: 18,
+    marginBottom: 18,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  logoBadge: {
-    fontSize: 48,
-    marginBottom: LAYOUT.spacing.sm,
-  },
-  logoText: {
-    fontSize: 36,
-    fontWeight: '900',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-    letterSpacing: 2,
-  },
-  logoSubtext: {
+  logoImage: { width: 220, height: 58 },
+  tagRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  tagLine: { flex: 1, height: 1, backgroundColor: COLORS.BORDER_SUBTLE },
+  tagText: {
     fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    fontFamily: 'System',
-    letterSpacing: 4,
-    marginTop: -4,
-  },
-  divider: {
-    width: 60,
-    height: 3,
-    backgroundColor: COLORS.PRIMARY_GOLD,
-    marginVertical: LAYOUT.spacing.md,
-  },
-  appTitle: {
-    fontSize: LAYOUT.typography.sizes.body,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_SECONDARY,
-    letterSpacing: 3,
+    fontWeight: '700',
+    color: COLORS.TEXT_MUTED,
+    letterSpacing: 3.5,
     fontFamily: 'System',
   },
-  formContainer: {
-    backgroundColor: COLORS.CARD_DARK,
-    padding: LAYOUT.spacing.lg,
-    borderRadius: LAYOUT.borderRadius.xl,
+
+  // ── Tabs ────────────────────────────────────────────────────────────────
+  tabRow: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.BG_ELEVATED,
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: COLORS.BORDER_DARK,
-    ...LAYOUT.shadows.md,
   },
-  sectionTitle: {
-    fontSize: LAYOUT.typography.sizes.h2,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    marginBottom: LAYOUT.spacing.xs,
-    fontFamily: 'System',
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: 'center' },
+  tabActive: {
+    backgroundColor: COLORS.BG_SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_GOLD,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  sectionDescription: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    lineHeight: LAYOUT.typography.lineHeights.body,
-    marginBottom: LAYOUT.spacing.md,
-    fontFamily: 'System',
-  },
-  actionBtn: {
-    marginTop: LAYOUT.spacing.md,
-  },
-  switchBtn: {
-    marginTop: LAYOUT.spacing.md,
+  tabLabel: { fontSize: 13, fontWeight: '600', color: COLORS.TEXT_TERTIARY, fontFamily: 'System' },
+  tabLabelActive: { color: COLORS.PRIMARY_GOLD_DARK },
+
+  // ── Form Card ───────────────────────────────────────────────────────────
+  formCard: {
+    backgroundColor: COLORS.BG_SURFACE,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
     borderColor: COLORS.BORDER_DARK,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
   },
-  demoSeparatorContainer: {
-    flexDirection: 'row',
+  formHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: 20 },
+  formIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_GOLD,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: LAYOUT.spacing.md,
+    flexShrink: 0,
   },
-  demoLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.BORDER_DARK,
+  formHeaderText: { flex: 1 },
+  formTitle: { fontSize: 18, fontWeight: '700', color: COLORS.TEXT_PRIMARY, fontFamily: 'System', marginBottom: 4 },
+  formDesc: { fontSize: 13, color: COLORS.TEXT_SECONDARY, lineHeight: 19, fontFamily: 'System' },
+
+  primaryAction: { marginTop: 18 },
+  secondaryAction: { marginTop: 10 },
+
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 18, gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.BORDER_SUBTLE },
+  dividerText: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.5,
+    fontFamily: 'System',
+    textTransform: 'uppercase',
   },
-  demoSeparatorText: {
-    color: COLORS.TEXT_SECONDARY,
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginHorizontal: LAYOUT.spacing.sm,
-    letterSpacing: 1,
-  },
-  demoBtn: {
-    marginTop: 0,
-    borderColor: COLORS.PRIMARY_GOLD,
-    borderWidth: 1.5,
-  },
+
+  footer: { textAlign: 'center', color: COLORS.TEXT_MUTED, fontSize: 11, marginTop: 28, fontFamily: 'System' },
 });
 
 export default InvitationCodeScreen;

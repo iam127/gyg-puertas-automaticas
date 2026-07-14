@@ -2,7 +2,6 @@ import api from './config';
 import { Mantenimiento } from '../types/mantenimiento.types';
 import { useAuthStore } from '../store/authStore';
 
-// Mock Data for Demo/Guest Mode when backend is offline
 let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
   {
     id: 101,
@@ -26,14 +25,15 @@ let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
       {
         id: 201,
         mantenimiento: 101,
-        tecnico: 999, // Matching Guest Technician ID
+        tecnico: 999,
         fecha: '2026-05-20',
         hora: '09:00',
         estado: 'programada',
-        diagnostico: 'Desgaste en la cremallera de arrastre y falta de lubricación en las guías principales del riel superior.',
+        diagnostico: 'Desgaste en la cremallera de arrastre.',
         trabajos_realizados: '',
         repuestos_utilizados: '',
         costo_total: null,
+        foto_mantenimiento: null,
       }
     ]
   },
@@ -47,7 +47,7 @@ let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
     distrito: 'La Molina',
     tipo_puerta: 'Seccional de Madera Cochera',
     fecha_instalacion_aprox: '2025-01-20',
-    descripcion_problema: 'Mantenimiento preventivo anual programado para engrasar resortes y verificar alineación de fotocélulas.',
+    descripcion_problema: 'Mantenimiento preventivo anual.',
     disponibilidad: 'Sábados por la mañana',
     tipo: 'preventivo',
     estado: 'visita_agendada',
@@ -67,6 +67,7 @@ let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
         trabajos_realizados: '',
         repuestos_utilizados: '',
         costo_total: null,
+        foto_mantenimiento: null,
       }
     ]
   },
@@ -80,7 +81,7 @@ let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
     distrito: 'Ate',
     tipo_puerta: 'Industrial Levadiza de Gran Peso',
     fecha_instalacion_aprox: '2023-08-15',
-    descripcion_problema: 'Se requiere cambio preventivo de resortes debido a cumplimiento de ciclos máximos de uso.',
+    descripcion_problema: 'Cambio preventivo de resortes.',
     disponibilidad: 'Cualquier día previa coordinación',
     tipo: 'garantia',
     estado: 'resuelto',
@@ -97,70 +98,48 @@ let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
         hora: '15:00',
         estado: 'completada',
         diagnostico: 'Resortes desgastados con riesgo de ruptura.',
-        trabajos_realizados: 'Reemplazo de resortes helicoidales de torsión pesada, engrasado general y calibración del límite de carrera del motor.',
-        repuestos_utilizados: '2 Resortes de torsión de 10000 ciclos, Grasa de litio multiusos.',
+        trabajos_realizados: 'Reemplazo de resortes helicoidales.',
+        repuestos_utilizados: '2 Resortes de torsión, Grasa de litio.',
         costo_total: 450.00,
+        foto_mantenimiento: null,
       }
     ]
   }
 ];
 
 export const MantenimientoService = {
-  /**
-   * Fetches all maintenance tickets and filters them by technician ID on the client side
-   */
   getMyMantenimientos: async (tecnicoId: number): Promise<Mantenimiento[]> => {
     if (useAuthStore.getState().isDemoMode) {
-      return MOCK_MANTENIMIENTOS.filter((m) =>
-        m.visitas?.some((v) => v.tecnico === tecnicoId)
-      );
+      return MOCK_MANTENIMIENTOS;
     }
-
-    const response = await api.get<Mantenimiento[]>('/mantenimientos/');
-    return response.data.filter((m) =>
-      m.visitas?.some((v) => v.tecnico === tecnicoId)
-    );
+    const response = await api.get<Mantenimiento[]>('/mantenimientos/mis_mantenimientos/');
+    return response.data;
   },
 
-  /**
-   * Fetches full details for a single maintenance ticket
-   */
   getMantenimientoDetail: async (id: number): Promise<Mantenimiento> => {
     if (useAuthStore.getState().isDemoMode) {
       const mant = MOCK_MANTENIMIENTOS.find((m) => m.id === id);
       if (!mant) throw new Error('Mantenimiento no encontrado (Demo)');
       return mant;
     }
-
     const response = await api.get<Mantenimiento>(`/mantenimientos/${id}/`);
     return response.data;
   },
 
-  /**
-   * Updates the global status of a maintenance ticket
-   */
   updateMantenimientoStatus: async (id: number, status: any): Promise<Mantenimiento> => {
     if (useAuthStore.getState().isDemoMode) {
       MOCK_MANTENIMIENTOS = MOCK_MANTENIMIENTOS.map((m) => {
-        if (m.id === id) {
-          return { ...m, estado: status, actualizado_en: new Date().toISOString() };
-        }
+        if (m.id === id) return { ...m, estado: status, actualizado_en: new Date().toISOString() };
         return m;
       });
       const updated = MOCK_MANTENIMIENTOS.find((m) => m.id === id);
       if (!updated) throw new Error('Mantenimiento no encontrado (Demo)');
       return updated;
     }
-
-    const response = await api.patch<Mantenimiento>(`/mantenimientos/${id}/`, {
-      estado: status,
-    });
+    const response = await api.patch<Mantenimiento>(`/mantenimientos/${id}/`, { estado: status });
     return response.data;
   },
 
-  /**
-   * Updates the technical details of a specific maintenance visit
-   */
   updateVisitaMantenimiento: async (visitaId: number, data: {
     estado: 'programada' | 'completada' | 'cancelada' | 'reprogramada';
     diagnostico: string;
@@ -189,10 +168,30 @@ export const MantenimientoService = {
         }
         return m;
       });
-      return { success: true, message: 'Visita de mantenimiento actualizada exitosamente (Demo)' };
+      return { success: true };
     }
-
     const response = await api.patch(`/visitas-mantenimiento/${visitaId}/`, data);
+    return response.data;
+  },
+
+  subirFotoMantenimiento: async (visitaId: number, fotoUri: string): Promise<any> => {
+    if (useAuthStore.getState().isDemoMode) {
+      return { success: true };
+    }
+    const formData = new FormData();
+    const filename = fotoUri.split('/').pop() || 'foto.jpg';
+    const match = /\.(\w+)$/.exec(filename);
+    const ext = match ? match[1] : 'jpg';
+
+    formData.append('foto_mantenimiento', {
+      uri: fotoUri,
+      name: `mantenimiento_${visitaId}.${ext}`,
+      type: `image/${ext}`,
+    } as any);
+
+    const response = await api.patch(`/visitas-mantenimiento/${visitaId}/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return response.data;
   },
 };

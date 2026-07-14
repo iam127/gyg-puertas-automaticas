@@ -7,8 +7,10 @@ import {
   KeyboardAvoidingView, 
   Platform, 
   ScrollView, 
-  Alert 
+  Alert,
+  Image 
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../../types/navigation.types';
@@ -186,114 +188,139 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, rout
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header title="Registro de Técnico" onBack={() => navigation.goBack()} />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#1A1A1A', '#111111', '#0A0A0A']}
+        style={styles.gradientBackground}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.card}>
-            <Text style={styles.instructions}>
-              Complete sus datos para asociar su cuenta con el código de invitación validado:{' '}
-              <Text style={styles.codeText}>{codigo}</Text>
-            </Text>
+        {/* Círculos decorativos */}
+        <View style={styles.circleTop} />
+        <View style={styles.circleBottom} />
+        
+        <SafeAreaView style={styles.safeArea}>
+          <Header title="Registro de Técnico" onBack={() => navigation.goBack()} />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardView}
+          >
+            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+              {/* Logo */}
+              <View style={styles.logoContainer}>
+                <View style={styles.logoWrapper}>
+                  <Image 
+                    source={require('../../../assets/Logo-gyg.png')}
+                    style={styles.logoImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </View>
 
-            <Input
-              label="Nombre *"
-              placeholder="Ej. Juan"
-              value={firstName}
-              onChangeText={(text) => {
-                setFirstName(text);
-                setErrors({ ...errors, firstName: '' });
-              }}
-              error={errors.firstName}
-            />
+              {/* Formulario */}
+              <View style={styles.card}>
+                <Text style={styles.instructions}>
+                  Complete sus datos para asociar su cuenta con el código de invitación validado:{' '}
+                  <Text style={styles.codeText}>{codigo}</Text>
+                </Text>
 
-            <Input
-              label="Apellidos *"
-              placeholder="Ej. Pérez Gómez"
-              value={lastName}
-              onChangeText={(text) => {
-                setLastName(text);
-                setErrors({ ...errors, lastName: '' });
-              }}
-              error={errors.lastName}
-            />
+                <Input
+                  label="Nombre"
+                  placeholder="Ingrese su nombre"
+                  value={firstName}
+                  onChangeText={(text) => {
+                    setFirstName(text);
+                    setErrors({ ...errors, firstName: '' });
+                  }}
+                  error={errors.firstName}
+                />
 
-            <Input
-              label="Nombre de Usuario *"
-              placeholder="Ej. jperez"
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                setErrors({ ...errors, username: '' });
-              }}
-              error={errors.username}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+                <Input
+                  label="Apellidos"
+                  placeholder="Ingrese sus apellidos"
+                  value={lastName}
+                  onChangeText={(text) => {
+                    setLastName(text);
+                    setErrors({ ...errors, lastName: '' });
+                  }}
+                  error={errors.lastName}
+                />
 
-            <Input
-              label="Correo Electrónico *"
-              placeholder="Ej. juan.perez@gyg.com"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setErrors({ ...errors, email: '' });
-              }}
-              error={errors.email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+                <Input
+                  label="Nombre de Usuario"
+                  placeholder="Mínimo 4 caracteres"
+                  value={username}
+                  onChangeText={(text) => {
+                    setUsername(text);
+                    setErrors({ ...errors, username: '' });
+                  }}
+                  error={errors.username}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
 
-            <Input
-              label="Teléfono / Celular *"
-              placeholder="Ej. 987654321"
-              value={telefono}
-              onChangeText={(text) => {
-                setTelefono(text);
-                setErrors({ ...errors, telefono: '' });
-              }}
-              error={errors.telefono}
-              keyboardType="phone-pad"
-            />
+                <Input
+                  label="Correo Electrónico"
+                  placeholder="Ingrese su correo"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    setErrors({ ...errors, email: '' });
+                  }}
+                  error={errors.email}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
 
-            <Input
-              label="Contraseña *"
-              placeholder="Mínimo 6 caracteres"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setErrors({ ...errors, password: '' });
-              }}
-              error={errors.password}
-              secureTextEntry
-            />
+                <Input
+                  label="Teléfono / Celular"
+                  placeholder="Ingrese su teléfono"
+                  value={telefono}
+                  onChangeText={(text) => {
+                    setTelefono(text);
+                    setErrors({ ...errors, telefono: '' });
+                  }}
+                  error={errors.telefono}
+                  keyboardType="phone-pad"
+                />
 
-            <Input
-              label="Confirmar Contraseña *"
-              placeholder="Repita su contraseña"
-              value={confirmPassword}
-              onChangeText={(text) => {
-                setConfirmPassword(text);
-                setErrors({ ...errors, confirmPassword: '' });
-              }}
-              error={errors.confirmPassword}
-              secureTextEntry
-            />
+                <Input
+                  label="Contraseña"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setErrors({ ...errors, password: '' });
+                  }}
+                  error={errors.password}
+                  secureTextEntry
+                />
 
-            <Button
-              title="Registrar Cuenta"
-              onPress={handleRegister}
-              loading={isRegistering}
-              style={styles.btn}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+                <Input
+                  label="Confirmar Contraseña"
+                  placeholder="Repita su contraseña"
+                  value={confirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    setErrors({ ...errors, confirmPassword: '' });
+                  }}
+                  error={errors.confirmPassword}
+                  secureTextEntry
+                />
+
+                <Button
+                  title="Registrar Cuenta"
+                  onPress={handleRegister}
+                  loading={isRegistering}
+                  style={styles.btn}
+                />
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </LinearGradient>
+    </View>
   );
 };
 
@@ -302,35 +329,83 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BG_DARK,
   },
+  gradientBackground: {
+    flex: 1,
+    position: 'relative',
+  },
+  circleTop: {
+    position: 'absolute',
+    top: -100,
+    right: -80,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(250, 204, 21, 0.08)',
+    opacity: 0.6,
+  },
+  circleBottom: {
+    position: 'absolute',
+    bottom: -120,
+    left: -60,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: 'rgba(59, 130, 246, 0.06)',
+    opacity: 0.5,
+  },
+  safeArea: {
+    flex: 1,
+  },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: LAYOUT.spacing.md,
+    padding: LAYOUT.spacing.lg,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: LAYOUT.spacing.xl,
+    marginTop: LAYOUT.spacing.md,
+  },
+  logoWrapper: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingHorizontal: LAYOUT.spacing.xl,
+    paddingVertical: LAYOUT.spacing.md,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(250, 204, 21, 0.15)',
+    ...LAYOUT.shadows.md,
+  },
+  logoImage: {
+    width: 200,
+    height: 55,
   },
   card: {
-    backgroundColor: COLORS.CARD_DARK,
-    padding: LAYOUT.spacing.lg,
-    borderRadius: LAYOUT.borderRadius.xl,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: LAYOUT.spacing.xl,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: COLORS.BORDER_DARK,
-    ...LAYOUT.shadows.md,
-    marginBottom: LAYOUT.spacing.lg,
+    borderColor: 'rgba(250, 204, 21, 0.2)',
+    ...LAYOUT.shadows.lg,
+    marginBottom: LAYOUT.spacing.xxl,
   },
   instructions: {
-    fontSize: LAYOUT.typography.sizes.body,
+    fontSize: 14,
     color: COLORS.TEXT_SECONDARY,
-    lineHeight: LAYOUT.typography.lineHeights.body,
+    lineHeight: 22,
     marginBottom: LAYOUT.spacing.lg,
     fontFamily: 'System',
+    fontWeight: '400',
   },
   codeText: {
     color: COLORS.PRIMARY_GOLD,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   btn: {
     marginTop: LAYOUT.spacing.lg,
+    ...LAYOUT.shadows.sm,
   },
 });
 

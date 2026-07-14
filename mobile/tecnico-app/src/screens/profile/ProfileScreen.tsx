@@ -109,7 +109,7 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.profileUsername}>@{tecnico?.usuario.username}</Text>
           <View style={styles.activeBadge}>
             <View style={styles.activeDot} />
-            <Text style={styles.activeText}>Técnico Homologado</Text>
+            <Text style={styles.activeText}>Técnico GyG</Text>
           </View>
         </View>
 

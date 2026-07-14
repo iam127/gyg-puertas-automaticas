@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 import Card from '../common/Card';
 import Badge from '../common/Badge';
 
@@ -12,49 +12,57 @@ interface AssignmentCardProps {
 }
 
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({ item, type, onPress }) => {
-  // Common details extracted
-  const code = item.codigo;
-  const clientName = item.nombre_cliente;
-  const district = item.distrito;
-  const status = item.estado;
-  
-  // Specifics
-  const subtitle = type === 'mantenimiento' 
-    ? `Puerta: ${item.tipo_puerta || 'General'} (${item.tipo || 'mantenimiento'})`
-    : `Uso: ${item.tipo_uso || 'Residencial'}`;
-
-  // Get scheduled date from the first visit if available
-  const visit = item.visitas && item.visitas.length > 0 ? item.visitas[0] : null;
-  const dateStr = visit ? `${visit.fecha} a las ${visit.hora}` : 'Sin fecha agendada';
+  const isMant = type === 'mantenimiento';
+  const visit = item.visitas?.[0] ?? null;
+  const dateStr = visit ? `${visit.fecha}  ${visit.hora}` : 'Sin fecha agendada';
+  const subtitle = isMant
+    ? `${item.tipo_puerta || 'General'} · ${item.tipo || 'Mantenimiento'}`
+    : `Uso ${item.tipo_uso || 'Residencial'}`;
 
   return (
-    <TouchableOpacity 
-      onPress={onPress} 
-      activeOpacity={0.85}
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.78}
       accessibilityRole="button"
-      accessibilityLabel={`Servicio ${code} para ${clientName}. ${subtitle}. Estado: ${status}. Fecha: ${dateStr}`}
+      accessibilityLabel={`Servicio ${item.codigo} para ${item.nombre_cliente}. Estado: ${item.estado}`}
     >
-      <Card style={styles.cardContainer} hasBorder>
-        <View style={styles.headerRow}>
-          <Text style={styles.codeText}>{code}</Text>
-          <Badge status={status} type={type} />
-        </View>
-
-        <Text style={styles.clientText}>{clientName}</Text>
-        <Text style={styles.subtitleText}>{subtitle}</Text>
-        
-        <View style={styles.divider} />
-
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Ubicación:</Text>
-          <Text style={styles.infoValue} numberOfLines={1}>
-            {district} - {item.direccion}
+      <Card style={styles.card} hasBorder>
+        {/* Franja de color por tipo */}
+        <View style={[styles.typeStripe, { backgroundColor: isMant ? COLORS.PREVENTIVE_BLUE_BG : COLORS.CORRECTIVE_ORANGE_BG }]}>
+          <MaterialIcons
+            name={isMant ? 'build' : 'straighten'}
+            size={13}
+            color={isMant ? COLORS.PREVENTIVE_BLUE : COLORS.CORRECTIVE_ORANGE}
+          />
+          <Text style={[styles.typeLabel, { color: isMant ? COLORS.PREVENTIVE_BLUE : COLORS.CORRECTIVE_ORANGE }]}>
+            {isMant ? 'MANTENIMIENTO' : 'VISITA TÉCNICA'}
           </Text>
         </View>
 
+        {/* Header: código + badge */}
+        <View style={styles.headerRow}>
+          <Text style={styles.codeText}>{item.codigo}</Text>
+          <Badge status={item.estado} type={type} />
+        </View>
+
+        {/* Cliente */}
+        <Text style={styles.clientText}>{item.nombre_cliente}</Text>
+        <Text style={styles.subtitleText}>{subtitle}</Text>
+
+        <View style={styles.divider} />
+
+        {/* Ubicación */}
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Programado:</Text>
-          <Text style={styles.infoValue}>📅 {dateStr}</Text>
+          <MaterialIcons name="location-on" size={14} color={COLORS.TEXT_TERTIARY} />
+          <Text style={styles.infoValue} numberOfLines={1}>
+            {item.distrito} — {item.direccion}
+          </Text>
+        </View>
+
+        {/* Fecha */}
+        <View style={styles.infoRow}>
+          <MaterialIcons name="event" size={14} color={COLORS.PRIMARY_GOLD} />
+          <Text style={[styles.infoValue, styles.dateValue]}>{dateStr}</Text>
         </View>
       </Card>
     </TouchableOpacity>
@@ -62,57 +70,80 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ item, type, onPr
 };
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    marginVertical: LAYOUT.spacing.sm,
-    padding: LAYOUT.spacing.md,
+  card: {
+    marginVertical: 5,
+    padding: 0,
+    overflow: 'hidden',
+  },
+  typeStripe: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  typeLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    fontFamily: 'System',
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: LAYOUT.spacing.sm,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    marginBottom: 6,
   },
   codeText: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.TEXT_PRIMARY,
     fontFamily: 'System',
+    letterSpacing: 0.3,
   },
   clientText: {
-    fontSize: LAYOUT.typography.sizes.h3,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '700',
     color: COLORS.TEXT_PRIMARY,
-    marginBottom: LAYOUT.spacing.xs,
+    paddingHorizontal: 14,
+    marginBottom: 2,
     fontFamily: 'System',
   },
   subtitleText: {
-    fontSize: LAYOUT.typography.sizes.small,
+    fontSize: 12,
     color: COLORS.TEXT_SECONDARY,
-    marginBottom: LAYOUT.spacing.md,
+    paddingHorizontal: 14,
+    marginBottom: 10,
     fontFamily: 'System',
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.BORDER_DARK,
-    marginVertical: LAYOUT.spacing.sm,
+    backgroundColor: COLORS.BORDER_SUBTLE,
+    marginHorizontal: 14,
+    marginBottom: 10,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: LAYOUT.spacing.xs,
-  },
-  infoLabel: {
-    width: 90,
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-    fontWeight: '600',
+    gap: 6,
+    paddingHorizontal: 14,
+    marginBottom: 7,
   },
   infoValue: {
     flex: 1,
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_PRIMARY,
+    fontSize: 12,
+    color: COLORS.TEXT_SECONDARY,
     fontFamily: 'System',
+    fontWeight: '500',
+  },
+  dateValue: {
+    color: COLORS.PRIMARY_GOLD_DARK,
+    fontWeight: '600',
   },
 });
 

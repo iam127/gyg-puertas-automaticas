@@ -1,64 +1,34 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 
 interface EmptyStateProps {
   title?: string;
   message: string;
-  icon?: string;
+  iconName?: keyof typeof MaterialIcons.glyphMap;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ 
-  title = 'Sin resultados', 
-  message,
-}) => {
-  return (
-    <View style={styles.container} accessibilityRole="summary">
-      <View style={styles.iconContainer}>
-        <Text style={styles.iconText}>🔍</Text>
-      </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{message}</Text>
+export const EmptyState: React.FC<EmptyStateProps> = ({ title = 'Sin resultados', message, iconName = 'inbox' }) => (
+  <View style={styles.container} accessibilityRole="summary">
+    <View style={styles.iconContainer}>
+      <MaterialIcons name={iconName} size={28} color={COLORS.PRIMARY_GOLD} />
     </View>
-  );
-};
+    <Text style={styles.title}>{title}</Text>
+    <Text style={styles.message}>{message}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
-  container: {
-    padding: LAYOUT.spacing.xl,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
+  container: { paddingVertical: 48, paddingHorizontal: 32, justifyContent: 'center', alignItems: 'center' },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: LAYOUT.borderRadius.round,
-    backgroundColor: COLORS.CARD_DARK,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.md,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER_DARK,
+    width: 64, height: 64, borderRadius: 20,
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 20,
   },
-  iconText: {
-    fontSize: 28,
-  },
-  title: {
-    fontSize: LAYOUT.typography.sizes.h3,
-    color: COLORS.TEXT_PRIMARY,
-    fontWeight: 'bold',
-    marginBottom: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-  },
-  message: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    textAlign: 'center',
-    lineHeight: LAYOUT.typography.lineHeights.body,
-    fontFamily: 'System',
-  },
+  title: { fontSize: 17, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 8, fontFamily: 'System', textAlign: 'center' },
+  message: { fontSize: 14, color: COLORS.TEXT_SECONDARY, textAlign: 'center', lineHeight: 21, fontFamily: 'System' },
 });
 
 export default EmptyState;

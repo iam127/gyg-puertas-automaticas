@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  SectionList, 
-  StyleSheet, 
-  SafeAreaView, 
-  TouchableOpacity, 
-  RefreshControl, 
-  Alert 
-} from 'react-native';
+import { View, Text, SectionList, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 import MantenimientoService from '../../api/mantenimientos';
 import CotizacionService from '../../api/cotizaciones';
 import Card from '../../components/common/Card';
@@ -20,27 +11,14 @@ import EmptyState from '../../components/common/EmptyState';
 import Header from '../../components/common/Header';
 
 interface HistoryItem {
-  id: number;
-  codigo: string;
-  nombre_cliente: string;
-  direccion: string;
-  distrito: string;
-  estado: string;
-  tipo_puerta?: string;
-  tipo_uso?: string;
-  taskType: 'mantenimiento' | 'cotizacion';
-  fechaCompleted: string; // YYYY-MM-DD
+  id: number; codigo: string; nombre_cliente: string;
+  direccion: string; distrito: string; estado: string;
+  tipo_puerta?: string; tipo_uso?: string;
+  taskType: 'mantenimiento' | 'cotizacion'; fechaCompleted: string;
 }
+interface SectionData { title: string; data: HistoryItem[]; }
 
-interface SectionData {
-  title: string; // e.g. "Mayo 2026"
-  data: HistoryItem[];
-}
-
-const MONTHS_ES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 export const HistoryScreen: React.FC<any> = ({ navigation }) => {
   const { tecnico } = useAuthStore();
@@ -51,89 +29,38 @@ export const HistoryScreen: React.FC<any> = ({ navigation }) => {
 
   const fetchHistory = async () => {
     if (!tecnico) return;
-
     try {
       const [mantenimientos, cotizaciones] = await Promise.all([
         MantenimientoService.getMyMantenimientos(tecnico.id),
         CotizacionService.getMyCotizaciones(tecnico.id),
       ]);
-
-      // Filter only finished tickets
-      const completedMants: HistoryItem[] = mantenimientos
-        .filter((m) => m.estado === 'resuelto')
-        .map((m) => {
-          const visit = m.visitas && m.visitas.length > 0 ? m.visitas[0] : null;
-          return {
-            id: m.id,
-            codigo: m.codigo,
-            nombre_cliente: m.nombre_cliente,
-            direccion: m.direccion,
-            distrito: m.distrito,
-            estado: m.estado,
-            tipo_puerta: m.tipo_puerta,
-            taskType: 'mantenimiento',
-            fechaCompleted: visit?.fecha || m.actualizado_en?.split('T')[0] || '2026-05-01',
-          };
-        });
-
-      const completedQuotes: HistoryItem[] = cotizaciones
-        .filter((c) => c.estado === 'completado')
-        .map((c) => {
-          const visit = c.visitas && c.visitas.length > 0 ? c.visitas[0] : null;
-          return {
-            id: c.id,
-            codigo: c.codigo,
-            nombre_cliente: c.nombre_cliente,
-            direccion: c.direccion,
-            distrito: c.distrito,
-            estado: c.estado,
-            tipo_uso: c.tipo_uso,
-            taskType: 'cotizacion',
-            fechaCompleted: visit?.fecha || c.actualizado_en?.split('T')[0] || '2026-05-01',
-          };
-        });
-
+      const completedMants: HistoryItem[] = mantenimientos.filter(m => m.estado === 'resuelto').map(m => ({
+        id: m.id, codigo: m.codigo, nombre_cliente: m.nombre_cliente, direccion: m.direccion,
+        distrito: m.distrito, estado: m.estado, tipo_puerta: m.tipo_puerta, taskType: 'mantenimiento',
+        fechaCompleted: m.visitas?.[0]?.fecha ?? m.actualizado_en?.split('T')[0] ?? '2026-05-01',
+      }));
+      const completedQuotes: HistoryItem[] = cotizaciones.filter(c => c.estado === 'completado').map(c => ({
+        id: c.id, codigo: c.codigo, nombre_cliente: c.nombre_cliente, direccion: c.direccion,
+        distrito: c.distrito, estado: c.estado, tipo_uso: c.tipo_uso, taskType: 'cotizacion',
+        fechaCompleted: c.visitas?.[0]?.fecha ?? c.actualizado_en?.split('T')[0] ?? '2026-05-01',
+      }));
       const allCompleted = [...completedMants, ...completedQuotes];
       setTotalCompleted(allCompleted.length);
-
-      // Group by Month Year
       const groups: Record<string, HistoryItem[]> = {};
-      
-      allCompleted.forEach((item) => {
-        const parts = item.fechaCompleted.split('-'); // [YYYY, MM, DD]
+      allCompleted.forEach(item => {
+        const parts = item.fechaCompleted.split('-');
         if (parts.length >= 2) {
-          const year = parts[0];
-          const monthIndex = parseInt(parts[1], 10) - 1;
-          const monthName = MONTHS_ES[monthIndex] || 'General';
-          const groupKey = `${monthName} ${year}`;
-          
-          if (!groups[groupKey]) {
-            groups[groupKey] = [];
-          }
-          groups[groupKey].push(item);
+          const key = `${MONTHS_ES[parseInt(parts[1], 10) - 1] ?? 'General'} ${parts[0]}`;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(item);
         }
       });
-
-      // Sort items inside groups by date descending, and sort groups chronologically descending
-      const formattedSections = Object.keys(groups)
-        .map((key) => {
-          // Sort items by date descending
-          const sortedData = groups[key].sort((a, b) => b.fechaCompleted.localeCompare(a.fechaCompleted));
-          return {
-            title: key,
-            data: sortedData,
-          };
-        })
-        .sort((a, b) => {
-          // Compare group titles (we can extract month/year or compare first item dates)
-          const dateA = a.data[0]?.fechaCompleted || '';
-          const dateB = b.data[0]?.fechaCompleted || '';
-          return dateB.localeCompare(dateA);
-        });
-
-      setSections(formattedSections);
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo cargar el historial de trabajos.');
+      setSections(Object.keys(groups).map(key => ({
+        title: key,
+        data: groups[key].sort((a, b) => b.fechaCompleted.localeCompare(a.fechaCompleted)),
+      })).sort((a, b) => (b.data[0]?.fechaCompleted ?? '').localeCompare(a.data[0]?.fechaCompleted ?? '')));
+    } catch {
+      Alert.alert('Error', 'No se pudo cargar el historial.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -142,205 +69,134 @@ export const HistoryScreen: React.FC<any> = ({ navigation }) => {
 
   useEffect(() => {
     fetchHistory();
-    // Refresh history when focus returns
-    const unsubscribe = navigation.addListener('focus', () => {
-      fetchHistory();
-    });
+    const unsubscribe = navigation.addListener('focus', fetchHistory);
     return unsubscribe;
   }, [tecnico]);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchHistory();
-  }, [tecnico]);
+  const onRefresh = useCallback(() => { setRefreshing(true); fetchHistory(); }, [tecnico]);
 
   const renderSectionHeader = ({ section: { title } }: { section: SectionData }) => (
-    <View style={styles.sectionHeaderContainer}>
-      <Text style={styles.sectionHeaderText}>{title}</Text>
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionPill}>
+        <MaterialIcons name="calendar-today" size={11} color={COLORS.PRIMARY_GOLD_DARK} style={{ marginRight: 5 }} />
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
     </View>
   );
 
-  const renderItem = ({ item }: { item: HistoryItem }) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('AssignmentsTab', {
-        screen: 'AssignmentDetail',
-        params: { id: item.id, type: item.taskType }
-      })}
-      activeOpacity={0.8}
-      accessibilityRole="button"
-      accessibilityLabel={`Trabajo resuelto ${item.codigo} para ${item.nombre_cliente}`}
-    >
-      <Card style={styles.itemCard} hasBorder>
-        <View style={styles.itemHeader}>
+  const renderItem = ({ item }: { item: HistoryItem }) => {
+    const isMant = item.taskType === 'mantenimiento';
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('AssignmentsTab', { screen: 'AssignmentDetail', params: { id: item.id, type: item.taskType } })}
+        activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel={`Trabajo ${item.codigo} para ${item.nombre_cliente}`}
+      >
+        <Card style={styles.itemCard} hasBorder>
+          <View style={styles.itemTop}>
+            <View style={styles.typeBadge}>
+              <View style={[styles.typeDot, { backgroundColor: isMant ? COLORS.PREVENTIVE_BLUE : COLORS.CORRECTIVE_ORANGE }]} />
+              <Text style={[styles.typeText, { color: isMant ? COLORS.PREVENTIVE_BLUE : COLORS.CORRECTIVE_ORANGE }]}>
+                {isMant ? 'Mantenimiento' : 'Visita técnica'}
+              </Text>
+            </View>
+            <View style={styles.completedBadge}>
+              <MaterialIcons name="check-circle" size={12} color={COLORS.SUCCESS} />
+              <Text style={styles.completedText}>Completado</Text>
+            </View>
+          </View>
+          <Text style={styles.clientName}>{item.nombre_cliente}</Text>
           <Text style={styles.itemCode}>{item.codigo}</Text>
-          <Text style={styles.itemBadge}>✅ Completado</Text>
-        </View>
-        
-        <Text style={styles.itemClient}>{item.nombre_cliente}</Text>
-        <Text style={styles.itemSubText}>
-          {item.taskType === 'mantenimiento' 
-            ? `🔧 Mantenimiento: ${item.tipo_puerta || 'General'}` 
-            : `📐 Visita Técnica: Uso ${item.tipo_uso || 'Residencial'}`}
-        </Text>
-        
-        <View style={styles.itemFooter}>
-          <Text style={styles.itemAddress}>📍 {item.distrito}</Text>
-          <Text style={styles.itemDate}>📅 {item.fechaCompleted}</Text>
-        </View>
-      </Card>
-    </TouchableOpacity>
-  );
+          <Text style={styles.itemSub}>{isMant ? item.tipo_puerta ?? 'General' : `Uso ${item.tipo_uso ?? 'Residencial'}`}</Text>
+          <View style={styles.itemFooter}>
+            <View style={styles.metaChip}>
+              <MaterialIcons name="location-on" size={12} color={COLORS.TEXT_TERTIARY} />
+              <Text style={styles.metaText}>{item.distrito}</Text>
+            </View>
+            <View style={styles.metaChip}>
+              <MaterialIcons name="event" size={12} color={COLORS.PRIMARY_GOLD} />
+              <Text style={[styles.metaText, styles.metaGold]}>{item.fechaCompleted}</Text>
+            </View>
+          </View>
+        </Card>
+      </TouchableOpacity>
+    );
+  };
 
-  if (loading) {
-    return <Loader message="Cargando historial de trabajos..." />;
-  }
+  if (loading) return <Loader message="Cargando historial de trabajos..." />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header title="Historial Técnico" />
-      
-      {/* Summary Stat Card */}
-      <View style={styles.summarySection}>
-        <Card style={styles.summaryCard} hasBorder>
-          <Text style={styles.summaryEmoji}>📜</Text>
-          <View style={styles.summaryStats}>
-            <Text style={styles.summaryLabel}>Total Servicios Realizados</Text>
-            <Text style={styles.summaryCount}>{totalCompleted} Trabajos</Text>
+    <SafeAreaView style={styles.root}>
+      <Header title="Historial técnico" />
+
+      <View style={styles.statSection}>
+        <Card variant="gold" style={styles.statCard}>
+          <View style={styles.statIconWrap}>
+            <MaterialIcons name="history" size={22} color={COLORS.PRIMARY_GOLD_DARK} />
           </View>
+          <View style={styles.statBody}>
+            <Text style={styles.statLabel}>Servicios realizados</Text>
+            <Text style={styles.statCount}>{totalCompleted}</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={COLORS.TEXT_MUTED} />
         </Card>
       </View>
 
-      {/* Sections list */}
       <SectionList
         sections={sections}
-        keyExtractor={(item) => `${item.taskType}-${item.id}`}
+        keyExtractor={item => `${item.taskType}-${item.id}`}
         renderItem={renderItem}
         renderSectionHeader={renderSectionHeader}
         contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={COLORS.PRIMARY_GOLD}
-            colors={[COLORS.PRIMARY_GOLD]}
-          />
-        }
-        ListEmptyComponent={
-          <EmptyState
-            title="Sin historial"
-            message="Aún no registra servicios completados en el sistema."
-          />
-        }
+        stickySectionHeadersEnabled={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.PRIMARY_GOLD} colors={[COLORS.PRIMARY_GOLD]} />}
+        ListEmptyComponent={<EmptyState title="Sin historial" message="Aún no registra servicios completados en el sistema." iconName="history" />}
       />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BG_DARK,
+  root: { flex: 1, backgroundColor: COLORS.BG_BASE },
+
+  statSection: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 },
+  statCard: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderColor: COLORS.BORDER_GOLD, gap: 14 },
+  statIconWrap: {
+    width: 44, height: 44, borderRadius: 12,
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD,
+    justifyContent: 'center', alignItems: 'center',
   },
-  summarySection: {
-    paddingHorizontal: LAYOUT.spacing.md,
-    marginTop: LAYOUT.spacing.sm,
+  statBody: { flex: 1 },
+  statLabel: { fontSize: 12, color: COLORS.TEXT_SECONDARY, fontWeight: '500', marginBottom: 2 },
+  statCount: { fontSize: 26, fontWeight: '800', color: COLORS.PRIMARY_GOLD_DARK, lineHeight: 30 },
+
+  sectionHeader: { paddingHorizontal: 16, paddingTop: 18, paddingBottom: 6 },
+  sectionPill: {
+    flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start',
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5,
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD,
   },
-  summaryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: LAYOUT.spacing.md,
-    borderColor: COLORS.PRIMARY_GOLD,
-    borderWidth: 1,
-  },
-  summaryEmoji: {
-    fontSize: 32,
-    marginRight: LAYOUT.spacing.md,
-  },
-  summaryStats: {
-    flex: 1,
-  },
-  summaryLabel: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-    fontWeight: '600',
-  },
-  summaryCount: {
-    fontSize: LAYOUT.typography.sizes.h2,
-    fontWeight: '900',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-  },
-  sectionHeaderContainer: {
-    backgroundColor: COLORS.BG_DARK,
-    paddingVertical: LAYOUT.spacing.sm,
-    paddingHorizontal: LAYOUT.spacing.md,
-  },
-  sectionHeaderText: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-  },
-  listContent: {
-    paddingHorizontal: LAYOUT.spacing.md,
-    paddingBottom: LAYOUT.spacing.lg,
-    flexGrow: 1,
-  },
-  itemCard: {
-    padding: LAYOUT.spacing.md,
-    marginVertical: LAYOUT.spacing.xs,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.xs,
-  },
-  itemCode: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    fontFamily: 'System',
-  },
-  itemBadge: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.WARRANTY_GREEN,
-    fontFamily: 'System',
-  },
-  itemClient: {
-    fontSize: LAYOUT.typography.sizes.h3,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-  },
-  itemSubText: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    marginBottom: LAYOUT.spacing.md,
-    fontFamily: 'System',
-  },
-  itemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER_DARK,
-    paddingTop: LAYOUT.spacing.sm,
-  },
-  itemAddress: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-  },
-  itemDate: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-    fontWeight: 'bold',
-  },
+  sectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.PRIMARY_GOLD_DARK, letterSpacing: 0.3 },
+
+  listContent: { paddingHorizontal: 16, paddingBottom: 32, flexGrow: 1 },
+
+  itemCard: { padding: 14, marginVertical: 4 },
+  itemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  typeBadge: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  typeDot: { width: 6, height: 6, borderRadius: 3 },
+  typeText: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.3 },
+  completedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.SUCCESS_BG, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  completedText: { fontSize: 11, fontWeight: '700', color: COLORS.SUCCESS },
+  clientName: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 2 },
+  itemCode: { fontSize: 12, color: COLORS.TEXT_TERTIARY, fontWeight: '500', marginBottom: 4, letterSpacing: 0.5 },
+  itemSub: { fontSize: 13, color: COLORS.TEXT_SECONDARY, marginBottom: 10 },
+  itemFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: COLORS.BORDER_SUBTLE, paddingTop: 10 },
+  metaChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { fontSize: 12, color: COLORS.TEXT_TERTIARY, fontWeight: '500' },
+  metaGold: { color: COLORS.PRIMARY_GOLD_DARK },
 });
 
 export default HistoryScreen;

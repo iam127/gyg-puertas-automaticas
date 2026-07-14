@@ -1,94 +1,52 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 
 interface HeaderProps {
   title: string;
+  subtitle?: string;
   onBack?: () => void;
   rightComponent?: React.ReactNode;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, onBack, rightComponent }) => {
+export const Header: React.FC<HeaderProps> = ({ title, subtitle, onBack, rightComponent }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.leftContainer}>
-          {onBack ? (
-            <TouchableOpacity 
-              onPress={onBack} 
-              style={styles.backButton}
-              accessibilityRole="button"
-              accessibilityLabel="Regresar"
-            >
-              <Text style={styles.backArrow}>←</Text>
+        <View style={styles.leftSlot}>
+          {onBack && (
+            <TouchableOpacity onPress={onBack} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Regresar" activeOpacity={0.75}>
+              <MaterialIcons name="arrow-back" size={20} color={COLORS.PRIMARY_GOLD_DARK} />
             </TouchableOpacity>
-          ) : null}
+          )}
         </View>
-        
-        <View style={styles.titleContainer}>
-          <Text style={styles.title} numberOfLines={1}>
-            {title}
-          </Text>
+        <View style={styles.center}>
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          {subtitle && <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>}
         </View>
-        
-        <View style={styles.rightContainer}>
-          {rightComponent || null}
-        </View>
+        <View style={styles.rightSlot}>{rightComponent ?? null}</View>
       </View>
+      <View style={styles.accent} />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: COLORS.BG_DARK,
+  safeArea: { backgroundColor: COLORS.BG_SURFACE },
+  container: { height: 58, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 },
+  leftSlot:  { width: 44, alignItems: 'flex-start', justifyContent: 'center' },
+  rightSlot: { width: 44, alignItems: 'flex-end',   justifyContent: 'center' },
+  center:    { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, letterSpacing: 0.2, fontFamily: 'System', textAlign: 'center' },
+  subtitle: { fontSize: 11, color: COLORS.TEXT_TERTIARY, marginTop: 1, fontFamily: 'System', textAlign: 'center' },
+  backBtn: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: COLORS.BG_ELEVATED,
+    borderWidth: 1, borderColor: COLORS.BORDER_DARK,
+    justifyContent: 'center', alignItems: 'center',
   },
-  container: {
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: LAYOUT.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER_DARK,
-    backgroundColor: COLORS.BG_DARK,
-  },
-  leftContainer: {
-    width: 40,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  titleContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rightContainer: {
-    width: 40,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: LAYOUT.typography.sizes.h3,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    fontFamily: 'System',
-    textAlign: 'center',
-  },
-  backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: LAYOUT.borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.CARD_DARK,
-  },
-  backArrow: {
-    fontSize: 20,
-    color: COLORS.PRIMARY_GOLD,
-    fontWeight: 'bold',
-  },
+  accent: { height: 1, backgroundColor: COLORS.BORDER_SUBTLE },
 });
 
 export default Header;

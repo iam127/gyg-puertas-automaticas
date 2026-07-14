@@ -1,42 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  StyleSheet, 
-  SafeAreaView, 
-  TouchableOpacity, 
-  Alert 
+import {
+  View, Text, ScrollView, StyleSheet, SafeAreaView,
+  TouchableOpacity, Alert, Image, ActivityIndicator,
+  StatusBar as RNStatusBar,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '../../store/authStore';
 import COLORS from '../../constants/colors';
-import LAYOUT from '../../constants/layout';
 import MantenimientoService from '../../api/mantenimientos';
 import CotizacionService from '../../api/cotizaciones';
 import NativeLinking from '../../services/linking';
 import Header from '../../components/common/Header';
 import Loader from '../../components/common/Loader';
-import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
 import StatusBar from '../../components/common/StatusBar';
+import api from '../../api/config';
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+const SectionCard: React.FC<{ title: string; iconName: React.ComponentProps<typeof MaterialIcons>['name']; children: React.ReactNode }> = ({ title, iconName, children }) => (
+  <View style={styles.card}>
+    <View style={styles.cardHeader}>
+      <View style={styles.cardIconWrap}>
+        <MaterialIcons name={iconName} size={16} color={COLORS.PRIMARY_GOLD_DARK} />
+      </View>
+      <Text style={styles.cardTitle}>{title}</Text>
+    </View>
+    {children}
+  </View>
+);
+
+const InfoRow: React.FC<{ icon: React.ComponentProps<typeof MaterialIcons>['name']; iconColor?: string; text: string }> = ({ icon, iconColor = COLORS.TEXT_TERTIARY, text }) => (
+  <View style={styles.infoRow}>
+    <MaterialIcons name={icon} size={16} color={iconColor} />
+    <Text style={styles.infoText}>{text}</Text>
+  </View>
+);
+
+const SpecRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <View style={styles.specRow}>
+    <Text style={styles.specLabel}>{label}</Text>
+    <Text style={styles.specValue}>{value}</Text>
+  </View>
+);
+
+// ── Componente principal ──────────────────────────────────────────────────────
 
 export const AssignmentDetailScreen: React.FC<any> = ({ route, navigation }) => {
   const { id, type } = route.params;
-  const { tecnico } = useAuthStore();
-  const [loading, setLoading] = useState(true);
-  const [item, setItem] = useState<any>(null);
+  const { tecnico }  = useAuthStore();
+  const [loading, setLoading]                   = useState(true);
+  const [item, setItem]                         = useState<any>(null);
+  const [subiendoFoto, setSubiendoFoto]         = useState(false);
+  const [fotoSeleccionada, setFotoSeleccionada] = useState<string | null>(null);
 
   const fetchDetail = async () => {
     try {
-      if (type === 'mantenimiento') {
-        const res = await MantenimientoService.getMantenimientoDetail(id);
-        setItem(res);
-      } else {
-        const res = await CotizacionService.getCotizacionDetail(id);
-        setItem(res);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'No se pudieron recuperar los detalles de la asignación.');
+      const res = type === 'mantenimiento'
+        ? await MantenimientoService.getMantenimientoDetail(id)
+        : await CotizacionService.getCotizacionDetail(id);
+      setItem(res);
+    } catch {
+      Alert.alert('Error', 'No se pudieron recuperar los detalles.');
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -45,465 +71,533 @@ export const AssignmentDetailScreen: React.FC<any> = ({ route, navigation }) => 
 
   useEffect(() => {
     fetchDetail();
-    
-    // Add listener to refresh detail when coming back from UpdateStatus
-    const unsubscribe = navigation.addListener('focus', () => {
-      fetchDetail();
-    });
-    return unsubscribe;
+    const unsub = navigation.addListener('focus', fetchDetail);
+    return unsub;
   }, [id, type]);
 
-  if (loading) {
-    return <Loader message="Cargando expediente técnico..." />;
-  }
+  if (loading) return <Loader message="Cargando expediente técnico..." />;
+  if (!item)   return null;
 
-  if (!item) return null;
-
-  // Determine timeline configuration
+  // ── Timeline ────────────────────────────────────────────────────────────────
   let timelineSteps: string[] = [];
   let currentStepIndex = 0;
 
   if (type === 'mantenimiento') {
-    timelineSteps = ['Recibido', 'Agendado', 'En Proceso', 'Resuelto'];
-    const status = item.estado;
-    if (status === 'recibido') currentStepIndex = 0;
-    else if (status === 'visita_agendada') currentStepIndex = 1;
-    else if (
-      status === 'en_proceso' || 
-      status === 'en_revision' || 
-      status === 'diagnostico_remoto' || 
-      status === 'esperando_repuestos'
-    ) currentStepIndex = 2;
-    else if (status === 'resuelto') currentStepIndex = 3;
+    timelineSteps = ['Recibido', 'Agendado', 'En proceso', 'Resuelto'];
+    const s = item.estado;
+    if (s === 'recibido') currentStepIndex = 0;
+    else if (s === 'visita_agendada') currentStepIndex = 1;
+    else if (['en_proceso','en_revision','diagnostico_remoto','esperando_repuestos'].includes(s)) currentStepIndex = 2;
+    else if (s === 'resuelto') currentStepIndex = 3;
   } else {
-    timelineSteps = ['Recibido', 'Agendado', 'Instalación', 'Completado'];
-    const status = item.estado;
-    if (status === 'recibido' || status === 'en_revision') currentStepIndex = 0;
-    else if (status === 'visita_agendada' || status === 'cotizado' || status === 'aceptado') currentStepIndex = 1;
-    else if (status === 'instalacion_agendada' || status === 'en_instalacion') currentStepIndex = 2;
-    else if (status === 'completado') currentStepIndex = 3;
+    timelineSteps = ['Agendado', 'Medidas', 'Instalación', 'Completado'];
+    const s = item.estado;
+    if (s === 'visita_agendada') currentStepIndex = 0;
+    else if (['cotizado','aceptado'].includes(s)) currentStepIndex = 1;
+    else if (['instalacion_agendada','en_instalacion'].includes(s)) currentStepIndex = 2;
+    else if (s === 'completado') currentStepIndex = 3;
   }
 
-  // Quick Action triggers
-  const activeVisit = item.visitas && item.visitas.length > 0 ? item.visitas[0] : null;
-  const isCompleted = type === 'mantenimiento' 
-    ? item.estado === 'resuelto' || item.estado === 'cancelado'
-    : item.estado === 'completado' || item.estado === 'cancelado' || item.estado === 'rechazado';
+  const activeVisit = item.visitas?.[0] ?? null;
+  const isCompleted = type === 'mantenimiento'
+    ? ['resuelto','cancelado'].includes(item.estado)
+    : ['completado','cancelado','rechazado'].includes(item.estado);
 
+  const puedeSubirFotoCotizacion  = type === 'cotizacion' && ['instalacion_agendada','en_instalacion'].includes(item.estado);
+  const puedeSubirFotoMantenimiento = type === 'mantenimiento' && item.estado === 'en_proceso' && activeVisit;
+  const puedeActualizar = !isCompleted && activeVisit;
+
+  // ── Acciones ─────────────────────────────────────────────────────────────────
   const handleCall = () => {
-    if (item.telefono) {
-      NativeLinking.callPhone(item.telefono);
-    } else {
-      Alert.alert('Info', 'El cliente no tiene teléfono registrado.');
-    }
+    if (item.telefono) NativeLinking.callPhone(item.telefono);
+    else Alert.alert('Sin teléfono', 'El cliente no tiene teléfono registrado.');
   };
-
   const handleWhatsApp = () => {
-    if (item.telefono) {
-      const technicianName = tecnico?.usuario.first_name || 'Técnico';
-      const template = `Hola ${item.nombre_cliente}, le saluda ${technicianName} de GyG Puertas Automáticas. Estoy a cargo de su atención programada con código ${item.codigo}. Por favor, confírmeme si se encuentra en casa o local para proceder con la visita técnica.`;
-      NativeLinking.openWhatsApp(item.telefono, template);
-    } else {
-      Alert.alert('Info', 'El cliente no tiene teléfono registrado.');
-    }
+    if (!item.telefono) { Alert.alert('Sin teléfono', 'El cliente no tiene teléfono registrado.'); return; }
+    const name = tecnico?.usuario.first_name || 'Técnico';
+    const msg  = `Hola ${item.nombre_cliente}, le saluda ${name} de GyG Puertas Automáticas. Estoy a cargo de su atención con código ${item.codigo}. Por favor, confírmeme si se encuentra disponible para proceder con la visita.`;
+    NativeLinking.openWhatsApp(item.telefono, msg);
   };
-
   const handleMaps = () => {
-    if (item.direccion) {
-      NativeLinking.openGoogleMaps(item.direccion, item.distrito);
-    } else {
-      Alert.alert('Info', 'No hay dirección especificada.');
-    }
+    if (item.direccion) NativeLinking.openGoogleMaps(item.direccion, item.distrito);
+    else Alert.alert('Sin dirección', 'No hay dirección especificada.');
+  };
+  const handleUpdateStatus = () => {
+    if (!activeVisit) { Alert.alert('Sin visita asignada', 'No hay visitas asociadas. Contacte al administrador.'); return; }
+    navigation.navigate('UpdateStatus', { id: item.id, type, currentStatus: item.estado, visitaId: activeVisit.id });
   };
 
-  const handleUpdateStatus = () => {
-    if (!activeVisit) {
-      Alert.alert(
-        'Sin Visita Asignada', 
-        'No se puede actualizar el progreso porque no hay visitas asociadas a este registro. Póngase en contacto con el administrador.'
-      );
-      return;
-    }
-    
-    navigation.navigate('UpdateStatus', {
-      id: item.id,
-      type: type,
-      currentStatus: item.estado,
-      visitaId: activeVisit.id
-    });
+  // ── Foto ─────────────────────────────────────────────────────────────────────
+  const seleccionarFoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') { Alert.alert('Permiso requerido', 'Se necesita acceso a la galería.'); return; }
+    Alert.alert('Seleccionar foto', '¿De dónde quieres obtener la foto?', [
+      { text: 'Cámara', onPress: async () => {
+          const cam = await ImagePicker.requestCameraPermissionsAsync();
+          if (cam.status !== 'granted') { Alert.alert('Permiso requerido', 'Se necesita acceso a la cámara.'); return; }
+          const r = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8, allowsEditing: true });
+          if (!r.canceled && r.assets[0]) setFotoSeleccionada(r.assets[0].uri);
+        }},
+      { text: 'Galería', onPress: async () => {
+          const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8, allowsEditing: true });
+          if (!r.canceled && r.assets[0]) setFotoSeleccionada(r.assets[0].uri);
+        }},
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
   };
+
+  const confirmarYSubirFoto = (onConfirm: () => Promise<void>) => {
+    Alert.alert('Confirmar', '¿Confirmas que el servicio está completo y deseas enviar la foto?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Confirmar y enviar', onPress: onConfirm },
+    ]);
+  };
+
+  const subirFotoInstalacion = () => confirmarYSubirFoto(async () => {
+    if (!fotoSeleccionada || !activeVisit) return;
+    setSubiendoFoto(true);
+    try {
+      const formData = new FormData();
+      const filename = fotoSeleccionada.split('/').pop() || 'foto.jpg';
+      const ext = (/\.(\w+)$/.exec(filename) || [])[1] || 'jpg';
+      formData.append('foto_instalacion', { uri: fotoSeleccionada, name: `instalacion_${item.codigo}.${ext}`, type: `image/${ext}` } as any);
+      await api.patch(`/visitas/${activeVisit.id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await CotizacionService.updateCotizacionStatus(id, 'completado' as any);
+      Alert.alert('¡Foto enviada!', 'El servicio quedará marcado como completado.', [{ text: 'Aceptar', onPress: () => { setFotoSeleccionada(null); fetchDetail(); } }]);
+    } catch { Alert.alert('Error', 'No se pudo subir la foto.'); }
+    finally   { setSubiendoFoto(false); }
+  });
+
+  const subirFotoMantenimiento = () => confirmarYSubirFoto(async () => {
+    if (!fotoSeleccionada || !activeVisit) return;
+    setSubiendoFoto(true);
+    try {
+      await MantenimientoService.subirFotoMantenimiento(activeVisit.id, fotoSeleccionada);
+      await MantenimientoService.updateMantenimientoStatus(id, 'resuelto');
+      Alert.alert('¡Foto enviada!', 'El mantenimiento quedará marcado como resuelto.', [{ text: 'Aceptar', onPress: () => { setFotoSeleccionada(null); fetchDetail(); } }]);
+    } catch { Alert.alert('Error', 'No se pudo subir la foto.'); }
+    finally   { setSubiendoFoto(false); }
+  });
+
+  // ── Render foto card ─────────────────────────────────────────────────────────
+  const renderFotoCard = (titulo: string, desc: string, onSubir: () => void) => (
+    <View style={styles.fotoCard}>
+      <View style={styles.fotoHeader}>
+        <View style={styles.fotoIconWrap}>
+          <MaterialIcons name="camera-alt" size={18} color={COLORS.PRIMARY_GOLD_DARK} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.fotoTitulo}>{titulo}</Text>
+          <Text style={styles.fotoDesc}>{desc}</Text>
+        </View>
+      </View>
+
+      {fotoSeleccionada ? (
+        <View style={styles.fotoPreviewWrap}>
+          <Image source={{ uri: fotoSeleccionada }} style={styles.fotoPreview} />
+          <TouchableOpacity onPress={seleccionarFoto} style={styles.cambiarFotoBtn}>
+            <MaterialIcons name="refresh" size={14} color={COLORS.TEXT_SECONDARY} />
+            <Text style={styles.cambiarFotoText}>Cambiar foto</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity onPress={seleccionarFoto} style={styles.fotoDropzone} activeOpacity={0.75}>
+          <MaterialIcons name="add-a-photo" size={28} color={COLORS.PRIMARY_GOLD} />
+          <Text style={styles.fotoDropzoneText}>Seleccionar o tomar foto</Text>
+        </TouchableOpacity>
+      )}
+
+      {fotoSeleccionada && (
+        <TouchableOpacity onPress={onSubir} disabled={subiendoFoto} style={[styles.subirFotoBtn, subiendoFoto && { opacity: 0.6 }]} activeOpacity={0.82}>
+          {subiendoFoto
+            ? <ActivityIndicator color={COLORS.WHITE} />
+            : (<><MaterialIcons name="cloud-upload" size={20} color={COLORS.WHITE} /><Text style={styles.subirFotoText}>Enviar foto y completar</Text></>)
+          }
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  // ── Tipo mantenimiento tag ────────────────────────────────────────────────────
+  const mantTipoColor = item.tipo === 'preventivo' ? COLORS.PREVENTIVE_BLUE : item.tipo === 'correctivo' ? COLORS.CORRECTIVE_ORANGE : COLORS.SUCCESS;
+  const mantTipoBg    = item.tipo === 'preventivo' ? COLORS.PREVENTIVE_BLUE_BG : item.tipo === 'correctivo' ? COLORS.CORRECTIVE_ORANGE_BG : COLORS.SUCCESS_BG;
+  const mantTipoLabel = item.tipo === 'preventivo' ? 'Preventivo' : item.tipo === 'correctivo' ? 'Correctivo' : 'Garantía';
+
+  // ── Visit status label ────────────────────────────────────────────────────────
+  const visitaEstadoLabel = activeVisit
+    ? { programada: 'Programada', completada: 'Completada', reprogramada: 'Reprogramada', cancelada: 'Cancelada' }[activeVisit.estado as string] ?? activeVisit.estado
+    : '';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header title={item.codigo} onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Status indicator timeline header */}
-        <View style={styles.statusSection}>
-          <View style={styles.badgeRow}>
-            <Text style={styles.sectionHeader}>Progreso del Trabajo</Text>
-            <Badge status={item.estado} type={type} />
-          </View>
-          <StatusBar steps={timelineSteps} currentStepIndex={currentStepIndex} />
-        </View>
+    <View style={styles.root}>
+      <RNStatusBar barStyle="dark-content" backgroundColor={COLORS.BG_SURFACE} />
+      <SafeAreaView style={styles.safe}>
+        <Header title={item.codigo} onBack={() => navigation.goBack()} />
 
-        {/* Client & Fast Actions Contact */}
-        <Card style={styles.card} hasBorder>
-          <Text style={styles.cardTitle}>Datos de Contacto</Text>
-          <Text style={styles.clientName}>{item.nombre_cliente}</Text>
-          <Text style={styles.contactItem}>📧 {item.correo || 'Sin correo electrónico'}</Text>
-          <Text style={styles.contactItem}>📞 {item.telefono || 'Sin teléfono celular'}</Text>
-          <Text style={styles.contactItem}>📍 {item.distrito} - {item.direccion}</Text>
-          {item.referencias ? (
-            <Text style={styles.referenceItem}>🔍 Referencia: {item.referencias}</Text>
-          ) : null}
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-          {/* Quick Linking Buttons */}
-          <View style={styles.actionsRow}>
-            <TouchableOpacity 
-              onPress={handleCall} 
-              style={[styles.actionBtn, styles.callBtn]}
-              accessibilityRole="button"
-              accessibilityLabel="Llamar por teléfono al cliente"
-            >
-              <Text style={styles.actionBtnText}>📞 Llamar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              onPress={handleWhatsApp} 
-              style={[styles.actionBtn, styles.waBtn]}
-              accessibilityRole="button"
-              accessibilityLabel="Enviar mensaje por WhatsApp al cliente"
-            >
-              <Text style={styles.actionBtnText}>💬 WhatsApp</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              onPress={handleMaps} 
-              style={[styles.actionBtn, styles.mapsBtn]}
-              accessibilityRole="button"
-              accessibilityLabel="Ver dirección en Google Maps"
-            >
-              <Text style={styles.actionBtnText}>🗺️ Maps</Text>
-            </TouchableOpacity>
-          </View>
-        </Card>
-
-        {/* Technical specs */}
-        <Card style={styles.card} hasBorder>
-          <Text style={styles.cardTitle}>Especificaciones Técnicas</Text>
-          {type === 'mantenimiento' ? (
-            <>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Tipo de Puerta:</Text>
-                <Text style={styles.specValue}>{item.tipo_puerta || 'General'}</Text>
-              </View>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Clase Mantenimiento:</Text>
-                <Text style={[styles.specValue, styles.highlightValue]}>
-                  {item.tipo === 'preventivo' ? '⚙️ Preventivo' : item.tipo === 'correctivo' ? '🚨 Correctivo' : '🛡️ Garantía'}
-                </Text>
-              </View>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Disponibilidad Horaria:</Text>
-                <Text style={styles.specValue}>{item.disponibilidad || 'Sin especificar'}</Text>
-              </View>
-              <View style={styles.divider} />
-              <Text style={styles.specHeader}>Descripción del Problema:</Text>
-              <Text style={styles.descriptionText}>{item.descripcion_problema || 'No se detalló problema.'}</Text>
-            </>
-          ) : (
-            <>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Tipo de Uso:</Text>
-                <Text style={styles.specValue}>{item.tipo_uso || 'Residencial'}</Text>
-              </View>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Disponibilidad Horaria:</Text>
-                <Text style={styles.specValue}>{item.disponibilidad || 'Sin especificar'}</Text>
-              </View>
-              <View style={styles.divider} />
-              <Text style={styles.specHeader}>Descripción de la Solicitud:</Text>
-              <Text style={styles.descriptionText}>{item.descripcion || 'No se detalló solicitud.'}</Text>
-            </>
-          )}
-        </Card>
-
-        {/* Active Visit status & diagnostics */}
-        <Card style={styles.card} hasBorder>
-          <Text style={styles.cardTitle}>Detalles de la Visita Programada</Text>
-          {activeVisit ? (
-            <View>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Fecha agendada:</Text>
-                <Text style={styles.specValue}>📅 {activeVisit.fecha}</Text>
-              </View>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Hora programada:</Text>
-                <Text style={styles.specValue}>⏰ {activeVisit.hora}</Text>
-              </View>
-              <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Estado Visita:</Text>
-                <Text style={[styles.specValue, styles.visitStatus]}>
-                  {activeVisit.estado === 'programada' ? '📅 Programada' : activeVisit.estado === 'completada' ? '✅ Completada' : activeVisit.estado === 'reprogramada' ? '🔄 Reprogramada' : '❌ Cancelada'}
-                </Text>
-              </View>
-
-              {/* Read only diagnostic reports if complete */}
-              {activeVisit.estado === 'completada' && (
-                <View style={styles.diagnosticSection}>
-                  <View style={styles.divider} />
-                  <Text style={styles.diagnosticTitle}>Reporte Técnico Cargado</Text>
-                  
-                  {type === 'mantenimiento' ? (
-                    <>
-                      <Text style={styles.diagnosticLabel}>Diagnóstico:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.diagnostico || 'N/A'}</Text>
-                      
-                      <Text style={styles.diagnosticLabel}>Trabajos Realizados:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.trabajos_realizados || 'N/A'}</Text>
-
-                      <Text style={styles.diagnosticLabel}>Repuestos Utilizados:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.repuestos_utilizados || 'N/A'}</Text>
-
-                      <Text style={styles.diagnosticLabel}>Costo Total del Servicio:</Text>
-                      <Text style={styles.costText}>S/ {activeVisit.costo_total || '0.00'}</Text>
-                    </>
-                  ) : (
-                    <>
-                      <Text style={styles.diagnosticLabel}>Medidas Técnicas Tomadas:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.medidas || 'N/A'}</Text>
-                      
-                      <Text style={styles.diagnosticLabel}>Dificultad de la Instalación:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.dificultad || 'N/A'}</Text>
-
-                      <Text style={styles.diagnosticLabel}>Tiempo Estimado de Trabajo:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.tiempo_estimado || 'N/A'}</Text>
-
-                      <Text style={styles.diagnosticLabel}>Observaciones de Visita:</Text>
-                      <Text style={styles.diagnosticText}>{activeVisit.observaciones || 'N/A'}</Text>
-                    </>
-                  )}
-                </View>
-              )}
+          {/* ── Progreso ──────────────────────────────────────────────── */}
+          <SectionCard title="Progreso del trabajo" iconName="timeline">
+            <View style={styles.progressBadgeRow}>
+              <Badge status={item.estado} type={type} />
             </View>
-          ) : (
-            <Text style={styles.noVisitText}>⚠️ No hay visitas programadas asignadas.</Text>
-          )}
-        </Card>
+            <StatusBar steps={timelineSteps} currentStepIndex={currentStepIndex} />
+          </SectionCard>
 
-        {/* Haupt Action Button */}
-        {!isCompleted ? (
-          <TouchableOpacity 
-            onPress={handleUpdateStatus} 
-            style={styles.mainActionBtn}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            accessibilityLabel="Actualizar Estado del Servicio"
-          >
-            <Text style={styles.mainActionBtnText}>⚙️ Actualizar Estado / Reporte</Text>
-          </TouchableOpacity>
-        ) : (
-          <Card style={styles.readOnlyBanner} hasBorder>
-            <Text style={styles.readOnlyText}>📜 Servicio Finalizado (Solo Lectura)</Text>
-          </Card>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          {/* ── Banner confirmación instalación ───────────────────────── */}
+          {type === 'cotizacion' && item.estado === 'instalacion_agendada' && (
+            <View style={[styles.bannerCard, styles.bannerSuccess]}>
+              <MaterialIcons name="check-circle" size={22} color={COLORS.SUCCESS} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={[styles.bannerTitle, { color: COLORS.SUCCESS }]}>¡El cliente aceptó la cotización!</Text>
+                <Text style={styles.bannerDesc}>El administrador confirmó la instalación. Ve al domicilio, realiza la instalación y sube la foto al completar.</Text>
+              </View>
+            </View>
+          )}
+
+          {/* ── Banner confirmación mantenimiento ─────────────────────── */}
+          {type === 'mantenimiento' && item.estado === 'en_proceso' && (
+            <View style={[styles.bannerCard, styles.bannerSuccess]}>
+              <MaterialIcons name="build" size={22} color={COLORS.SUCCESS} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={[styles.bannerTitle, { color: COLORS.SUCCESS }]}>¡El cliente aceptó el mantenimiento!</Text>
+                <Text style={styles.bannerDesc}>Ve al domicilio, realiza el trabajo y sube una foto al completar.</Text>
+              </View>
+            </View>
+          )}
+
+          {/* ── Datos de contacto ─────────────────────────────────────── */}
+          <SectionCard title="Datos de contacto" iconName="person">
+            <Text style={styles.clientName}>{item.nombre_cliente}</Text>
+
+            <InfoRow icon="email"       text={item.correo    || 'Sin correo'} />
+            <InfoRow icon="phone"       text={item.telefono  || 'Sin teléfono'} />
+            <InfoRow icon="location-on" text={`${item.distrito} — ${item.direccion}`} />
+
+            {item.referencias && (
+              <View style={styles.referenceBox}>
+                <MaterialIcons name="info-outline" size={14} color={COLORS.PRIMARY_GOLD_DARK} />
+                <Text style={styles.referenceText}>Referencia: {item.referencias}</Text>
+              </View>
+            )}
+
+            {/* Botones de acción */}
+            <View style={styles.actionsRow}>
+              <TouchableOpacity onPress={handleCall} style={styles.actionBtn} activeOpacity={0.8}>
+                <View style={[styles.actionIcon, { backgroundColor: COLORS.INFO_BG }]}>
+                  <MaterialIcons name="phone" size={18} color={COLORS.INFO} />
+                </View>
+                <Text style={styles.actionLabel}>Llamar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleWhatsApp} style={styles.actionBtn} activeOpacity={0.8}>
+                <View style={[styles.actionIcon, { backgroundColor: COLORS.SUCCESS_BG }]}>
+                  <MaterialIcons name="chat" size={18} color={COLORS.SUCCESS} />
+                </View>
+                <Text style={styles.actionLabel}>WhatsApp</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleMaps} style={styles.actionBtn} activeOpacity={0.8}>
+                <View style={[styles.actionIcon, { backgroundColor: COLORS.WARNING_BG }]}>
+                  <MaterialIcons name="map" size={18} color={COLORS.PRIMARY_GOLD_DARK} />
+                </View>
+                <Text style={styles.actionLabel}>Mapa</Text>
+              </TouchableOpacity>
+            </View>
+          </SectionCard>
+
+          {/* ── Especificaciones técnicas ──────────────────────────────── */}
+          <SectionCard title="Especificaciones técnicas" iconName="settings">
+            {type === 'mantenimiento' ? (
+              <>
+                <SpecRow label="Tipo de puerta"        value={item.tipo_puerta || 'General'} />
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Clase mantenimiento</Text>
+                  <View style={[styles.tipoTag, { backgroundColor: mantTipoBg }]}>
+                    <MaterialIcons name={item.tipo === 'preventivo' ? 'build' : item.tipo === 'correctivo' ? 'warning' : 'verified'} size={13} color={mantTipoColor} />
+                    <Text style={[styles.tipoTagText, { color: mantTipoColor }]}>{mantTipoLabel}</Text>
+                  </View>
+                </View>
+                <SpecRow label="Disponibilidad" value={item.disponibilidad || 'Sin especificar'} />
+                <View style={styles.divider} />
+                <Text style={styles.subSectionLabel}>Descripción del problema</Text>
+                <Text style={styles.descText}>{item.descripcion_problema || 'No se detalló problema.'}</Text>
+              </>
+            ) : (
+              <>
+                <SpecRow label="Tipo de uso"    value={item.tipo_uso      || 'Residencial'} />
+                <SpecRow label="Disponibilidad" value={item.disponibilidad || 'Sin especificar'} />
+                <View style={styles.divider} />
+                <Text style={styles.subSectionLabel}>Descripción</Text>
+                <Text style={styles.descText}>{item.descripcion || 'No se detalló solicitud.'}</Text>
+              </>
+            )}
+          </SectionCard>
+
+          {/* ── Detalles de la visita ─────────────────────────────────── */}
+          <SectionCard title="Detalles de la visita" iconName="event">
+            {activeVisit ? (
+              <>
+                <View style={styles.visitRow}>
+                  <View style={[styles.visitIconWrap, { backgroundColor: COLORS.WARNING_BG }]}>
+                    <MaterialIcons name="event" size={16} color={COLORS.PRIMARY_GOLD_DARK} />
+                  </View>
+                  <View>
+                    <Text style={styles.visitLabel}>Fecha agendada</Text>
+                    <Text style={styles.visitValue}>{activeVisit.fecha}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.visitRow}>
+                  <View style={[styles.visitIconWrap, { backgroundColor: COLORS.WARNING_BG }]}>
+                    <MaterialIcons name="access-time" size={16} color={COLORS.PRIMARY_GOLD_DARK} />
+                  </View>
+                  <View>
+                    <Text style={styles.visitLabel}>Hora programada</Text>
+                    <Text style={styles.visitValue}>{activeVisit.hora}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.visitRow}>
+                  <View style={[styles.visitIconWrap, { backgroundColor: COLORS.SUCCESS_BG }]}>
+                    <MaterialIcons name="check-circle" size={16} color={COLORS.SUCCESS} />
+                  </View>
+                  <View>
+                    <Text style={styles.visitLabel}>Estado visita</Text>
+                    <Text style={styles.visitValue}>{visitaEstadoLabel}</Text>
+                  </View>
+                </View>
+
+                {/* Reporte técnico si visita completada */}
+                {activeVisit.estado === 'completada' && (
+                  <>
+                    <View style={styles.divider} />
+                    <Text style={styles.subSectionLabel}>Reporte técnico</Text>
+
+                    {type === 'mantenimiento' ? (
+                      <>
+                        <ReporteItem label="Diagnóstico"          value={activeVisit.diagnostico} />
+                        <ReporteItem label="Trabajos realizados"  value={activeVisit.trabajos_realizados} />
+                        <ReporteItem label="Repuestos utilizados" value={activeVisit.repuestos_utilizados} />
+                        <View style={styles.costoRow}>
+                          <Text style={styles.costoLabel}>Costo total</Text>
+                          <Text style={styles.costoValue}>S/ {activeVisit.costo_total || '0.00'}</Text>
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        <ReporteItem label="Medidas técnicas"      value={activeVisit.medidas} />
+                        <ReporteItem label="Materiales necesarios" value={activeVisit.materiales_necesarios} />
+                        <ReporteItem label="Dificultad"            value={activeVisit.dificultad} />
+                        <ReporteItem label="Tiempo estimado"       value={activeVisit.tiempo_estimado} />
+                        <ReporteItem label="Observaciones"         value={activeVisit.observaciones} />
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <View style={styles.noVisitBox}>
+                <View style={[styles.noVisitIconWrap]}>
+                  <MaterialIcons name="event-busy" size={26} color={COLORS.ERROR_RED} />
+                </View>
+                <Text style={styles.noVisitText}>No hay visitas programadas</Text>
+                <Text style={styles.noVisitSub}>Contacte al administrador para asignar una visita</Text>
+              </View>
+            )}
+          </SectionCard>
+
+          {/* ── Foto instalación / mantenimiento ─────────────────────── */}
+          {puedeSubirFotoCotizacion && renderFotoCard(
+            'Foto de instalación completada',
+            'Una vez terminada la instalación, toma una foto y envíala al administrador para cerrar el servicio.',
+            subirFotoInstalacion
+          )}
+          {puedeSubirFotoMantenimiento && renderFotoCard(
+            'Foto del mantenimiento realizado',
+            'Toma una foto del mantenimiento completado y envíala al administrador para cerrar el servicio.',
+            subirFotoMantenimiento
+          )}
+
+          {/* ── Botones de acción principal ───────────────────────────── */}
+          {type === 'cotizacion' && item.estado === 'visita_agendada' && activeVisit && (
+            <TouchableOpacity onPress={handleUpdateStatus} style={styles.primaryBtn} activeOpacity={0.82}>
+              <MaterialIcons name="straighten" size={20} color={COLORS.WHITE} />
+              <Text style={styles.primaryBtnText}>Registrar medidas y materiales</Text>
+            </TouchableOpacity>
+          )}
+
+          {type === 'mantenimiento' && puedeActualizar && !puedeSubirFotoMantenimiento && (
+            <TouchableOpacity onPress={handleUpdateStatus} style={styles.primaryBtn} activeOpacity={0.82}>
+              <MaterialIcons name="update" size={20} color={COLORS.WHITE} />
+              <Text style={styles.primaryBtnText}>Actualizar estado / reporte</Text>
+            </TouchableOpacity>
+          )}
+
+          {isCompleted && (
+            <View style={styles.completedBanner}>
+              <MaterialIcons name="lock" size={18} color={COLORS.TEXT_TERTIARY} />
+              <Text style={styles.completedText}>Servicio finalizado — Solo lectura</Text>
+            </View>
+          )}
+
+          <View style={{ height: 32 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 
+// ── Helper interno ────────────────────────────────────────────────────────────
+const ReporteItem: React.FC<{ label: string; value?: string }> = ({ label, value }) => (
+  <View style={styles.reporteItem}>
+    <Text style={styles.reporteLabel}>{label}</Text>
+    <Text style={styles.reporteText}>{value || 'N/A'}</Text>
+  </View>
+);
+
+// ── Estilos ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BG_DARK,
-  },
-  scrollContent: {
-    padding: LAYOUT.spacing.md,
-  },
-  statusSection: {
-    marginBottom: LAYOUT.spacing.sm,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: LAYOUT.spacing.xs,
-  },
-  sectionHeader: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    fontFamily: 'System',
-  },
+  root: { flex: 1, backgroundColor: COLORS.BG_BASE },
+  safe: { flex: 1 },
+  scroll: { padding: 14, paddingTop: 12 },
+
+  // ── Cards ────────────────────────────────────────────────────────────────
   card: {
-    padding: LAYOUT.spacing.md,
-    marginVertical: LAYOUT.spacing.sm,
+    backgroundColor: COLORS.BG_SURFACE,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_DARK,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  cardTitle: {
-    fontSize: LAYOUT.typography.sizes.h3,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    marginBottom: LAYOUT.spacing.md,
-    fontFamily: 'System',
+  cardHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14,
+    paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.BORDER_SUBTLE,
   },
-  clientName: {
-    fontSize: LAYOUT.typography.sizes.h2,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: LAYOUT.spacing.md,
-    fontFamily: 'System',
+  cardIconWrap: {
+    width: 30, height: 30, borderRadius: 8,
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD,
+    justifyContent: 'center', alignItems: 'center',
   },
-  contactItem: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    marginVertical: LAYOUT.spacing.xs,
-    fontFamily: 'System',
+  cardTitle: { fontSize: 14, fontWeight: '700', color: COLORS.TEXT_PRIMARY, letterSpacing: 0.2 },
+
+  // ── Progreso ─────────────────────────────────────────────────────────────
+  progressBadgeRow: { alignItems: 'flex-start', marginBottom: 12 },
+
+  // ── Banners ──────────────────────────────────────────────────────────────
+  bannerCard: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    borderRadius: 14, padding: 14, marginBottom: 12,
+    borderWidth: 1,
   },
-  referenceItem: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-    marginTop: LAYOUT.spacing.sm,
-    fontStyle: 'italic',
+  bannerSuccess: {
+    backgroundColor: COLORS.SUCCESS_BG,
+    borderColor: COLORS.SUCCESS_BORDER,
   },
-  actionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: LAYOUT.spacing.lg,
+  bannerTitle: { fontSize: 13, fontWeight: '700', marginBottom: 4 },
+  bannerDesc:  { fontSize: 12, color: COLORS.TEXT_SECONDARY, lineHeight: 17 },
+
+  // ── Contacto ─────────────────────────────────────────────────────────────
+  clientName: { fontSize: 19, fontWeight: '800', color: COLORS.TEXT_PRIMARY, marginBottom: 12 },
+  infoRow:    { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  infoText:   { fontSize: 13, color: COLORS.TEXT_SECONDARY, flex: 1, fontWeight: '500' },
+  referenceBox: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
+    borderRadius: 10, padding: 10, marginTop: 8,
+    borderLeftWidth: 3, borderLeftColor: COLORS.PRIMARY_GOLD,
   },
-  actionBtn: {
-    flex: 1,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: LAYOUT.borderRadius.md,
-    marginHorizontal: 4,
-    ...LAYOUT.shadows.sm,
+  referenceText: { fontSize: 12, color: COLORS.TEXT_SECONDARY, flex: 1, fontStyle: 'italic', lineHeight: 17 },
+
+  actionsRow: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  actionBtn:  { flex: 1, alignItems: 'center', gap: 6 },
+  actionIcon: {
+    width: 44, height: 44, borderRadius: 14,
+    justifyContent: 'center', alignItems: 'center',
   },
-  actionBtnText: {
-    fontSize: LAYOUT.typography.sizes.small,
-    fontWeight: 'bold',
-    color: COLORS.BG_DARK,
-    fontFamily: 'System',
+  actionLabel: { fontSize: 11, fontWeight: '600', color: COLORS.TEXT_SECONDARY },
+
+  // ── Specs ────────────────────────────────────────────────────────────────
+  specRow:   { marginBottom: 10 },
+  specLabel: { fontSize: 12, color: COLORS.TEXT_TERTIARY, fontWeight: '600', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 },
+  specValue: { fontSize: 14, color: COLORS.TEXT_PRIMARY, fontWeight: '600' },
+  tipoTag:   { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, alignSelf: 'flex-start' },
+  tipoTagText: { fontSize: 12, fontWeight: '700' },
+  divider:   { height: 1, backgroundColor: COLORS.BORDER_SUBTLE, marginVertical: 14 },
+  subSectionLabel: { fontSize: 13, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 8 },
+  descText:  { fontSize: 13, color: COLORS.TEXT_SECONDARY, lineHeight: 20 },
+
+  // ── Visita ───────────────────────────────────────────────────────────────
+  visitRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  visitIconWrap: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  visitLabel: { fontSize: 11, color: COLORS.TEXT_TERTIARY, fontWeight: '500', marginBottom: 2, textTransform: 'uppercase', letterSpacing: 0.3 },
+  visitValue: { fontSize: 14, color: COLORS.TEXT_PRIMARY, fontWeight: '700' },
+  noVisitBox: { alignItems: 'center', paddingVertical: 24 },
+  noVisitIconWrap: { width: 52, height: 52, borderRadius: 16, backgroundColor: COLORS.ERROR_BG, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
+  noVisitText: { fontSize: 14, color: COLORS.ERROR_RED, fontWeight: '700', marginBottom: 4 },
+  noVisitSub:  { fontSize: 12, color: COLORS.TEXT_TERTIARY, textAlign: 'center' },
+
+  // ── Reporte ──────────────────────────────────────────────────────────────
+  reporteItem:  { marginBottom: 12 },
+  reporteLabel: { fontSize: 11, color: COLORS.TEXT_TERTIARY, fontWeight: '600', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 },
+  reporteText:  { fontSize: 13, color: COLORS.TEXT_PRIMARY, lineHeight: 19 },
+  costoRow:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: COLORS.SUCCESS_BG, padding: 14, borderRadius: 12, marginTop: 4 },
+  costoLabel:   { fontSize: 13, color: COLORS.TEXT_SECONDARY, fontWeight: '600' },
+  costoValue:   { fontSize: 22, fontWeight: '900', color: COLORS.SUCCESS },
+
+  // ── Foto card ────────────────────────────────────────────────────────────
+  fotoCard: {
+    backgroundColor: COLORS.BG_SURFACE,
+    borderRadius: 18, padding: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: COLORS.BORDER_GOLD,
+    shadowColor: COLORS.PRIMARY_GOLD,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
   },
-  callBtn: {
-    backgroundColor: COLORS.PREVENTIVE_BLUE,
+  fotoHeader:   { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 14 },
+  fotoIconWrap: { width: 34, height: 34, borderRadius: 10, backgroundColor: COLORS.PRIMARY_GOLD_MUTED, borderWidth: 1, borderColor: COLORS.BORDER_GOLD, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
+  fotoTitulo:   { fontSize: 14, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 3 },
+  fotoDesc:     { fontSize: 12, color: COLORS.TEXT_SECONDARY, lineHeight: 17 },
+  fotoDropzone: {
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: COLORS.BORDER_GOLD_STRONG,
+    borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 28, gap: 8, marginBottom: 12,
+    backgroundColor: COLORS.PRIMARY_GOLD_MUTED,
   },
-  waBtn: {
-    backgroundColor: COLORS.WHATSAPP_GREEN,
-  },
-  mapsBtn: {
+  fotoDropzoneText: { fontSize: 13, color: COLORS.PRIMARY_GOLD_DARK, fontWeight: '600' },
+  fotoPreviewWrap:  { marginBottom: 12 },
+  fotoPreview:      { width: '100%', height: 200, borderRadius: 12, marginBottom: 8 },
+  cambiarFotoBtn:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
+  cambiarFotoText:  { fontSize: 12, color: COLORS.TEXT_SECONDARY, textDecorationLine: 'underline' },
+  subirFotoBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: COLORS.PRIMARY_GOLD, paddingVertical: 14, borderRadius: 14 },
+  subirFotoText:    { fontSize: 15, fontWeight: '700', color: COLORS.WHITE },
+
+  // ── Botón principal ──────────────────────────────────────────────────────
+  primaryBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: COLORS.PRIMARY_GOLD,
+    paddingVertical: 16, borderRadius: 16, marginBottom: 12,
+    shadowColor: COLORS.PRIMARY_GOLD,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25, shadowRadius: 8, elevation: 4,
   },
-  specRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: LAYOUT.spacing.sm,
+  primaryBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.WHITE },
+
+  // ── Completado ───────────────────────────────────────────────────────────
+  completedBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: COLORS.BG_ELEVATED,
+    paddingVertical: 14, borderRadius: 14, marginBottom: 12,
+    borderWidth: 1, borderColor: COLORS.BORDER_DARK,
   },
-  specLabel: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-    fontWeight: '600',
-  },
-  specValue: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_PRIMARY,
-    fontFamily: 'System',
-    fontWeight: '700',
-  },
-  highlightValue: {
-    color: COLORS.PRIMARY_GOLD,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.BORDER_DARK,
-    marginVertical: LAYOUT.spacing.md,
-  },
-  specHeader: {
-    fontSize: LAYOUT.typography.sizes.body,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: LAYOUT.spacing.sm,
-    fontFamily: 'System',
-  },
-  descriptionText: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_SECONDARY,
-    lineHeight: LAYOUT.typography.lineHeights.body,
-    fontFamily: 'System',
-  },
-  visitStatus: {
-    color: COLORS.PRIMARY_GOLD,
-  },
-  noVisitText: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.ERROR_RED,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginVertical: LAYOUT.spacing.md,
-  },
-  diagnosticSection: {
-    marginTop: LAYOUT.spacing.xs,
-  },
-  diagnosticTitle: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY_GOLD,
-    marginBottom: LAYOUT.spacing.sm,
-    fontFamily: 'System',
-  },
-  diagnosticLabel: {
-    fontSize: LAYOUT.typography.sizes.small,
-    color: COLORS.TEXT_SECONDARY,
-    fontWeight: 'bold',
-    marginTop: LAYOUT.spacing.sm,
-    fontFamily: 'System',
-  },
-  diagnosticText: {
-    fontSize: LAYOUT.typography.sizes.body,
-    color: COLORS.TEXT_PRIMARY,
-    lineHeight: LAYOUT.typography.lineHeights.body,
-    marginTop: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-  },
-  costText: {
-    fontSize: LAYOUT.typography.sizes.h2,
-    fontWeight: '900',
-    color: COLORS.WARRANTY_GREEN,
-    marginTop: LAYOUT.spacing.xs,
-    fontFamily: 'System',
-  },
-  mainActionBtn: {
-    height: 52,
-    backgroundColor: COLORS.PRIMARY_GOLD,
-    borderRadius: LAYOUT.borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: LAYOUT.spacing.lg,
-    ...LAYOUT.shadows.md,
-  },
-  mainActionBtnText: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.BG_DARK,
-    fontFamily: 'System',
-  },
-  readOnlyBanner: {
-    padding: LAYOUT.spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.CARD_DARK,
-    marginVertical: LAYOUT.spacing.lg,
-  },
-  readOnlyText: {
-    fontSize: LAYOUT.typography.sizes.bodyLarge,
-    fontWeight: 'bold',
-    color: COLORS.TEXT_SECONDARY,
-    fontFamily: 'System',
-  },
+  completedText: { fontSize: 13, fontWeight: '600', color: COLORS.TEXT_TERTIARY },
 });
 
 export default AssignmentDetailScreen;
