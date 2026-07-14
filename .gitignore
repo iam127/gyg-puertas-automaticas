@@ -207,4 +207,4 @@ marimo/_lsp/
 __marimo__/
 
 node_modules/
-mobile/tecnico-app/node_modules/
+mobile/tecnico-app/node_modules/mobile/ 
