@@ -62,6 +62,7 @@ class ImagenMantenimiento(models.Model):
 
 
 class VisitaMantenimiento(models.Model):
+    foto_mantenimiento = models.ImageField(upload_to='fotos_mantenimiento/', null=True, blank=True)
     ESTADO_CHOICES = [
         ('programada', 'Programada'),
         ('completada', 'Completada'),

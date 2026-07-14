@@ -1,0 +1,82 @@
+=== ARCHIVOS RAIZ === 
+.env.example
+.expo
+.gitignore
+app.json
+App.tsx
+babel.config.js
+estructura-completa.txt
+metro.config.js
+node_modules
+package-lock.json
+package.json
+src
+tsconfig.json
+ 
+=== ESTRUCTURA SRC === 
+Listado de rutas de carpetas
+El número de serie del volumen es D41C-D52B
+C:\TESIS\GYG-PUERTAS-AUTOMATICAS\MOBILE\TECNICO-APP\SRC
++---api
+|       auth.ts
+|       config.ts
+|       cotizaciones.ts
+|       mantenimientos.ts
+|       tecnico.ts
+|       
++---components
+|   +---assignments
+|   |       AssignmentCard.tsx
+|   |       
+|   \---common
+|           Badge.tsx
+|           Button.tsx
+|           Card.tsx
+|           EmptyState.tsx
+|           Header.tsx
+|           Input.tsx
+|           Loader.tsx
+|           StatusBar.tsx
+|           
++---constants
+|       colors.ts
+|       layout.ts
+|       statusConfig.ts
+|       
++---navigation
+|       AppNavigator.tsx
+|       AuthNavigator.tsx
+|       index.tsx
+|       
++---screens
+|   +---assignments
+|   |       AssignmentDetailScreen.tsx
+|   |       AssignmentsScreen.tsx
+|   |       UpdateStatusScreen.tsx
+|   |       
+|   +---auth
+|   |       InvitationCodeScreen.tsx
+|   |       RegisterScreen.tsx
+|   |       
+|   +---history
+|   |       HistoryScreen.tsx
+|   |       
+|   +---home
+|   |       HomeScreen.tsx
+|   |       
+|   \---profile
+|           ProfileScreen.tsx
+|           
++---services
+|       linking.ts
+|       storage.ts
+|       
++---store
+|       authStore.ts
+|       
+\---types
+        auth.types.ts
+        cotizacion.types.ts
+        mantenimiento.types.ts
+        navigation.types.ts
+        

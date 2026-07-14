@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { getSeguimiento } from '../services/cotizaciones'
 import { getSeguimientoMantenimiento } from '../services/mantenimientos'
-import { FaSearch, FaCheckCircle, FaTimesCircle, FaTools, FaFileAlt, FaWhatsapp, FaPhone } from 'react-icons/fa'
+import { FaSearch, FaCheckCircle, FaTimesCircle, FaTools, FaFileAlt, FaWhatsapp, FaPhone, FaDownload } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 
@@ -35,6 +35,7 @@ const estadoTexto = {
   resuelto: '#047857',
 }
 
+// Orden de estados para cotizaciones
 const pasosCotizacion = [
   { estado: 'recibido', label: 'Recibido' },
   { estado: 'en_revision', label: 'En revisión' },
@@ -45,56 +46,128 @@ const pasosCotizacion = [
   { estado: 'completado', label: 'Completado' },
 ]
 
+// Orden de estados para mantenimientos
 const pasosMantenimiento = [
   { estado: 'recibido', label: 'Recibido' },
   { estado: 'en_revision', label: 'En revisión' },
   { estado: 'visita_agendada', label: 'Visita agendada' },
   { estado: 'en_proceso', label: 'En proceso' },
-  { estado: 'completado', label: 'Completado' },
+  { estado: 'resuelto', label: 'Resuelto' },
 ]
 
+// Estados negativos que cancelan el flujo
+const estadosNegativos = ['rechazado', 'cancelado']
+
 function BarraProgreso({ pasos, estadoActual }) {
+  const esNegativo = estadosNegativos.includes(estadoActual)
   const indexActual = pasos.findIndex(p => p.estado === estadoActual)
+
   return (
-    <div style={{ 
-      display: 'flex', alignItems: 'flex-start', 
-      justifyContent: 'space-between', marginBottom: '32px',
-      overflowX: 'auto', paddingBottom: '8px',
-    }}>
-      {pasos.map((paso, i) => (
-        <div key={paso.estado} style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '12px', fontWeight: 700, border: '2px solid',
-              flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              background: i < indexActual ? '#10B981' : (i === indexActual ? '#FACC15' : '#fff'),
-              borderColor: i < indexActual ? '#10B981' : (i === indexActual ? '#FACC15' : '#E8E5E0'),
-              color: i < indexActual ? '#fff' : (i === indexActual ? '#111' : '#CCC'),
-            }}>
-              {i < indexActual ? <FaCheckCircle size={14} /> : i + 1}
-            </div>
-            <p style={{
-              fontSize: '11px', marginTop: '6px', textAlign: 'center',
-              width: '64px', lineHeight: 1.3,
-              color: i <= indexActual ? '#111' : '#BBB',
-              fontWeight: i <= indexActual ? 600 : 400,
-            }}>
-              {paso.label}
+    <div>
+      {esNegativo ? (
+        <div style={{
+          background: '#FEE2E2', border: '1px solid #FCA5A5',
+          borderRadius: '12px', padding: '16px 20px',
+          display: 'flex', alignItems: 'center', gap: '12px',
+          marginBottom: '24px',
+        }}>
+          <FaTimesCircle size={20} color="#DC2626" style={{ flexShrink: 0 }} />
+          <div>
+            <p style={{ margin: 0, fontWeight: 700, color: '#DC2626', fontSize: '14px' }}>
+              Solicitud {estadoActual === 'rechazado' ? 'rechazada' : 'cancelada'}
+            </p>
+            <p style={{ margin: '2px 0 0', color: '#DC2626', fontSize: '13px', opacity: 0.8 }}>
+              Esta solicitud no continuará con el proceso.
             </p>
           </div>
-          {i < pasos.length - 1 && (
-            <div style={{
-              height: '4px', width: '32px', marginLeft: '4px',
-              marginRight: '4px', marginTop: '16px', borderRadius: '10px',
-              flexShrink: 0, background: i < indexActual ? '#10B981' : '#E8E5E0',
-            }} />
-          )}
         </div>
-      ))}
+      ) : (
+        <div style={{
+          display: 'flex', alignItems: 'flex-start',
+          justifyContent: 'space-between', marginBottom: '32px',
+          overflowX: 'auto', paddingBottom: '8px',
+        }}>
+          {pasos.map((paso, i) => {
+            const completado = i < indexActual
+            const actual = i === indexActual
+            const pendiente = i > indexActual
+            return (
+              <div key={paso.estado} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '12px', fontWeight: 700, border: '2px solid',
+                    flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    background: completado ? '#10B981' : actual ? '#FACC15' : '#fff',
+                    borderColor: completado ? '#10B981' : actual ? '#FACC15' : '#E8E5E0',
+                    color: completado ? '#fff' : actual ? '#111' : '#CCC',
+                  }}>
+                    {completado ? <FaCheckCircle size={14} /> : i + 1}
+                  </div>
+                  <p style={{
+                    fontSize: '11px', marginTop: '6px', textAlign: 'center',
+                    width: '64px', lineHeight: 1.3,
+                    color: pendiente ? '#BBB' : '#111',
+                    fontWeight: actual ? 700 : completado ? 600 : 400,
+                  }}>
+                    {paso.label}
+                  </p>
+                </div>
+                {i < pasos.length - 1 && (
+                  <div style={{
+                    height: '4px', width: '32px', marginLeft: '4px',
+                    marginRight: '4px', marginTop: '16px', borderRadius: '10px',
+                    flexShrink: 0,
+                    background: completado ? '#10B981' : '#E8E5E0',
+                  }} />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Mensaje según estado actual */}
+      {!esNegativo && (
+        <div style={{
+          background: indexActual === pasos.length - 1 ? '#D1FAE5' : '#FFFBEB',
+          border: `1px solid ${indexActual === pasos.length - 1 ? '#6EE7B7' : '#FDE68A'}`,
+          borderRadius: '10px', padding: '14px 18px',
+          marginBottom: '24px',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          {indexActual === pasos.length - 1
+            ? <FaCheckCircle size={16} color="#047857" />
+            : <span style={{ fontSize: '16px' }}>⏳</span>
+          }
+          <p style={{
+            margin: 0, fontSize: '13px', fontWeight: 600,
+            color: indexActual === pasos.length - 1 ? '#047857' : '#92400E',
+          }}>
+            {getMensajeEstado(estadoActual)}
+          </p>
+        </div>
+      )}
     </div>
   )
+}
+
+function getMensajeEstado(estado) {
+  const mensajes = {
+    recibido: 'Recibimos tu solicitud. Nuestro equipo la revisará pronto.',
+    en_revision: 'Estamos revisando tu solicitud. Te contactaremos a la brevedad.',
+    visita_agendada: 'Un técnico fue asignado y visitará tu domicilio para evaluar el trabajo.',
+    cotizado: 'Tu cotización está lista. Revisa tu correo electrónico y WhatsApp.',
+    aceptado: 'Aceptaste la cotización. Coordinaremos la fecha de instalación contigo.',
+    instalacion_agendada: 'La instalación está programada. Nuestro equipo irá a tu domicilio.',
+    completado: '¡Trabajo completado! Gracias por confiar en GyG Puertas Automáticas.',
+    en_proceso: 'El técnico está trabajando en tu solicitud.',
+    resuelto: '¡Servicio completado exitosamente! Gracias por confiar en nosotros.',
+    rechazado: 'La cotización fue rechazada.',
+    cancelado: 'La solicitud fue cancelada.',
+  }
+  return mensajes[estado] || 'Tu solicitud está siendo procesada.'
 }
 
 function Seguimiento() {
@@ -135,7 +208,6 @@ function Seguimiento() {
           .a2{animation:fadeUp .9s .18s cubic-bezier(.22,1,.36,1) both}
           .a3{animation:fadeUp .9s .30s cubic-bezier(.22,1,.36,1) both}
           .a4{animation:fadeUp .9s .42s cubic-bezier(.22,1,.36,1) both}
-          
           .input-buscar:focus{outline:none;border-color:#FACC15!important}
           .btn-buscar:hover{background:#FDE047!important}
           .btn-buscar{transition:background .2s}
@@ -158,7 +230,6 @@ function Seguimiento() {
           width: '4px', background: 'linear-gradient(to bottom, #FACC15, #F59E0B)',
           zIndex: 3,
         }} />
-
         <div style={{
           position: 'absolute', right: '-100px', top: '-100px',
           width: '480px', height: '480px', borderRadius: '50%',
@@ -179,7 +250,6 @@ function Seguimiento() {
           }}>
             Estado de tu pedido
           </p>
-
           <h1 className="a2" style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontSize: 'clamp(3rem, 7vw, 5.8rem)',
@@ -189,9 +259,7 @@ function Seguimiento() {
             Seguimiento de<br />
             <span style={{ color: '#FACC15' }}>Solicitud</span>
           </h1>
-
           <div style={{ width: '52px', height: '3px', background: '#FACC15', margin: '0 auto 28px' }} />
-
           <p className="a3" style={{
             fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 300,
             color: 'rgba(255,255,255,0.6)', lineHeight: 1.75,
@@ -283,6 +351,7 @@ function Seguimiento() {
               background: '#fff', borderRadius: '16px',
               border: '1px solid #EEECEA', overflow: 'hidden',
             }}>
+              {/* Header */}
               <div style={{ background: '#111', padding: '28px 32px' }}>
                 <div style={{
                   display: 'flex', justifyContent: 'space-between',
@@ -307,10 +376,7 @@ function Seguimiento() {
                       }}>
                         {resultado.tipo === 'cotizacion' ? 'Cotización' : 'Mantenimiento'}
                       </p>
-                      <p style={{
-                        color: '#FACC15', fontWeight: 700,
-                        fontSize: '24px', margin: 0,
-                      }}>
+                      <p style={{ color: '#FACC15', fontWeight: 700, fontSize: '24px', margin: 0 }}>
                         {resultado.data.codigo}
                       </p>
                     </div>
@@ -327,6 +393,7 @@ function Seguimiento() {
                 </div>
               </div>
 
+              {/* Barra de progreso */}
               <div style={{ padding: '32px 32px 8px' }}>
                 <p style={{
                   fontSize: '11px', fontWeight: 700,
@@ -341,6 +408,46 @@ function Seguimiento() {
                 />
               </div>
 
+              {/* PDF de cotización disponible */}
+              {resultado.tipo === 'cotizacion' && resultado.data.cotizacion_formal?.pdf_cotizacion && (
+                <div style={{ padding: '0 32px 24px' }}>
+                  <div style={{
+                    background: '#F0FDF4', border: '2px solid #22C55E',
+                    borderRadius: '12px', padding: '20px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    flexWrap: 'wrap', gap: '12px',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <FaCheckCircle size={20} color="#16A34A" />
+                      <div>
+                        <p style={{ margin: 0, fontWeight: 700, color: '#15803D', fontSize: '14px' }}>
+                          Tu cotización está lista
+                        </p>
+                        <p style={{ margin: '2px 0 0', color: '#16A34A', fontSize: '12px' }}>
+                          Descarga el PDF con el detalle completo de tu cotización
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={`http://127.0.0.1:8000${resultado.data.cotizacion_formal.pdf_cotizacion}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        background: '#16A34A', color: '#fff',
+                        padding: '10px 20px', borderRadius: '8px',
+                        fontWeight: 700, fontSize: '13px',
+                        textDecoration: 'none',
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                      }}
+                    >
+                      <FaDownload size={13} />
+                      Descargar PDF
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Información */}
               <div style={{ padding: '0 32px 32px' }}>
                 <p style={{
                   fontSize: '11px', fontWeight: 700,
@@ -398,10 +505,7 @@ function Seguimiento() {
                     border: '1px solid #EEECEA',
                   }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 8px' }}>Descripción</p>
-                    <p style={{
-                      fontWeight: 500, color: '#111',
-                      fontSize: '14px', lineHeight: 1.6, margin: 0,
-                    }}>
+                    <p style={{ fontWeight: 500, color: '#111', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
                       {resultado.data.descripcion}
                     </p>
                   </div>
@@ -414,10 +518,7 @@ function Seguimiento() {
                     border: '1px solid #EEECEA',
                   }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 8px' }}>Problema reportado</p>
-                    <p style={{
-                      fontWeight: 500, color: '#111',
-                      fontSize: '14px', lineHeight: 1.6, margin: 0,
-                    }}>
+                    <p style={{ fontWeight: 500, color: '#111', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
                       {resultado.data.descripcion_problema}
                     </p>
                   </div>
@@ -429,10 +530,7 @@ function Seguimiento() {
                     borderRadius: '12px', padding: '16px', marginBottom: '12px',
                   }}>
                     <p style={{ color: '#DC2626', fontSize: '11px', margin: '0 0 8px', fontWeight: 700 }}>Motivo de rechazo</p>
-                    <p style={{
-                      fontWeight: 500, color: '#DC2626',
-                      fontSize: '14px', lineHeight: 1.6, margin: 0,
-                    }}>
+                    <p style={{ fontWeight: 500, color: '#DC2626', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
                       {resultado.data.motivo_rechazo}
                     </p>
                   </div>
@@ -443,10 +541,7 @@ function Seguimiento() {
                   borderRadius: '12px', padding: '20px',
                   marginBottom: '20px', marginTop: '8px', textAlign: 'center',
                 }}>
-                  <p style={{
-                    color: '#92400E', fontSize: '14px',
-                    fontWeight: 600, margin: 0,
-                  }}>
+                  <p style={{ color: '#92400E', fontSize: '14px', fontWeight: 600, margin: 0 }}>
                     ¿Necesitas ayuda con tu solicitud? Contáctanos directamente.
                   </p>
                 </div>

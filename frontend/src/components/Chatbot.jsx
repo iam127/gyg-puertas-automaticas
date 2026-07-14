@@ -2,6 +2,16 @@ import { useState, useRef, useEffect } from 'react'
 import { FaTimes, FaPaperPlane, FaCommentDots } from 'react-icons/fa'
 import api from '../services/api'
 
+const limpiarMarkdown = (texto) => {
+  return texto
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#{1,6} /g, '')
+    .replace(/`(.*?)`/g, '$1')
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+    .trim()
+}
+
 function Chatbot() {
   const [abierto, setAbierto] = useState(false)
   const [mensajes, setMensajes] = useState([
@@ -57,12 +67,14 @@ function Chatbot() {
           width: '320px', marginBottom: '16px',
           display: 'flex', flexDirection: 'column',
           overflow: 'hidden', border: '1px solid #EEECEA',
+          height: '480px',
         }}>
           {/* Header */}
           <div style={{
             background: '#111', color: '#fff',
             padding: '16px 20px', display: 'flex',
             justifyContent: 'space-between', alignItems: 'center',
+            flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
@@ -91,7 +103,7 @@ function Chatbot() {
             flex: 1, overflowY: 'auto',
             padding: '20px', display: 'flex',
             flexDirection: 'column', gap: '12px',
-            height: '380px', background: '#FAFAF8',
+            background: '#FAFAF8',
           }}>
             {mensajes.map((msg, i) => (
               <div
@@ -111,8 +123,9 @@ function Chatbot() {
                   color: msg.rol === 'user' ? '#111' : '#333',
                   border: msg.rol === 'user' ? 'none' : '1px solid #EEECEA',
                   fontWeight: msg.rol === 'user' ? 600 : 400,
+                  whiteSpace: 'pre-wrap',
                 }}>
-                  {msg.contenido}
+                  {msg.rol === 'assistant' ? limpiarMarkdown(msg.contenido) : msg.contenido}
                 </div>
               </div>
             ))}
@@ -138,6 +151,7 @@ function Chatbot() {
               borderTop: '1px solid #EEECEA',
               padding: '16px', display: 'flex',
               gap: '10px', background: '#fff',
+              flexShrink: 0,
             }}
           >
             <input

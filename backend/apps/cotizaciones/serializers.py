@@ -27,9 +27,12 @@ class CotizacionSerializer(serializers.ModelSerializer):
         read_only_fields = ['codigo', 'token_unico']
 
 class CotizacionListSerializer(serializers.ModelSerializer):
+    visitas = VisitaTecnicaSerializer(many=True, read_only=True)
+    cotizacion_formal = CotizacionFormalSerializer(read_only=True)
+
     class Meta:
         model = Cotizacion
-        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo_uso', 'estado', 'disponibilidad', 'descripcion', 'referencias', 'creado_en']
+        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo_uso', 'estado', 'disponibilidad', 'descripcion', 'referencias', 'creado_en', 'visitas', 'cotizacion_formal']
 
 class MensajeContactoSerializer(serializers.ModelSerializer):
     class Meta:

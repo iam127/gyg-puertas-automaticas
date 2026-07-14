@@ -1,7 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Cotizacion, VisitaTecnica, CotizacionFormal, MensajeContacto
 from .serializers import CotizacionSerializer, CotizacionListSerializer, VisitaTecnicaSerializer, CotizacionFormalSerializer, MensajeContactoSerializer
 
@@ -63,6 +64,59 @@ class CotizacionViewSet(viewsets.ModelViewSet):
         cotizacion.save()
         return Response({'mensaje': 'Respuesta registrada correctamente'})
 
+    @action(detail=True, methods=['post'])
+    def asignar_tecnico(self, request, pk=None):
+        cotizacion = self.get_object()
+        tecnico_id = request.data.get('tecnico_id')
+        fecha = request.data.get('fecha')
+        hora = request.data.get('hora')
+
+        if not all([tecnico_id, fecha, hora]):
+            return Response({'error': 'tecnico_id, fecha y hora son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from apps.tecnicos.models import Tecnico
+            tecnico = Tecnico.objects.get(id=tecnico_id)
+
+            visita_existente = VisitaTecnica.objects.filter(cotizacion=cotizacion).first()
+            if visita_existente:
+                visita_existente.tecnico = tecnico
+                visita_existente.fecha = fecha
+                visita_existente.hora = hora
+                visita_existente.save()
+                visita = visita_existente
+            else:
+                visita = VisitaTecnica.objects.create(
+                    cotizacion=cotizacion,
+                    tecnico=tecnico,
+                    fecha=fecha,
+                    hora=hora,
+                )
+
+            cotizacion.estado = 'visita_agendada'
+            cotizacion.save()
+            serializer = VisitaTecnicaSerializer(visita)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Tecnico.DoesNotExist:
+            return Response({'error': 'Técnico no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], authentication_classes=[JWTAuthentication], permission_classes=[IsAuthenticated])
+    def mis_cotizaciones(self, request):
+        try:
+            from apps.tecnicos.models import Tecnico
+            tecnico = Tecnico.objects.get(usuario=request.user)
+            visitas = tecnico.visitas_cotizacion.select_related('cotizacion').all()
+            cotizacion_ids = visitas.values_list('cotizacion_id', flat=True).distinct()
+            cotizaciones = Cotizacion.objects.filter(id__in=cotizacion_ids)
+            serializer = CotizacionSerializer(cotizaciones, many=True)
+            return Response(serializer.data)
+        except Tecnico.DoesNotExist:
+            return Response({'error': 'Técnico no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class VisitaTecnicaViewSet(viewsets.ModelViewSet):
     queryset = VisitaTecnica.objects.all()
@@ -74,6 +128,21 @@ class CotizacionFormalViewSet(viewsets.ModelViewSet):
     queryset = CotizacionFormal.objects.all()
     serializer_class = CotizacionFormalSerializer
     permission_classes = [AllowAny]
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        try:
+            if 'pdf_cotizacion' in request.FILES:
+                cotizacion_formal = self.get_object()
+                from apps.notificaciones.email import notificar_cotizacion_enviada_email
+                from apps.notificaciones.whatsapp import notificar_cotizacion_enviada_whatsapp
+                import os
+                pdf_path = os.path.join('media', str(cotizacion_formal.pdf_cotizacion))
+                notificar_cotizacion_enviada_email(cotizacion_formal.cotizacion, pdf_path)
+                notificar_cotizacion_enviada_whatsapp(cotizacion_formal.cotizacion)
+        except Exception as e:
+            print(f"Error enviando notificaciones cotizacion enviada: {e}")
+        return response
 
 
 class MensajeContactoViewSet(viewsets.ModelViewSet):

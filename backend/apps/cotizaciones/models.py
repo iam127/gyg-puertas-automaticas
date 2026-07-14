@@ -62,11 +62,13 @@ class ImagenCotizacion(models.Model):
 
 
 class VisitaTecnica(models.Model):
+    foto_instalacion = models.ImageField(upload_to='instalaciones/', null=True, blank=True)
     ESTADO_CHOICES = [
         ('programada', 'Programada'),
         ('completada', 'Completada'),
         ('cancelada', 'Cancelada'),
         ('reprogramada', 'Reprogramada'),
+        
     ]
 
     cotizacion = models.ForeignKey(Cotizacion, on_delete=models.CASCADE, related_name='visitas')
@@ -75,6 +77,7 @@ class VisitaTecnica(models.Model):
     hora = models.TimeField()
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='programada')
     medidas = models.TextField(blank=True)
+    materiales_necesarios = models.TextField(blank=True)
     observaciones = models.TextField(blank=True)
     dificultad = models.CharField(max_length=20, blank=True)
     tiempo_estimado = models.CharField(max_length=100, blank=True)
@@ -111,6 +114,7 @@ class CotizacionFormal(models.Model):
     validez_dias = models.IntegerField(default=15)
     terminos = models.TextField(blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
+    pdf_cotizacion = models.FileField(upload_to='cotizaciones_pdf/', null=True, blank=True)
 
     def __str__(self):
         return f'Cotizacion formal de {self.cotizacion.codigo}'
@@ -118,6 +122,7 @@ class CotizacionFormal(models.Model):
     class Meta:
         verbose_name = 'Cotizacion Formal'
         verbose_name_plural = 'Cotizaciones Formales'
+
 
 class MensajeContacto(models.Model):
     nombre = models.CharField(max_length=200)

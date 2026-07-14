@@ -4,7 +4,6 @@ from django.conf import settings
 
 def notificar_cotizacion_email(cotizacion):
     try:
-        # EMAIL AL CLIENTE
         subject = f'GyG Puertas - Cotizacion recibida {cotizacion.codigo}'
         text_content = f'Hola {cotizacion.nombre_cliente}, recibimos tu cotizacion {cotizacion.codigo}'
 
@@ -86,7 +85,6 @@ def notificar_cotizacion_email(cotizacion):
         msg.attach_alternative(html_cliente, "text/html")
         msg.send()
 
-        # EMAIL A LA EMPRESA
         html_empresa = f'''
 <!DOCTYPE html>
 <html>
@@ -143,7 +141,6 @@ def notificar_cotizacion_email(cotizacion):
 </body>
 </html>
 '''
-
         msg_empresa = EmailMultiAlternatives(
             subject=f'Nueva cotizacion recibida - {cotizacion.codigo}',
             body=f'Nueva cotizacion de {cotizacion.nombre_cliente} - {cotizacion.telefono}',
@@ -159,7 +156,6 @@ def notificar_cotizacion_email(cotizacion):
 
 def notificar_mantenimiento_email(mantenimiento):
     try:
-        # EMAIL AL CLIENTE
         subject = f'GyG Puertas - Solicitud de {mantenimiento.tipo} recibida {mantenimiento.codigo}'
         text_content = f'Hola {mantenimiento.nombre_cliente}, recibimos tu solicitud {mantenimiento.codigo}'
 
@@ -240,12 +236,10 @@ def notificar_mantenimiento_email(mantenimiento):
 </body>
 </html>
 '''
-
         msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [mantenimiento.correo])
         msg.attach_alternative(html_cliente, "text/html")
         msg.send()
 
-        # EMAIL A LA EMPRESA
         html_empresa = f'''
 <!DOCTYPE html>
 <html>
@@ -306,7 +300,6 @@ def notificar_mantenimiento_email(mantenimiento):
 </body>
 </html>
 '''
-
         msg_empresa = EmailMultiAlternatives(
             subject=f'Nueva solicitud de {mantenimiento.tipo} - {mantenimiento.codigo}',
             body=f'Nueva solicitud de {mantenimiento.nombre_cliente} - {mantenimiento.telefono}',
@@ -318,3 +311,84 @@ def notificar_mantenimiento_email(mantenimiento):
 
     except Exception as e:
         print(f"Error enviando email mantenimiento: {e}")
+
+
+def notificar_cotizacion_enviada_email(cotizacion, pdf_path=None):
+    try:
+        subject = f'GyG Puertas - Tu cotizacion {cotizacion.codigo} esta lista'
+        text_content = f'Hola {cotizacion.nombre_cliente}, tu cotizacion {cotizacion.codigo} esta lista.'
+
+        html_cliente = f'''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {{ font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }}
+    .container {{ max-width: 600px; margin: 30px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+    .header {{ background-color: #111827; padding: 30px; text-align: center; }}
+    .header h1 {{ color: #facc15; margin: 0; font-size: 24px; }}
+    .header p {{ color: #9ca3af; margin: 5px 0 0; font-size: 14px; }}
+    .body {{ padding: 30px; }}
+    .greeting {{ font-size: 18px; color: #111827; font-weight: bold; margin-bottom: 10px; }}
+    .message {{ color: #6b7280; font-size: 14px; margin-bottom: 25px; line-height: 1.6; }}
+    .codigo-box {{ background-color: #fefce8; border: 2px solid #facc15; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 25px; }}
+    .codigo-box p {{ margin: 0 0 5px; color: #6b7280; font-size: 13px; }}
+    .codigo-box h2 {{ margin: 0; color: #111827; font-size: 28px; letter-spacing: 4px; font-weight: bold; }}
+    .alert-box {{ background-color: #f0fdf4; border: 2px solid #22c55e; border-radius: 10px; padding: 16px; margin-bottom: 25px; text-align: center; }}
+    .alert-box p {{ margin: 0; color: #16a34a; font-weight: bold; font-size: 14px; }}
+    .cta {{ text-align: center; margin-bottom: 25px; }}
+    .cta a {{ background-color: #facc15; color: #111827; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; }}
+    .footer {{ background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb; }}
+    .footer p {{ margin: 3px 0; color: #9ca3af; font-size: 12px; }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>GyG Puertas Automaticas</h1>
+      <p>Especialistas en puertas automaticas en Lima</p>
+    </div>
+    <div class="body">
+      <p class="greeting">Hola, {cotizacion.nombre_cliente}</p>
+      <p class="message">
+        Hemos preparado tu cotizacion personalizada. Puedes revisar el detalle completo en el PDF adjunto a este correo.
+        Si estas de acuerdo, respondenos por WhatsApp o correo para coordinar la instalacion.
+      </p>
+      <div class="alert-box">
+        <p>Tu cotizacion esta adjunta en este correo como PDF</p>
+      </div>
+      <div class="codigo-box">
+        <p>Tu codigo de seguimiento:</p>
+        <h2>{cotizacion.codigo}</h2>
+      </div>
+      <div class="cta">
+        <a href="http://localhost:5173/seguimiento">Ver estado de mi solicitud</a>
+      </div>
+      <p style="color:#6b7280;font-size:13px;text-align:center;">
+        Si tienes alguna pregunta, contactanos por WhatsApp al <strong>+51 947 316 864</strong>
+      </p>
+    </div>
+    <div class="footer">
+      <p><strong>GyG Puertas Automaticas</strong></p>
+      <p>Manuel Odria 161, Ate, Lima, Peru</p>
+      <p>Tel: +51 947 316 864 | WhatsApp: +51 947 316 874</p>
+      <p>gygpuertasautomaticas@gmail.com</p>
+    </div>
+  </div>
+</body>
+</html>
+'''
+        msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [cotizacion.correo])
+        msg.attach_alternative(html_cliente, "text/html")
+
+        if pdf_path:
+            import os
+            if os.path.exists(pdf_path):
+                with open(pdf_path, 'rb') as f:
+                    msg.attach(f'Cotizacion_{cotizacion.codigo}.pdf', f.read(), 'application/pdf')
+
+        msg.send()
+        print(f"Email cotizacion enviada a {cotizacion.correo}")
+    except Exception as e:
+        print(f"Error enviando email cotizacion enviada: {e}")

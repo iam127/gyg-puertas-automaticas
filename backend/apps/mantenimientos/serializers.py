@@ -21,9 +21,11 @@ class MantenimientoSerializer(serializers.ModelSerializer):
         read_only_fields = ['codigo', 'token_unico', 'garantia_vigente']
 
 class MantenimientoListSerializer(serializers.ModelSerializer):
+    visitas = VisitaMantenimientoSerializer(many=True, read_only=True)
+
     class Meta:
         model = Mantenimiento
-        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo', 'tipo_puerta', 'disponibilidad', 'descripcion_problema', 'estado', 'garantia_vigente', 'creado_en']
+        fields = ['id', 'codigo', 'nombre_cliente', 'telefono', 'correo', 'distrito', 'tipo', 'tipo_puerta', 'disponibilidad', 'descripcion_problema', 'estado', 'garantia_vigente', 'creado_en', 'visitas']
 
 class TestimonioSerializer(serializers.ModelSerializer):
     class Meta:
