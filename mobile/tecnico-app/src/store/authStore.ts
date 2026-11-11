@@ -8,10 +8,8 @@ interface AuthState {
   tecnico: Tecnico | null;
   isLoggedIn: boolean;
   isLoading: boolean;
-  isDemoMode: boolean;
   setTokens: (access: string, refresh: string) => Promise<void>;
   setTecnico: (tecnico: Tecnico) => Promise<void>;
-  enableDemoMode: () => Promise<void>;
   restoreSession: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -22,45 +20,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   tecnico: null,
   isLoggedIn: false,
   isLoading: true,
-  isDemoMode: false,
 
   setTokens: async (access: string, refresh: string) => {
     await Storage.setAccessToken(access);
     await Storage.setRefreshToken(refresh);
-    set({ accessToken: access, refreshToken: refresh, isLoggedIn: true, isDemoMode: false });
+    set({ accessToken: access, refreshToken: refresh, isLoggedIn: true });
   },
 
   setTecnico: async (tecnico: Tecnico) => {
     await Storage.setTecnicoProfile(tecnico);
     set({ tecnico });
-  },
-
-  enableDemoMode: async () => {
-    const demoTecnico: Tecnico = {
-      id: 999,
-      usuario: {
-        id: 999,
-        username: 'tecnico_invitado',
-        first_name: 'Juan (Invitado)',
-        last_name: 'Pérez',
-        email: 'demo@gygpuertas.com',
-      },
-      telefono: '+51 987 654 321',
-      activo: true,
-      codigo_invitacion: 'DEMO-MODE-ACTIVE',
-      creado_en: new Date().toISOString(),
-    };
-    await Storage.setAccessToken('demo-access-token');
-    await Storage.setRefreshToken('demo-refresh-token');
-    await Storage.setTecnicoProfile(demoTecnico);
-    set({
-      accessToken: 'demo-access-token',
-      refreshToken: 'demo-refresh-token',
-      tecnico: demoTecnico,
-      isLoggedIn: true,
-      isDemoMode: true,
-      isLoading: false,
-    });
   },
 
   restoreSession: async () => {
@@ -70,32 +39,31 @@ export const useAuthStore = create<AuthState>((set) => ({
       const refresh = await Storage.getRefreshToken();
       const tecnico = await Storage.getTecnicoProfile();
 
-      if (access && refresh && tecnico) {
+      // Ignorar sesiones demo que quedaron guardadas
+      if (access && refresh && tecnico && access !== 'demo-access-token') {
         set({
           accessToken: access,
           refreshToken: refresh,
           tecnico: tecnico,
           isLoggedIn: true,
-          isDemoMode: tecnico.codigo_invitacion === 'DEMO-MODE-ACTIVE',
           isLoading: false,
         });
       } else {
+        await Storage.clearAll();
         set({
           accessToken: null,
           refreshToken: null,
           tecnico: null,
           isLoggedIn: false,
-          isDemoMode: false,
           isLoading: false,
         });
       }
-    } catch (error) {
+    } catch {
       set({
         accessToken: null,
         refreshToken: null,
         tecnico: null,
         isLoggedIn: false,
-        isDemoMode: false,
         isLoading: false,
       });
     }
@@ -108,7 +76,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       refreshToken: null,
       tecnico: null,
       isLoggedIn: false,
-      isDemoMode: false,
       isLoading: false,
     });
   },

@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   StatusBar as RNStatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -38,15 +39,7 @@ export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navi
   const [passwordError, setPasswordError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const { setTokens, setTecnico, enableDemoMode } = useAuthStore();
-
-  const handleDemoAccess = async () => {
-    try {
-      await enableDemoMode();
-    } catch {
-      Alert.alert('Error', 'No se pudo activar el modo de demostración.');
-    }
-  };
+  const { setTokens, setTecnico } = useAuthStore();
 
   const handleVerifyCode = async () => {
     if (!code.trim()) { setCodeError('Por favor, ingrese el código de invitación.'); return; }
@@ -95,15 +88,11 @@ export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navi
     }
   };
 
-  // Decodifica el payload de un JWT sin dependencias externas.
-  // Usa la técnica de escape/unescape que maneja UTF-8 correctamente en RN.
   const decodeJwtPayload = (token: string): any => {
     const part = token.split('.')[1];
     if (!part) throw new Error('Token JWT inválido.');
-    // base64url → base64 estándar con padding correcto
     const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
     const padded = base64 + '=='.slice(0, (4 - (base64.length % 4)) % 4);
-    // Decodificar: convertir cada byte a %XX y luego decodeURIComponent para UTF-8
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
     let binary = '';
     let i = 0;
@@ -119,7 +108,6 @@ export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navi
       if (c3 !== 64) binary += String.fromCharCode(b2);
       if (c4 !== 64) binary += String.fromCharCode(b3);
     }
-    // Convertir string de bytes a URI-encoded para manejar UTF-8
     const encoded = binary
       .split('')
       .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
@@ -154,12 +142,12 @@ export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navi
 
             {/* ── Tabs ──────────────────────────────────────────────────── */}
             <View style={styles.tabRow}>
-              <View style={[styles.tab, isCodeMode && styles.tabActive]}>
+              <TouchableOpacity style={[styles.tab, isCodeMode && styles.tabActive]} onPress={() => setMode('code')}>
                 <Text style={[styles.tabLabel, isCodeMode && styles.tabLabelActive]}>Código</Text>
-              </View>
-              <View style={[styles.tab, !isCodeMode && styles.tabActive]}>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.tab, !isCodeMode && styles.tabActive]} onPress={() => setMode('login')}>
                 <Text style={[styles.tabLabel, !isCodeMode && styles.tabLabelActive]}>Iniciar sesión</Text>
-              </View>
+              </TouchableOpacity>
             </View>
 
             {/* ── Formulario ────────────────────────────────────────────── */}
@@ -202,17 +190,9 @@ export const InvitationCodeScreen: React.FC<InvitationCodeScreenProps> = ({ navi
                   <Button title="Tengo un código de invitación" onPress={() => setMode('code')} variant="ghost" style={styles.secondaryAction} />
                 </>
               )}
-
-              {/* ── Divisor demo ─────────────────────────────────────────── */}
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>o también</Text>
-                <View style={styles.dividerLine} />
-              </View>
-              <Button title="Entrar como invitado (Modo demo)" onPress={handleDemoAccess} variant="outline" />
             </View>
 
-            <Text style={styles.footer}>GyG Puertas Automáticas © 2024</Text>
+            <Text style={styles.footer}>GyG Puertas Automáticas © 2026</Text>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -227,11 +207,10 @@ const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 32,
-    paddingBottom: 40,
+    paddingVertical: 40,
+    justifyContent: 'center',
   },
 
-  // ── Logo ────────────────────────────────────────────────────────────────
   logoSection: { alignItems: 'center', marginBottom: 28 },
   logoCard: {
     backgroundColor: COLORS.BG_SURFACE,
@@ -258,7 +237,6 @@ const styles = StyleSheet.create({
     fontFamily: 'System',
   },
 
-  // ── Tabs ────────────────────────────────────────────────────────────────
   tabRow: {
     flexDirection: 'row',
     backgroundColor: COLORS.BG_ELEVATED,
@@ -282,7 +260,6 @@ const styles = StyleSheet.create({
   tabLabel: { fontSize: 13, fontWeight: '600', color: COLORS.TEXT_TERTIARY, fontFamily: 'System' },
   tabLabelActive: { color: COLORS.PRIMARY_GOLD_DARK },
 
-  // ── Form Card ───────────────────────────────────────────────────────────
   formCard: {
     backgroundColor: COLORS.BG_SURFACE,
     borderRadius: 20,
@@ -313,17 +290,6 @@ const styles = StyleSheet.create({
 
   primaryAction: { marginTop: 18 },
   secondaryAction: { marginTop: 10 },
-
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 18, gap: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.BORDER_SUBTLE },
-  dividerText: {
-    color: COLORS.TEXT_MUTED,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.5,
-    fontFamily: 'System',
-    textTransform: 'uppercase',
-  },
 
   footer: { textAlign: 'center', color: COLORS.TEXT_MUTED, fontSize: 11, marginTop: 28, fontFamily: 'System' },
 });

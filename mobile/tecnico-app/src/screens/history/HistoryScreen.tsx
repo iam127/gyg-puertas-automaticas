@@ -127,7 +127,8 @@ export const HistoryScreen: React.FC<any> = ({ navigation }) => {
   if (loading) return <Loader message="Cargando historial de trabajos..." />;
 
   return (
-    <SafeAreaView style={styles.root}>
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safe}>
       <Header title="Historial técnico" />
 
       <View style={styles.statSection}>
@@ -153,12 +154,14 @@ export const HistoryScreen: React.FC<any> = ({ navigation }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.PRIMARY_GOLD} colors={[COLORS.PRIMARY_GOLD]} />}
         ListEmptyComponent={<EmptyState title="Sin historial" message="Aún no registra servicios completados en el sistema." iconName="history" />}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.BG_BASE },
+  safe: { flex: 1 },
 
   statSection: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 },
   statCard: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderColor: COLORS.BORDER_GOLD, gap: 14 },
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.PRIMARY_GOLD_DARK, letterSpacing: 0.3 },
 
-  listContent: { paddingHorizontal: 16, paddingBottom: 32, flexGrow: 1 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 88, flexGrow: 1 },
 
   itemCard: { padding: 14, marginVertical: 4 },
   itemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

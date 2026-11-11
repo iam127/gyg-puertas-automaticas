@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, SafeAreaView,
-  RefreshControl, TouchableOpacity, Alert, StatusBar as RNStatusBar,
+  RefreshControl, TouchableOpacity, Alert, StatusBar as RNStatusBar, Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
@@ -174,8 +174,8 @@ export const HomeScreen: React.FC<any> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.BG_BASE },
-  safe: { flex: 1 },
-  scroll: { padding: 16, paddingTop: 20 },
+  safe: { flex: 1, paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0 },
+  scroll: { padding: 16, paddingTop: 12, paddingBottom: 88 },
 
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
   headerLeft: { flex: 1 },

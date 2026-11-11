@@ -14,7 +14,7 @@ interface AssignmentCardProps {
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({ item, type, onPress }) => {
   const isMant = type === 'mantenimiento';
   const visit = item.visitas?.[0] ?? null;
-  const dateStr = visit ? `${visit.fecha}  ${visit.hora}` : 'Sin fecha agendada';
+  const dateStr = visit ? `${visit.fecha}  ${visit.hora?.slice(0, 5) ?? ''}` : 'Sin fecha agendada';
   const subtitle = isMant
     ? `${item.tipo_puerta || 'General'} · ${item.tipo || 'Mantenimiento'}`
     : `Uso ${item.tipo_uso || 'Residencial'}`;

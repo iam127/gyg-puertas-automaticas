@@ -4,6 +4,7 @@ import {
   TouchableOpacity, TextInput, RefreshControl, Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { useAuthStore } from '../../store/authStore';
 import COLORS from '../../constants/colors';
 import MantenimientoService from '../../api/mantenimientos';
@@ -30,8 +31,17 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
   const [searchQuery, setSearchQuery]   = useState('');
   const [loading, setLoading]           = useState(true);
   const [refreshing, setRefreshing]     = useState(false);
+  const [isOffline, setIsOffline]       = useState(false);
   const [mantenimientos, setMantenimientos] = useState<any[]>([]);
   const [cotizaciones, setCotizaciones]     = useState<any[]>([]);
+
+  // Detectar cambios de conectividad
+  useEffect(() => {
+    const unsub = NetInfo.addEventListener((state: NetInfoState) => {
+      setIsOffline(!state.isConnected);
+    });
+    return unsub;
+  }, []);
 
   const fetchAssignments = async () => {
     if (!tecnico) return;
@@ -60,10 +70,10 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       filtered = list.filter(i =>
-        i.codigo.toLowerCase().includes(q) ||
-        i.nombre_cliente.toLowerCase().includes(q) ||
-        i.direccion.toLowerCase().includes(q) ||
-        i.distrito.toLowerCase().includes(q)
+        i.codigo?.toLowerCase().includes(q) ||
+        i.nombre_cliente?.toLowerCase().includes(q) ||
+        i.direccion?.toLowerCase().includes(q) ||
+        i.distrito?.toLowerCase().includes(q)
       );
     }
 
@@ -91,10 +101,19 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
   const cotizCount = cotizaciones.filter(c => !['completado','cancelado','rechazado'].includes(c.estado)).length;
 
   return (
-    <SafeAreaView style={styles.root}>
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safe}>
       <Header title="Mis Asignaciones" />
 
-      {/* ── Tabs ──────────────────────────────────────────────────────── */}
+      {/* ── Banner offline ────────────────────────────────────────────────── */}
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <MaterialIcons name="wifi-off" size={15} color="#92400E" />
+          <Text style={styles.offlineText}>Sin conexión — mostrando datos guardados</Text>
+        </View>
+      )}
+
+      {/* ── Tabs ──────────────────────────────────────────────────────────── */}
       <View style={styles.tabRow}>
         {(['mantenimiento','cotizacion'] as TabType[]).map(tab => {
           const active = activeTab === tab;
@@ -128,7 +147,7 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
         })}
       </View>
 
-      {/* ── Buscador ──────────────────────────────────────────────────── */}
+      {/* ── Buscador ──────────────────────────────────────────────────────── */}
       <View style={styles.searchWrap}>
         <View style={styles.searchBar}>
           <MaterialIcons name="search" size={18} color={COLORS.TEXT_TERTIARY} />
@@ -148,7 +167,7 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* ── Filtros ───────────────────────────────────────────────────── */}
+      {/* ── Filtros ───────────────────────────────────────────────────────── */}
       <View style={styles.filterRow}>
         {FILTERS.map(f => {
           const active = activeFilter === f.key;
@@ -167,7 +186,7 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
         })}
       </View>
 
-      {/* ── Lista ─────────────────────────────────────────────────────── */}
+      {/* ── Lista ─────────────────────────────────────────────────────────── */}
       <FlatList
         data={listData}
         keyExtractor={item => `${activeTab}-${item.id}`}
@@ -193,12 +212,31 @@ export const AssignmentsScreen: React.FC<any> = ({ navigation }) => {
           />
         }
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.BG_BASE },
+  safe: { flex: 1 },
+
+  // ── Banner offline ─────────────────────────────────────────────────────────
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF3C7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#FDE68A',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  offlineText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400E',
+  },
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
   tabRow: {
@@ -271,7 +309,7 @@ const styles = StyleSheet.create({
   chipTextActive: { color: COLORS.PRIMARY_GOLD_DARK },
 
   // ── Lista ─────────────────────────────────────────────────────────────────
-  listContent: { paddingHorizontal: 14, paddingBottom: 24, flexGrow: 1 },
+  listContent: { paddingHorizontal: 14, paddingBottom: 88, flexGrow: 1 },
 });
 
 export default AssignmentsScreen;

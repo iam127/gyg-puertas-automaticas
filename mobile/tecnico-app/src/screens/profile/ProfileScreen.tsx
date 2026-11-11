@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView, 
-  Alert 
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Alert,
 } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 import COLORS from '../../constants/colors';
@@ -96,7 +96,8 @@ export const ProfileScreen: React.FC = () => {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'T';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.root}>
+      <SafeAreaView style={styles.container}>
       <Header title="Mi Perfil" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         
@@ -161,18 +162,22 @@ export const ProfileScreen: React.FC = () => {
         
         <Text style={styles.appVersion}>GyG Puertas Automáticas v0.0.1 (Técnicos)</Text>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: COLORS.BG_DARK,
   },
+  container: {
+    flex: 1,
+  },
   scrollContent: {
     padding: LAYOUT.spacing.md,
-    paddingBottom: LAYOUT.spacing.xl,
+    paddingBottom: 88,
   },
   avatarSection: {
     alignItems: 'center',

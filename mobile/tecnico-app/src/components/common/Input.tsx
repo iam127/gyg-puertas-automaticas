@@ -11,7 +11,7 @@ interface InputProps extends TextInputProps {
 }
 
 export const Input: React.FC<InputProps> = ({
-  label, error, hint, containerStyle, secureTextEntry, onFocus, onBlur, ...props
+  label, error, hint, containerStyle, secureTextEntry, onFocus, onBlur, style, multiline, ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -25,15 +25,22 @@ export const Input: React.FC<InputProps> = ({
   return (
     <View style={[styles.wrapper, containerStyle]}>
       <Text style={styles.label}>{label}</Text>
-      <View style={[styles.fieldRow, { borderColor, borderWidth }, isFocused && styles.focusedBg]}>
+      <View style={[
+        styles.fieldRow,
+        { borderColor, borderWidth },
+        isFocused && styles.focusedBg,
+        multiline && styles.fieldRowMultiline,
+      ]}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, multiline && styles.inputMultiline, style]}
           placeholderTextColor={COLORS.TEXT_TERTIARY}
           secureTextEntry={isSecure}
+          multiline={multiline}
           onFocus={(e) => { setIsFocused(true); onFocus?.(e); }}
           onBlur={(e) => { setIsFocused(false); onBlur?.(e); }}
           accessibilityLabel={label}
           selectionColor={COLORS.PRIMARY_GOLD}
+          textAlignVertical={multiline ? 'top' : 'center'}
           {...props}
         />
         {secureTextEntry && (
@@ -77,8 +84,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 14,
   },
+  fieldRowMultiline: {
+    height: undefined,
+    minHeight: 56,
+    alignItems: 'flex-start',
+    paddingVertical: 10,
+  },
   focusedBg: { backgroundColor: COLORS.BG_SURFACE },
   input: { flex: 1, height: '100%', color: COLORS.TEXT_PRIMARY, fontSize: 15, fontFamily: 'System' },
+  inputMultiline: { height: undefined, minHeight: 40 },
   eyeBtn: { padding: 6, justifyContent: 'center', alignItems: 'center', marginLeft: 4 },
   feedbackRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 },
   errorText: { color: COLORS.ERROR_RED, fontSize: 12, fontWeight: '500', fontFamily: 'System' },

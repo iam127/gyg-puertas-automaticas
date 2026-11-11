@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '../../constants/colors';
 
@@ -12,7 +12,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ title, subtitle, onBack, rightComponent }) => {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.leftSlot}>
           {onBack && (
@@ -28,12 +28,14 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, onBack, rightCo
         <View style={styles.rightSlot}>{rightComponent ?? null}</View>
       </View>
       <View style={styles.accent} />
-    </SafeAreaView>
+    </View>
   );
 };
 
+const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? RNStatusBar.currentHeight ?? 0 : 0;
+
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: COLORS.BG_SURFACE },
+  safeArea: { backgroundColor: COLORS.BG_SURFACE, paddingTop: STATUS_BAR_HEIGHT },
   container: { height: 58, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 },
   leftSlot:  { width: 44, alignItems: 'flex-start', justifyContent: 'center' },
   rightSlot: { width: 44, alignItems: 'flex-end',   justifyContent: 'center' },

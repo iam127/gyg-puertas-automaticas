@@ -42,19 +42,19 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
   const [showForm, setShowForm]         = useState(false);
 
   // Mantenimiento
-  const [diagnostico, setDiagnostico]           = useState('');
-  const [trabajosRealizados, setTrabajosRealizados] = useState('');
-  const [repuestosUtilizados, setRepuestosUtilizados] = useState('');
-  const [costoTotal, setCostoTotal]             = useState('0');
-  const [firmaMant, setFirmaMant]               = useState(false);
+  const [diagnostico, setDiagnostico]                   = useState('');
+  const [trabajosRealizados, setTrabajosRealizados]     = useState('');
+  const [repuestosUtilizados, setRepuestosUtilizados]   = useState('');
+  const [costoTotal, setCostoTotal]                     = useState('0');
+  const [firmaMant, setFirmaMant]                       = useState(false);
 
   // Cotizacion
-  const [medidas, setMedidas]                       = useState('');
+  const [medidas, setMedidas]                           = useState('');
   const [materialesNecesarios, setMaterialesNecesarios] = useState('');
-  const [dificultad, setDificultad]                 = useState('Media');
-  const [tiempoEstimado, setTiempoEstimado]         = useState('');
-  const [observaciones, setObservaciones]           = useState('');
-  const [firmaCot, setFirmaCot]                     = useState(false);
+  const [dificultad, setDificultad]                     = useState('Media');
+  const [tiempoEstimado, setTiempoEstimado]             = useState('');
+  const [observaciones, setObservaciones]               = useState('');
+  const [firmaCot, setFirmaCot]                         = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -62,15 +62,16 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
   const validateForm = () => {
     const e: Record<string, string> = {};
     if (type === 'mantenimiento') {
-      if (!diagnostico.trim())       e.diagnostico        = 'El diagnóstico es obligatorio.';
-      if (!trabajosRealizados.trim()) e.trabajosRealizados = 'El detalle de trabajos es obligatorio.';
-      if (isNaN(Number(costoTotal)) || Number(costoTotal) < 0) e.costoTotal = 'Ingrese un costo numérico válido.';
-      if (!firmaMant) e.firmaMant = 'Debe declarar conformidad física del cliente.';
+      if (!diagnostico.trim())        e.diagnostico        = 'El diagnóstico es obligatorio.';
+      if (!trabajosRealizados.trim()) e.trabajosRealizados = 'Describa los trabajos realizados.';
+      if (isNaN(Number(costoTotal)) || Number(costoTotal) < 0)
+        e.costoTotal = 'Ingrese un monto numérico válido.';
+      if (!firmaMant) e.firmaMant = 'Debe confirmar la conformidad del cliente antes de cerrar.';
     } else {
-      if (!medidas.trim())             e.medidas             = 'Las medidas técnicas son obligatorias.';
-      if (!materialesNecesarios.trim()) e.materialesNecesarios = 'Los materiales necesarios son obligatorios.';
-      if (!tiempoEstimado.trim())      e.tiempoEstimado      = 'El tiempo estimado es obligatorio.';
-      if (!firmaCot) e.firmaCot = 'Debe declarar conformidad del cliente.';
+      if (!medidas.trim())              e.medidas              = 'Las medidas técnicas son obligatorias.';
+      if (!materialesNecesarios.trim()) e.materialesNecesarios = 'Indique los materiales requeridos.';
+      if (!tiempoEstimado.trim())       e.tiempoEstimado       = 'El tiempo estimado es obligatorio.';
+      if (!firmaCot) e.firmaCot = 'Debe confirmar la conformidad del cliente antes de cerrar.';
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -88,11 +89,11 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
       }
       Alert.alert(
         'Estado actualizado',
-        `El servicio está ahora en ${type === 'mantenimiento' ? 'proceso' : 'instalación'}.`,
+        `El servicio pasó a "${type === 'mantenimiento' ? 'En proceso' : 'En instalación'}".`,
         [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
       );
     } catch {
-      Alert.alert('Error', 'No se pudo actualizar el estado del servicio.');
+      Alert.alert('Error', 'No se pudo actualizar el estado. Intente nuevamente.');
     } finally {
       setSubmitting(false);
     }
@@ -120,23 +121,48 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
           dificultad: dificultad.trim(),
           tiempo_estimado: tiempoEstimado.trim(),
         });
+        await CotizacionService.updateCotizacionStatus(id, 'en_revision' as any);
       }
       Alert.alert(
-        type === 'mantenimiento' ? 'Reporte guardado' : 'Medidas registradas',
+        type === 'mantenimiento' ? 'Reporte guardado' : 'Relevamiento guardado',
         type === 'mantenimiento'
-          ? 'El diagnóstico fue enviado al administrador y el servicio quedó resuelto.'
-          : 'Las medidas y materiales fueron guardados. El administrador preparará la cotización formal.',
+          ? 'El reporte técnico fue enviado al administrador. El servicio quedó marcado como resuelto.'
+          : 'Las medidas y materiales fueron registrados. El administrador generará la cotización formal.',
         [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
       );
     } catch {
-      Alert.alert('Error', 'No se pudo guardar el reporte técnico.');
+      Alert.alert('Error', 'No se pudo guardar el reporte. Intente nuevamente.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const canStartProgress = !['en_proceso', 'en_instalacion'].includes(currentStatus);
+  // Mantenimiento: puede iniciar si está en visita_agendada
+  // Cotización: puede iniciar instalación solo si el cliente ya aceptó (cotizado o aceptado)
+  const canStartProgress = type === 'mantenimiento'
+    ? currentStatus === 'visita_agendada'
+    : ['cotizado', 'aceptado'].includes(currentStatus);
+
+  // Mantenimiento: puede completar solo si ya está en proceso
+  // Cotización: puede completar si está en instalacion O si está en visita_agendada (registrar medidas)
+  const canComplete = type === 'mantenimiento'
+    ? currentStatus === 'en_proceso'
+    : currentStatus === 'en_instalacion' || currentStatus === 'visita_agendada';
+
   const isMant = type === 'mantenimiento';
+
+  // Título y subtítulo del botón completar según contexto
+  const completeTitle = isMant
+    ? 'Completar y cargar reporte'
+    : currentStatus === 'visita_agendada'
+      ? 'Registrar medidas y materiales'
+      : 'Completar instalación';
+
+  const completeSubtitle = isMant
+    ? 'Ingrese el diagnóstico y los trabajos realizados'
+    : currentStatus === 'visita_agendada'
+      ? 'Registre las medidas relevadas para preparar la cotización'
+      : 'Ingrese el detalle de la instalación realizada';
 
   return (
     <View style={styles.root}>
@@ -166,10 +192,10 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
             {!showForm ? (
               <SectionCard
                 iconName="trending-up"
-                title="Acciones de progreso"
-                desc="Seleccione la siguiente etapa en el flujo de trabajo"
+                title="Acciones disponibles"
+                desc="Seleccione la siguiente etapa del servicio"
               >
-                {/* Iniciar */}
+                {/* Iniciar — solo visible si puede iniciar */}
                 {canStartProgress && (
                   <View style={styles.actionItem}>
                     <View style={styles.actionTop}>
@@ -198,45 +224,45 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                   </View>
                 )}
 
-                {/* Completar */}
-                <View style={[styles.actionItem, { marginBottom: 0 }]}>
-                  <View style={styles.actionTop}>
-                    <View style={[styles.actionIconWrap, { backgroundColor: COLORS.SUCCESS_BG }]}>
-                      <MaterialIcons name="assignment-turned-in" size={18} color={COLORS.SUCCESS} />
+                {/* Completar — visible si está en proceso / en instalación / visita_agendada (cotización) */}
+                {canComplete && (
+                  <View style={[styles.actionItem, { marginBottom: 0 }]}>
+                    <View style={styles.actionTop}>
+                      <View style={[styles.actionIconWrap, { backgroundColor: COLORS.SUCCESS_BG }]}>
+                        <MaterialIcons name="assignment-turned-in" size={18} color={COLORS.SUCCESS} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.actionTitle}>{completeTitle}</Text>
+                        <Text style={styles.actionSubtitle}>{completeSubtitle}</Text>
+                      </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.actionTitle}>
-                        {isMant ? 'Finalizar y cargar diagnóstico' : 'Registrar medidas y materiales'}
-                      </Text>
-                      <Text style={styles.actionSubtitle}>
-                        {isMant
-                          ? 'Completa el reporte técnico del servicio'
-                          : 'Registra las medidas para preparar la cotización'}
-                      </Text>
-                    </View>
+                    <Button
+                      title="Completar"
+                      onPress={() => setShowForm(true)}
+                      variant="outline"
+                      style={[styles.actionBtn, { borderColor: COLORS.SUCCESS_BORDER }]}
+                      textStyle={{ color: COLORS.SUCCESS }}
+                    />
                   </View>
-                  <Button
-                    title="Completar"
-                    onPress={() => setShowForm(true)}
-                    variant="outline"
-                    style={[styles.actionBtn, { borderColor: COLORS.SUCCESS_BORDER }]}
-                    textStyle={{ color: COLORS.SUCCESS }}
-                  />
-                </View>
+                )}
               </SectionCard>
             ) : (
 
               /* ── Vista: formulario ────────────────────────────────────── */
               <SectionCard
                 iconName="description"
-                title="Reporte técnico final"
-                desc="Complete el expediente. Será visible para el administrador en el panel."
+                title="Reporte técnico"
+                desc={
+                  isMant
+                    ? 'Complete el informe de la visita. Será visible para el administrador.'
+                    : 'Registre las medidas relevadas. El administrador preparará la cotización.'
+                }
               >
                 {isMant ? (
                   <>
                     <Input
                       label="Diagnóstico del problema *"
-                      placeholder="Describa el diagnóstico encontrado..."
+                      placeholder=""
                       value={diagnostico}
                       onChangeText={setDiagnostico}
                       error={errors.diagnostico}
@@ -246,7 +272,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     />
                     <Input
                       label="Trabajos realizados *"
-                      placeholder="Detalle las reparaciones, calibraciones..."
+                      placeholder=""
                       value={trabajosRealizados}
                       onChangeText={setTrabajosRealizados}
                       error={errors.trabajosRealizados}
@@ -256,7 +282,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     />
                     <Input
                       label="Repuestos utilizados"
-                      placeholder="Ej. Resorte de torsión 2'', Cremallera..."
+                      placeholder=""
                       value={repuestosUtilizados}
                       onChangeText={setRepuestosUtilizados}
                       multiline
@@ -265,7 +291,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     />
                     <Input
                       label="Costo adicional (S/)"
-                      placeholder="Ingrese costo o 0 si está incluido"
+                      placeholder=""
                       value={costoTotal}
                       onChangeText={setCostoTotal}
                       error={errors.costoTotal}
@@ -274,7 +300,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     <ConformidadSwitch
                       checked={firmaMant}
                       onChange={setFirmaMant}
-                      desc="Declaro que el cliente firmó conformidad física o digital en el sitio"
+                      desc="El cliente estuvo presente y dio su conformidad con el servicio realizado"
                       error={errors.firmaMant}
                     />
                   </>
@@ -282,7 +308,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                   <>
                     <Input
                       label="Medidas técnicas *"
-                      placeholder="Ej: Ancho: 3.50m, Alto: 2.40m, Cabezal: 30cm..."
+                      placeholder=""
                       value={medidas}
                       onChangeText={setMedidas}
                       error={errors.medidas}
@@ -292,7 +318,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     />
                     <Input
                       label="Materiales necesarios *"
-                      placeholder="Ej: Motor CAME 1HP, Riel 4m, Control remoto x2..."
+                      placeholder=""
                       value={materialesNecesarios}
                       onChangeText={setMaterialesNecesarios}
                       error={errors.materialesNecesarios}
@@ -302,20 +328,20 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     />
                     <Input
                       label="Grado de dificultad"
-                      placeholder="Baja / Media / Alta"
+                      placeholder=""
                       value={dificultad}
                       onChangeText={setDificultad}
                     />
                     <Input
                       label="Tiempo estimado de instalación *"
-                      placeholder="Ej. 1 día (4 horas)"
+                      placeholder=""
                       value={tiempoEstimado}
                       onChangeText={setTiempoEstimado}
                       error={errors.tiempoEstimado}
                     />
                     <Input
                       label="Observaciones adicionales"
-                      placeholder="Detalles adicionales, condiciones del lugar..."
+                      placeholder=""
                       value={observaciones}
                       onChangeText={setObservaciones}
                       multiline
@@ -325,7 +351,7 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                     <ConformidadSwitch
                       checked={firmaCot}
                       onChange={setFirmaCot}
-                      desc="Declaro que el cliente aprobó las medidas y materiales tomados"
+                      desc="El cliente validó las medidas tomadas y está de acuerdo con el relevamiento"
                       error={errors.firmaCot}
                     />
                   </>
@@ -369,7 +395,7 @@ const ConformidadSwitch: React.FC<{
       <View style={[styles.actionIconWrap, { backgroundColor: COLORS.PRIMARY_GOLD_MUTED }]}>
         <MaterialIcons name="verified" size={16} color={COLORS.PRIMARY_GOLD_DARK} />
       </View>
-      <Text style={styles.switchLabel}>Firma de conformidad</Text>
+      <Text style={styles.switchLabel}>Conformidad del cliente</Text>
     </View>
     <Text style={styles.switchDesc}>{desc}</Text>
     <View style={styles.switchRow}>
@@ -395,8 +421,8 @@ const ConformidadSwitch: React.FC<{
 // ── Estilos ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.BG_BASE },
-  safe: { flex: 1 },
-  scroll: { padding: 14, paddingTop: 12, flexGrow: 1 },
+  safe: { flex: 1, paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0 },
+  scroll: { padding: 14, paddingTop: 12, paddingBottom: 88, flexGrow: 1 },
 
   // ── Estado actual ─────────────────────────────────────────────────────────
   statusRow: {
@@ -482,7 +508,7 @@ const styles = StyleSheet.create({
   actionBtn:      { marginTop: 0 },
 
   // ── Textarea ──────────────────────────────────────────────────────────────
-  textArea: { minHeight: 90, textAlignVertical: 'top' },
+  textArea: { textAlignVertical: 'top' },
 
   // ── Switch conformidad ────────────────────────────────────────────────────
   switchCard: {

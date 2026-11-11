@@ -1,6 +1,8 @@
 import api from './config';
 import { Mantenimiento } from '../types/mantenimiento.types';
 import { useAuthStore } from '../store/authStore';
+import OfflineStorage, { PendingAction } from '../services/offlineStorage';
+import NetInfo from '@react-native-community/netinfo';
 
 let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
   {
@@ -108,26 +110,38 @@ let MOCK_MANTENIMIENTOS: Mantenimiento[] = [
 ];
 
 export const MantenimientoService = {
-  getMyMantenimientos: async (tecnicoId: number): Promise<Mantenimiento[]> => {
-    if (useAuthStore.getState().isDemoMode) {
+  getMyMantenimientos: async (_tecnicoId: number): Promise<Mantenimiento[]> => {
+    if ((useAuthStore.getState() as any).isDemoMode) {
       return MOCK_MANTENIMIENTOS;
     }
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      return OfflineStorage.getMantenimientos();
+    }
     const response = await api.get<Mantenimiento[]>('/mantenimientos/mis_mantenimientos/');
+    await OfflineStorage.saveMantenimientos(response.data);
     return response.data;
   },
 
   getMantenimientoDetail: async (id: number): Promise<Mantenimiento> => {
-    if (useAuthStore.getState().isDemoMode) {
+    if ((useAuthStore.getState() as any).isDemoMode) {
       const mant = MOCK_MANTENIMIENTOS.find((m) => m.id === id);
       if (!mant) throw new Error('Mantenimiento no encontrado (Demo)');
       return mant;
     }
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      const cached = await OfflineStorage.getMantenimientoDetail(id);
+      if (cached) return cached;
+      throw new Error('Sin conexión y sin datos en caché.');
+    }
     const response = await api.get<Mantenimiento>(`/mantenimientos/${id}/`);
+    await OfflineStorage.saveMantenimientoDetail(response.data);
     return response.data;
   },
 
   updateMantenimientoStatus: async (id: number, status: any): Promise<Mantenimiento> => {
-    if (useAuthStore.getState().isDemoMode) {
+    if ((useAuthStore.getState() as any).isDemoMode) {
       MOCK_MANTENIMIENTOS = MOCK_MANTENIMIENTOS.map((m) => {
         if (m.id === id) return { ...m, estado: status, actualizado_en: new Date().toISOString() };
         return m;
@@ -136,7 +150,21 @@ export const MantenimientoService = {
       if (!updated) throw new Error('Mantenimiento no encontrado (Demo)');
       return updated;
     }
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      const action: PendingAction = { type: 'updateMantenimientoStatus', id, status };
+      await OfflineStorage.enqueue(action);
+      // Actualizar cache local optimistamente
+      const cached = await OfflineStorage.getMantenimientoDetail(id);
+      if (cached) {
+        const updated = { ...cached, estado: status, actualizado_en: new Date().toISOString() };
+        await OfflineStorage.saveMantenimientoDetail(updated);
+        return updated;
+      }
+      throw new Error('Sin conexión. Acción guardada para sincronizar luego.');
+    }
     const response = await api.patch<Mantenimiento>(`/mantenimientos/${id}/`, { estado: status });
+    await OfflineStorage.saveMantenimientoDetail(response.data);
     return response.data;
   },
 
@@ -147,20 +175,13 @@ export const MantenimientoService = {
     repuestos_utilizados: string;
     costo_total: number;
   }): Promise<any> => {
-    if (useAuthStore.getState().isDemoMode) {
+    if ((useAuthStore.getState() as any).isDemoMode) {
       MOCK_MANTENIMIENTOS = MOCK_MANTENIMIENTOS.map((m) => {
         const hasVisita = m.visitas?.some((v) => v.id === visitaId);
         if (hasVisita) {
           const updatedVisitas = m.visitas?.map((v) => {
             if (v.id === visitaId) {
-              return {
-                ...v,
-                estado: data.estado,
-                diagnostico: data.diagnostico,
-                trabajos_realizados: data.trabajos_realizados,
-                repuestos_utilizados: data.repuestos_utilizados,
-                costo_total: data.costo_total,
-              };
+              return { ...v, ...data };
             }
             return v;
           });
@@ -170,13 +191,24 @@ export const MantenimientoService = {
       });
       return { success: true };
     }
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      const action: PendingAction = { type: 'updateVisitaMantenimiento', visitaId, data };
+      await OfflineStorage.enqueue(action);
+      return { success: true, offline: true };
+    }
     const response = await api.patch(`/visitas-mantenimiento/${visitaId}/`, data);
     return response.data;
   },
 
   subirFotoMantenimiento: async (visitaId: number, fotoUri: string): Promise<any> => {
-    if (useAuthStore.getState().isDemoMode) {
+    if ((useAuthStore.getState() as any).isDemoMode) {
       return { success: true };
+    }
+    // La foto requiere conexión obligatoriamente
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      throw new Error('Se necesita conexión para subir fotos.');
     }
     const formData = new FormData();
     const filename = fotoUri.split('/').pop() || 'foto.jpg';
@@ -193,6 +225,37 @@ export const MantenimientoService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
+  },
+
+  // ── Sincronizar cola pendiente al recuperar conexión ──────────────────────
+  syncPendingQueue: async (): Promise<void> => {
+    const queue = await OfflineStorage.getQueue();
+    if (queue.length === 0) return;
+
+    const failed: PendingAction[] = [];
+
+    for (const action of queue) {
+      try {
+        if (action.type === 'updateMantenimientoStatus') {
+          await api.patch(`/mantenimientos/${action.id}/`, { estado: action.status });
+        } else if (action.type === 'updateVisitaMantenimiento') {
+          await api.patch(`/visitas-mantenimiento/${action.visitaId}/`, action.data);
+        }
+        // cotizaciones las maneja CotizacionService
+      } catch {
+        failed.push(action);
+      }
+    }
+
+    if (failed.length === 0) {
+      await OfflineStorage.clearQueue();
+    } else {
+      // Guardar solo las que fallaron usando OfflineStorage
+      await OfflineStorage.clearQueue();
+      for (const action of failed) {
+        await OfflineStorage.enqueue(action);
+      }
+    }
   },
 };
 

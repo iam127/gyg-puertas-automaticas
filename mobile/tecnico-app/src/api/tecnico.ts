@@ -13,7 +13,7 @@ export const TecnicoService = {
   /**
    * Helper to locate the logged-in technician profile based on the decoded JWT user ID
    */
-  getMyProfile: async (userId?: number): Promise<Tecnico> => {
+  getMyProfile: async (_userId?: number): Promise<Tecnico> => {
     const response = await api.get<Tecnico>('/tecnicos/mi_perfil/');
     return response.data;
   },
