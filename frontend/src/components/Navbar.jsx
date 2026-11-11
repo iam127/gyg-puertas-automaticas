@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { FaPhone, FaEnvelope, FaBars, FaTimes, FaWhatsapp, FaClock } from 'react-icons/fa'
 import logo from '../assets/Logo-gyg.png'
 
 function Navbar() {
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const { pathname } = useLocation()
 
   const links = [
     { to: '/', label: 'Inicio' },
@@ -16,6 +17,11 @@ function Navbar() {
     { to: '/mantenimiento', label: 'Mantenimiento' },
     { to: '/contacto', label: 'Contacto' },
   ]
+
+  const isActive = (to) => {
+    if (to === '/') return pathname === '/'
+    return pathname.startsWith(to)
+  }
 
   return (
     <header>
@@ -53,6 +59,7 @@ function Navbar() {
         <style>{`
           .nav-link:hover { background: #FACC15 !important; color: #111 !important; }
           .nav-link { transition: all .2s; }
+          .nav-link-active { background: #FACC15; color: #111 !important; }
           .btn-cotizar-nav:hover { background: #FDE047 !important; }
           .btn-cotizar-nav { transition: background .2s; }
         `}</style>
@@ -66,7 +73,7 @@ function Navbar() {
               <Link
                 key={i}
                 to={item.to}
-                className="nav-link flex items-center px-3"
+                className={`nav-link flex items-center px-3 ${isActive(item.to) ? 'nav-link-active' : ''}`}
               >
                 {item.label}
               </Link>
@@ -95,7 +102,11 @@ function Navbar() {
               <Link
                 key={i}
                 to={item.to}
-                className="py-2.5 px-3 rounded-xl hover:bg-yellow-50 hover:text-yellow-600 font-medium transition"
+                className={`py-2.5 px-3 rounded-xl font-medium transition ${
+                  isActive(item.to)
+                    ? 'bg-yellow-400 text-gray-900'
+                    : 'hover:bg-yellow-50 hover:text-yellow-600'
+                }`}
                 onClick={() => setMenuAbierto(false)}
               >
                 {item.label}

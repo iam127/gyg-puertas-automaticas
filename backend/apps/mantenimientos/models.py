@@ -1,5 +1,15 @@
 from django.db import models
 import uuid
+import secrets
+import string
+
+def _generar_codigo_mantenimiento():
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        sufijo = ''.join(secrets.choice(chars) for _ in range(8))
+        codigo = f'MANT-{sufijo}'
+        if not Mantenimiento.objects.filter(codigo=codigo).exists():
+            return codigo
 
 class Mantenimiento(models.Model):
     TIPO_CHOICES = [
@@ -19,7 +29,7 @@ class Mantenimiento(models.Model):
         ('cancelado', 'Cancelado'),
     ]
 
-    codigo = models.CharField(max_length=20, unique=True, editable=False)
+    codigo = models.CharField(max_length=20, unique=True, editable=False, default=_generar_codigo_mantenimiento)
     nombre_cliente = models.CharField(max_length=200)
     telefono = models.CharField(max_length=20)
     correo = models.EmailField()
@@ -36,12 +46,6 @@ class Mantenimiento(models.Model):
     fecha_proximo_mantenimiento = models.DateField(null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        if not self.codigo:
-            ultimo = Mantenimiento.objects.count() + 1
-            self.codigo = f'MANT-{2026}-{str(ultimo).zfill(4)}'
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.codigo} - {self.nombre_cliente}'

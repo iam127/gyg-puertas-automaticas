@@ -6,6 +6,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
 from .models import Tecnico, CodigoInvitacion
 from .serializers import TecnicoSerializer, TecnicoRegistroSerializer, CodigoInvitacionSerializer
+import secrets
+import string
+
 
 class TecnicoViewSet(viewsets.ModelViewSet):
     queryset = Tecnico.objects.all()
@@ -64,11 +67,11 @@ class TecnicoViewSet(viewsets.ModelViewSet):
 class CodigoInvitacionViewSet(viewsets.ModelViewSet):
     queryset = CodigoInvitacion.objects.all()
     serializer_class = CodigoInvitacionSerializer
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        import random
-        import string
-        codigo = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        chars = string.ascii_uppercase + string.digits
+        codigo = ''.join(secrets.choice(chars) for _ in range(8))
         obj = CodigoInvitacion.objects.create(codigo=codigo)
         serializer = self.get_serializer(obj)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

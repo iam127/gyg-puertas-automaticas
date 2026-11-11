@@ -1,5 +1,26 @@
 from django.db import models
 import uuid
+import secrets
+import string
+
+
+def _generar_codigo_cotizacion():
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        sufijo = ''.join(secrets.choice(chars) for _ in range(8))
+        codigo = f'GYG-{sufijo}'
+        if not Cotizacion.objects.filter(codigo=codigo).exists():
+            return codigo
+
+
+def _generar_codigo_mantenimiento():
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        sufijo = ''.join(secrets.choice(chars) for _ in range(8))
+        codigo = f'MANT-{sufijo}'
+        if not Mantenimiento.objects.filter(codigo=codigo).exists():
+            return codigo
+
 
 class Cotizacion(models.Model):
     ESTADO_CHOICES = [
@@ -33,14 +54,15 @@ class Cotizacion(models.Model):
     disponibilidad = models.CharField(max_length=200)
     estado = models.CharField(max_length=30, choices=ESTADO_CHOICES, default='recibido')
     motivo_rechazo = models.TextField(blank=True)
+    fecha_instalacion_propuesta = models.DateField(null=True, blank=True)
+    hora_instalacion_propuesta = models.TimeField(null=True, blank=True)
     token_unico = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.codigo:
-            ultimo = Cotizacion.objects.count() + 1
-            self.codigo = f'GYG-{2026}-{str(ultimo).zfill(4)}'
+            self.codigo = _generar_codigo_cotizacion()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -68,7 +90,6 @@ class VisitaTecnica(models.Model):
         ('completada', 'Completada'),
         ('cancelada', 'Cancelada'),
         ('reprogramada', 'Reprogramada'),
-        
     ]
 
     cotizacion = models.ForeignKey(Cotizacion, on_delete=models.CASCADE, related_name='visitas')

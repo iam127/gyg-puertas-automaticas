@@ -47,40 +47,38 @@ function Chatbot() {
   }
 
   return (
-    <div style={{
-      position: 'fixed', bottom: '24px', right: '24px',
-      zIndex: 1000, fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
-    }}>
+    <>
       <style>{`
         .btn-enviar-chat:hover { background: #FDE047 !important; }
         .btn-enviar-chat { transition: background .2s; }
-        .btn-flotante-chat:hover { background: #FDE047 !important; }
-        .btn-flotante-chat { transition: background .2s; }
         .input-chat:focus { outline: none; border-color: #FACC15 !important; }
         .input-chat { transition: border-color .2s; }
+        .btn-chat-toggle:hover { transform: scale(1.08); }
+        .btn-chat-toggle { transition: transform .2s, box-shadow .2s; }
       `}</style>
 
+      {/* Ventana del chat */}
       {abierto && (
         <div style={{
+          position: 'fixed', bottom: '90px', right: '24px',
+          zIndex: 1000,
           background: '#fff', borderRadius: '16px',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
-          width: '320px', marginBottom: '16px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+          width: '320px',
           display: 'flex', flexDirection: 'column',
-          overflow: 'hidden', border: '1px solid #EEECEA',
-          height: '480px',
+          overflow: 'hidden', border: '1px solid #E8E5E0',
+          height: '460px',
+          fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
         }}>
           {/* Header */}
           <div style={{
             background: '#111', color: '#fff',
-            padding: '16px 20px', display: 'flex',
+            padding: '14px 18px', display: 'flex',
             justifyContent: 'space-between', alignItems: 'center',
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '8px', height: '8px',
-                background: '#10B981', borderRadius: '50%',
-              }} />
+              <div style={{ width: '8px', height: '8px', background: '#10B981', borderRadius: '50%' }} />
               <span style={{ fontWeight: 700, fontSize: '14px' }}>Asistente GyG</span>
             </div>
             <button
@@ -88,36 +86,32 @@ function Chatbot() {
               style={{
                 color: '#888', background: 'transparent',
                 border: 'none', cursor: 'pointer',
-                padding: '4px', display: 'flex',
-                alignItems: 'center', transition: 'color .2s',
+                padding: '4px', display: 'flex', alignItems: 'center',
               }}
-              onMouseEnter={(e) => e.target.style.color = '#fff'}
-              onMouseLeave={(e) => e.target.style.color = '#888'}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#888'}
             >
-              <FaTimes size={16} />
+              <FaTimes size={15} />
             </button>
           </div>
 
           {/* Mensajes */}
           <div style={{
             flex: 1, overflowY: 'auto',
-            padding: '20px', display: 'flex',
-            flexDirection: 'column', gap: '12px',
+            padding: '16px', display: 'flex',
+            flexDirection: 'column', gap: '10px',
             background: '#FAFAF8',
           }}>
             {mensajes.map((msg, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  justifyContent: msg.rol === 'user' ? 'flex-end' : 'flex-start',
-                }}
-              >
+              <div key={i} style={{
+                display: 'flex',
+                justifyContent: msg.rol === 'user' ? 'flex-end' : 'flex-start',
+              }}>
                 <div style={{
-                  maxWidth: '75%',
-                  padding: '12px 16px',
+                  maxWidth: '78%',
+                  padding: '10px 14px',
                   borderRadius: '12px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   lineHeight: 1.6,
                   background: msg.rol === 'user' ? '#FACC15' : '#fff',
                   color: msg.rol === 'user' ? '#111' : '#333',
@@ -132,9 +126,9 @@ function Chatbot() {
             {cargando && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                 <div style={{
-                  background: '#fff', color: '#666',
-                  padding: '12px 16px', borderRadius: '12px',
-                  fontSize: '14px', border: '1px solid #EEECEA',
+                  background: '#fff', color: '#999',
+                  padding: '10px 14px', borderRadius: '12px',
+                  fontSize: '13px', border: '1px solid #EEECEA',
                   fontStyle: 'italic',
                 }}>
                   Escribiendo...
@@ -145,15 +139,11 @@ function Chatbot() {
           </div>
 
           {/* Input */}
-          <form
-            onSubmit={enviarMensaje}
-            style={{
-              borderTop: '1px solid #EEECEA',
-              padding: '16px', display: 'flex',
-              gap: '10px', background: '#fff',
-              flexShrink: 0,
-            }}
-          >
+          <form onSubmit={enviarMensaje} style={{
+            borderTop: '1px solid #EEECEA',
+            padding: '12px 14px', display: 'flex',
+            gap: '8px', background: '#fff', flexShrink: 0,
+          }}>
             <input
               type="text"
               value={input}
@@ -162,9 +152,8 @@ function Chatbot() {
               className="input-chat"
               style={{
                 flex: 1, border: '1.5px solid #E8E5E0',
-                borderRadius: '8px', padding: '10px 14px',
-                fontSize: '14px', background: '#FAFAF8',
-                color: '#111',
+                borderRadius: '8px', padding: '9px 12px',
+                fontSize: '13px', background: '#FAFAF8', color: '#111',
               }}
             />
             <button
@@ -173,14 +162,13 @@ function Chatbot() {
               className="btn-enviar-chat"
               style={{
                 background: '#FACC15', color: '#111',
-                padding: '10px 16px', borderRadius: '8px',
-                fontWeight: 700, border: 'none',
-                cursor: cargando ? 'not-allowed' : 'pointer',
+                padding: '9px 14px', borderRadius: '8px',
+                border: 'none', cursor: cargando ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center',
                 opacity: cargando ? 0.5 : 1,
               }}
             >
-              <FaPaperPlane size={16} />
+              <FaPaperPlane size={15} />
             </button>
           </form>
         </div>
@@ -189,19 +177,23 @@ function Chatbot() {
       {/* Botón flotante */}
       <button
         onClick={() => setAbierto(!abierto)}
-        className="btn-flotante-chat"
+        className="btn-chat-toggle"
         style={{
+          position: 'fixed', bottom: '24px', right: '24px',
+          zIndex: 1001,
           background: '#FACC15', color: '#111',
-          width: '56px', height: '56px',
-          borderRadius: '50%', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+          width: '54px', height: '54px',
+          borderRadius: '50%',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
           display: 'flex', alignItems: 'center',
           justifyContent: 'center', border: 'none',
           cursor: 'pointer',
+          fontFamily: "'DM Sans', sans-serif",
         }}
       >
-        {abierto ? <FaTimes size={22} /> : <FaCommentDots size={22} />}
+        <FaCommentDots size={22} />
       </button>
-    </div>
+    </>
   )
 }
 

@@ -1,0 +1,119 @@
+from .models import Cotizacion, VisitaTecnica
+
+
+def crear_cotizacion(data):
+    cotizacion = Cotizacion.objects.create(**data)
+    try:
+        from apps.notificaciones.whatsapp import notificar_nueva_cotizacion
+        from apps.notificaciones.email import notificar_cotizacion_email
+        notificar_nueva_cotizacion(cotizacion)
+        notificar_cotizacion_email(cotizacion)
+    except Exception as e:
+        print(f"Error enviando notificacion: {e}")
+    return cotizacion
+
+
+def responder_cotizacion(cotizacion, respuesta, motivo=''):
+    if respuesta == 'aceptado':
+        cotizacion.estado = 'aceptado'
+    elif respuesta == 'rechazado':
+        cotizacion.estado = 'rechazado'
+        cotizacion.motivo_rechazo = motivo
+    elif respuesta == 'modificacion':
+        cotizacion.estado = 'en_revision'
+        cotizacion.motivo_rechazo = motivo
+    cotizacion.save()
+
+
+def proponer_fecha_cotizacion(cotizacion, fecha, hora):
+    cotizacion.fecha_instalacion_propuesta = fecha
+    cotizacion.hora_instalacion_propuesta = hora
+    cotizacion.save()
+
+
+def asignar_tecnico_cotizacion(cotizacion, tecnico, fecha, hora):
+    visita_existente = VisitaTecnica.objects.filter(cotizacion=cotizacion).first()
+    if visita_existente:
+        visita_existente.tecnico = tecnico
+        visita_existente.fecha = fecha
+        visita_existente.hora = hora
+        visita_existente.save()
+        visita = visita_existente
+    else:
+        visita = VisitaTecnica.objects.create(
+            cotizacion=cotizacion,
+            tecnico=tecnico,
+            fecha=fecha,
+            hora=hora,
+        )
+    cotizacion.estado = 'visita_agendada'
+    cotizacion.save()
+    return visita
+
+
+def enviar_cotizacion_formal(cotizacion_formal):
+    try:
+        from apps.notificaciones.email import notificar_cotizacion_enviada_email
+        from apps.notificaciones.whatsapp import notificar_cotizacion_enviada_whatsapp
+        import os
+        pdf_path = os.path.join('media', str(cotizacion_formal.pdf_cotizacion))
+        notificar_cotizacion_enviada_email(cotizacion_formal.cotizacion, pdf_path)
+        notificar_cotizacion_enviada_whatsapp(cotizacion_formal.cotizacion)
+    except Exception as e:
+        print(f"Error enviando notificaciones cotizacion enviada: {e}")
+
+
+def enviar_notificacion_contacto(mensaje):
+    try:
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+        html = f'''
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0;">
+  <div style="max-width:600px;margin:30px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+    <div style="background:#111827;padding:25px;text-align:center;">
+      <h2 style="color:#facc15;margin:0;font-size:20px;">Nuevo Mensaje de Contacto</h2>
+      <p style="color:#9ca3af;margin:6px 0 0;font-size:13px;">Recibido desde el formulario web</p>
+    </div>
+    <div style="padding:25px;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;width:40%;">Nombre</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mensaje.nombre}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:10px 8px;color:#6b7280;">Telefono</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mensaje.telefono}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:10px 8px;color:#6b7280;">Correo</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mensaje.correo}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 8px;color:#6b7280;vertical-align:top;">Mensaje</td>
+          <td style="padding:10px 8px;font-weight:bold;color:#111827;">{mensaje.mensaje}</td>
+        </tr>
+      </table>
+      <div style="margin-top:20px;text-align:center;">
+        <a href="http://localhost:5173/admin-panel" style="background:#facc15;color:#111827;padding:12px 30px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:14px;">Ver en el panel admin</a>
+      </div>
+    </div>
+    <div style="background:#f9fafb;padding:15px;text-align:center;border-top:1px solid #e5e7eb;">
+      <p style="margin:0;color:#9ca3af;font-size:12px;">GyG Puertas Automaticas — Panel Administrativo</p>
+    </div>
+  </div>
+</body>
+</html>
+'''
+        msg = EmailMultiAlternatives(
+            subject=f'Nuevo mensaje de contacto - {mensaje.nombre}',
+            body=f'Mensaje de {mensaje.nombre} - {mensaje.telefono}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[settings.EMAIL_HOST_USER]
+        )
+        msg.attach_alternative(html, "text/html")
+        msg.send(fail_silently=True)
+    except Exception as e:
+        print(f"Error enviando email contacto: {e}")

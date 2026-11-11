@@ -1,12 +1,16 @@
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Producto, CategoriaProducto, ImagenProducto
 from .serializers import ProductoSerializer, ProductoListSerializer, CategoriaProductoSerializer, ImagenProductoSerializer
+
 
 class CategoriaProductoViewSet(viewsets.ModelViewSet):
     queryset = CategoriaProducto.objects.all()
     serializer_class = CategoriaProductoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
 
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
@@ -14,6 +18,7 @@ class ProductoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion', 'uso', 'material']
     ordering_fields = ['nombre', 'creado_en']
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -39,6 +44,8 @@ class ProductoViewSet(viewsets.ModelViewSet):
         serializer = ProductoListSerializer(productos, many=True, context={'request': request})
         return Response(serializer.data)
 
+
 class ImagenProductoViewSet(viewsets.ModelViewSet):
     queryset = ImagenProducto.objects.all()
     serializer_class = ImagenProductoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]

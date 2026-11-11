@@ -1,62 +1,72 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { FaWhatsapp } from 'react-icons/fa'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import Chatbot from './components/Chatbot'
-import Inicio from './pages/Inicio'
-import Catalogo from './pages/Catalogo'
-import Cotizacion from './pages/Cotizacion'
-import Seguimiento from './pages/Seguimiento'
-import Mantenimiento from './pages/Mantenimiento'
-import Nosotros from './pages/Nosotros'
-import Contacto from './pages/Contacto'
-import Galeria from './pages/Galeria'
-import Blog from './pages/Blog'
-import DetalleProducto from './pages/DetalleProducto'
-import GuiaPuerta from './pages/GuiaPuerta'
-import Comparador from './pages/Comparador'
-import AdminLogin from './pages/AdminLogin'
-import AdminPanel from './pages/AdminPanel'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+import { AuthProvider } from './context/AuthContext'
+import PublicLayout from './layouts/PublicLayout'
+import AdminLayout from './layouts/AdminLayout'
+import { ROUTES } from './constants'
 
-const WHATSAPP_URL = 'https://wa.me/51947316874?text=Hola%2C%20me%20gustaria%20obtener%20informacion%20sobre%20sus%20puertas%20automaticas'
+// Páginas públicas
+import Inicio from './pages/public/Inicio'
+import Catalogo from './pages/public/Catalogo'
+import DetalleProducto from './pages/public/DetalleProducto'
+import Cotizacion from './pages/public/Cotizacion'
+import Seguimiento from './pages/public/Seguimiento'
+import Mantenimiento from './pages/public/Mantenimiento'
+import Nosotros from './pages/public/Nosotros'
+import Contacto from './pages/public/Contacto'
+import Galeria from './pages/public/Galeria'
+import Blog from './pages/public/Blog'
+import GuiaPuerta from './pages/public/GuiaPuerta'
+import Comparador from './pages/public/Comparador'
 
-function PublicLayout({ children }) {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-1">{children}</main>
-      <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="fixed bottom-6 left-6 bg-green-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-green-600 z-50">
-        <FaWhatsapp size={30} />
-      </a>
-      <Chatbot />
-      <Footer />
-    </div>
-  )
+// Páginas admin
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminPanel from './pages/admin/AdminPanel'
+import AdminCotizaciones from './pages/admin/AdminCotizaciones'
+import AdminMantenimientos from './pages/admin/AdminMantenimientos'
+import AdminTecnicos from './pages/admin/AdminTecnicos'
+import AdminProductos from './pages/admin/AdminProductos'
+import AdminReportes from './pages/admin/AdminReportes'
+import AdminContenido from './pages/admin/AdminContenido'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* RUTAS ADMIN - sin navbar ni footer */}
-        <Route path="/admin-login" element={<AdminLogin />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          {/* Admin */}
+          <Route path={ROUTES.ADMIN_LOGIN} element={<AdminLogin />} />
+          <Route path={ROUTES.ADMIN_PANEL} element={<AdminLayout><AdminPanel /></AdminLayout>} />
+          <Route path="/admin/cotizaciones" element={<AdminLayout><AdminCotizaciones /></AdminLayout>} />
+          <Route path="/admin/mantenimientos" element={<AdminLayout><AdminMantenimientos /></AdminLayout>} />
+          <Route path="/admin/tecnicos" element={<AdminLayout><AdminTecnicos /></AdminLayout>} />
+          <Route path="/admin/productos" element={<AdminLayout><AdminProductos /></AdminLayout>} />
+          <Route path="/admin/reportes" element={<AdminLayout><AdminReportes /></AdminLayout>} />
+          <Route path="/admin/contenido" element={<AdminLayout><AdminContenido /></AdminLayout>} />
 
-        {/* RUTAS PUBLICAS - con navbar y footer */}
-        <Route path="/" element={<PublicLayout><Inicio /></PublicLayout>} />
-        <Route path="/catalogo" element={<PublicLayout><Catalogo /></PublicLayout>} />
-        <Route path="/catalogo/:id" element={<PublicLayout><DetalleProducto /></PublicLayout>} />
-        <Route path="/cotizar" element={<PublicLayout><Cotizacion /></PublicLayout>} />
-        <Route path="/seguimiento" element={<PublicLayout><Seguimiento /></PublicLayout>} />
-        <Route path="/mantenimiento" element={<PublicLayout><Mantenimiento /></PublicLayout>} />
-        <Route path="/nosotros" element={<PublicLayout><Nosotros /></PublicLayout>} />
-        <Route path="/contacto" element={<PublicLayout><Contacto /></PublicLayout>} />
-        <Route path="/galeria" element={<PublicLayout><Galeria /></PublicLayout>} />
-        <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
-        <Route path="/guia" element={<PublicLayout><GuiaPuerta /></PublicLayout>} />
-        <Route path="/comparador" element={<PublicLayout><Comparador /></PublicLayout>} />
-        <Route path="/admin-panel" element={<AdminPanel />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Públicas */}
+          <Route path={ROUTES.HOME} element={<PublicLayout><Inicio /></PublicLayout>} />
+          <Route path={ROUTES.CATALOGO} element={<PublicLayout><Catalogo /></PublicLayout>} />
+          <Route path={ROUTES.CATALOGO_DETALLE} element={<PublicLayout><DetalleProducto /></PublicLayout>} />
+          <Route path={ROUTES.COTIZAR} element={<PublicLayout><Cotizacion /></PublicLayout>} />
+          <Route path={ROUTES.SEGUIMIENTO} element={<PublicLayout><Seguimiento /></PublicLayout>} />
+          <Route path={ROUTES.MANTENIMIENTO} element={<PublicLayout><Mantenimiento /></PublicLayout>} />
+          <Route path={ROUTES.NOSOTROS} element={<PublicLayout><Nosotros /></PublicLayout>} />
+          <Route path={ROUTES.CONTACTO} element={<PublicLayout><Contacto /></PublicLayout>} />
+          <Route path={ROUTES.GALERIA} element={<PublicLayout><Galeria /></PublicLayout>} />
+          <Route path={ROUTES.BLOG} element={<PublicLayout><Blog /></PublicLayout>} />
+          <Route path={ROUTES.GUIA} element={<PublicLayout><GuiaPuerta /></PublicLayout>} />
+          <Route path={ROUTES.COMPARADOR} element={<PublicLayout><Comparador /></PublicLayout>} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

@@ -24,6 +24,6 @@ data = {
     'text': {'body': 'Prueba desde GyG Puertas Automaticas'}
 }
 
-r = requests.post(url, headers=headers, json=data)
+r = requests.post(url, headers=headers, json=data, timeout=10)
 print(f'Status: {r.status_code}')
 print(f'Respuesta: {r.json()}')

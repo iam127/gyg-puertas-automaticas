@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from google import genai
@@ -15,23 +16,19 @@ def get_context_from_db():
     """Obtiene toda la información relevante de la base de datos en tiempo real."""
     from apps.productos.models import Producto, CategoriaProducto
 
-    # Fecha y hora peruana
     zona_peru = pytz.timezone('America/Lima')
     ahora = datetime.now(zona_peru)
     fecha_hora = ahora.strftime('%A %d de %B de %Y, %H:%M horas (hora de Lima, Perú)')
 
-    # Productos activos
     productos = Producto.objects.filter(activo=True)
     lista_productos = '\n'.join([
         f"- {p.nombre} | Uso: {p.get_uso_display()} | Material: {p.material or 'N/A'} | Descripción: {p.descripcion[:200]}"
         for p in productos
     ]) if productos.exists() else "No hay productos registrados actualmente."
 
-    # Categorías
     categorias = CategoriaProducto.objects.all()
     lista_categorias = ', '.join([c.nombre for c in categorias]) if categorias.exists() else "Sin categorías registradas."
 
-    # Estadísticas básicas
     from apps.cotizaciones.models import Cotizacion
     from apps.mantenimientos.models import Mantenimiento
     total_cotizaciones = Cotizacion.objects.count()
@@ -50,6 +47,45 @@ INFORMACIÓN DE LA EMPRESA:
 - Correo: gygpuertasautomaticas@gmail.com
 - WhatsApp: +51 947 316 864
 - Dirección: Manuel Odria 161, Ate, Lima, Perú
+
+MARCAS CON LAS QUE TRABAJAMOS:
+- Clopay (USA): puertas seccionales residenciales e industriales de alta calidad
+- LiftMaster (USA): motores y sistemas de apertura para puertas de cochera y seccionales
+- CAME (Italia): motores y automatismos para puertas corredizas, batientes y barreras
+- Nice (Italia): automatismos para puertas, portones y barreras vehiculares
+- DEA (Italia): motores para portones corredizos y batientes residenciales e industriales
+- BFT (Italia): automatismos para puertas, portones, barreras y accesos vehiculares
+
+TIPOS DE PUERTAS QUE INSTALAMOS Y MANTENEMOS:
+- Puertas corredizas automáticas (residencial, comercial, industrial)
+- Puertas batientes automáticas (1 y 2 hojas)
+- Puertas seccionales (cochera, residencial, industrial)
+- Puertas enrollables (acero galvanizado, acero inoxidable)
+- Puertas rápidas industriales (PVC flexible de alta velocidad)
+- Portones corredizos (hasta 1,200 kg)
+- Puertas de vidrio automáticas (uso comercial y corporativo)
+
+MATERIALES DISPONIBLES:
+- Acero galvanizado (el más económico y resistente a la corrosión)
+- Acero inoxidable (alta durabilidad, acabado premium)
+- Aluminio (liviano, ideal para uso comercial)
+- PVC (para puertas rápidas industriales)
+- Vidrio templado (para uso comercial y oficinas)
+
+COBERTURA Y DISTRITOS:
+- Atendemos los 43 distritos de Lima Metropolitana
+- Distritos principales: Miraflores, San Isidro, Surco, La Molina, San Borja, Ate, Chorrillos, Los Olivos, SJM, Callao, Lince, Jesús María, Pueblo Libre, Magdalena y muchos más
+- Desde Chorrillos hasta Carabayllo, desde Ate hasta La Perla
+- Contamos con técnicos en distintos puntos de Lima para tiempos de respuesta rápidos
+
+FORMAS DE PAGO:
+- Efectivo
+- Transferencia bancaria
+
+TIEMPOS DE RESPUESTA:
+- Visita técnica coordinada en menos de 24 horas
+- Cotización formal enviada en 24 a 48 horas tras la visita
+- Atención de emergencias con prioridad
 
 CATEGORÍAS DE PRODUCTOS:
 {lista_categorias}
@@ -103,7 +139,11 @@ INSTRUCCIONES DE COMPORTAMIENTO:
 - Si el cliente quiere cotizar, indícale que puede hacerlo en la sección "Cotizar" de la web o por WhatsApp
 - Si el cliente tiene un problema con su puerta, indícale la sección "Mantenimiento"
 - Si el cliente quiere seguimiento, indícale la sección "Seguimiento" con su código único
-- No inventes precios específicos, siempre indica que requiere visita técnica gratuita
+- Nunca inventes precios específicos, siempre indica que requieren visita técnica gratuita
+- Si preguntan por marcas, menciona: Clopay, LiftMaster, CAME, Nice, DEA y BFT
+- Si preguntan por distritos, menciona que atendemos los 43 distritos de Lima Metropolitana
+- Si preguntan por formas de pago, indica efectivo y transferencia bancaria
+- Si preguntan por tiempo de respuesta, indica menos de 24 horas para coordinar visita
 - Si el cliente pregunta por algo que no sabes, invítalos a contactarnos directamente
 - Responde de forma natural y conversacional, no como un robot
 - Cuando te pregunten la fecha u hora, usa la información proporcionada
@@ -111,6 +151,7 @@ INSTRUCCIONES DE COMPORTAMIENTO:
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def chatbot(request):
     mensaje = request.data.get('mensaje', '')
     historial = request.data.get('historial', [])
@@ -119,10 +160,8 @@ def chatbot(request):
         return Response({'error': 'Mensaje requerido'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Obtener contexto actualizado de la BD
         contexto = get_context_from_db()
 
-        # Construir historial para Gemini
         historial_gemini = []
         for msg in historial[-10:]:
             rol = 'user' if msg['rol'] == 'user' else 'model'
@@ -130,7 +169,6 @@ def chatbot(request):
                 genai.types.Content(role=rol, parts=[genai.types.Part(text=msg['contenido'])])
             )
 
-        # Prompt completo con contexto de BD
         prompt_completo = f"{contexto}\n\n{INSTRUCCIONES}\n\nUsuario: {mensaje}"
 
         respuesta = client.models.generate_content(
@@ -150,6 +188,7 @@ def chatbot(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def buscar_inteligente(request):
     query = request.query_params.get('q', '')
     if not query:

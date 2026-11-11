@@ -1,5 +1,6 @@
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 import os
 
 load_dotenv()
@@ -90,22 +91,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ]
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-from datetime import timedelta
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-# EMAIL SMTP
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -114,5 +115,4 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'GyG Puertas Automaticas <gygpuertasautomaticas@gmail.com>'
 
-# GEMINI
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
