@@ -5,12 +5,14 @@ import {
   StatusBar as RNStatusBar,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import NetInfo from '@react-native-community/netinfo';
 import COLORS from '../../constants/colors';
 import MantenimientoService from '../../api/mantenimientos';
 import CotizacionService from '../../api/cotizaciones';
 import Header from '../../components/common/Header';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import OfflineStorage from '../../services/offlineStorage';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -81,17 +83,35 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
   const handleUpdateToInProgress = async () => {
     const nextStatus = type === 'mantenimiento' ? 'en_proceso' : 'en_instalacion';
     setSubmitting(true);
+
+    const netState = await NetInfo.fetch();
+    const isOnline = netState.isConnected && netState.isInternetReachable;
+
     try {
-      if (type === 'mantenimiento') {
-        await MantenimientoService.updateMantenimientoStatus(id, nextStatus);
+      if (isOnline) {
+        if (type === 'mantenimiento') {
+          await MantenimientoService.updateMantenimientoStatus(id, nextStatus);
+        } else {
+          await CotizacionService.updateCotizacionStatus(id, nextStatus as any);
+        }
+        Alert.alert(
+          'Estado actualizado',
+          `El servicio pasó a "${type === 'mantenimiento' ? 'En proceso' : 'En instalación'}".`,
+          [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
+        );
       } else {
-        await CotizacionService.updateCotizacionStatus(id, nextStatus as any);
+        // Sin señal: encolar para sincronizar después
+        if (type === 'mantenimiento') {
+          await OfflineStorage.enqueue({ type: 'updateMantenimientoStatus', id, status: nextStatus });
+        } else {
+          await OfflineStorage.enqueue({ type: 'updateCotizacionStatus', id, status: nextStatus });
+        }
+        Alert.alert(
+          'Guardado sin conexión',
+          'No hay señal. El cambio de estado se sincronizará automáticamente cuando recuperes conexión.',
+          [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
+        );
       }
-      Alert.alert(
-        'Estado actualizado',
-        `El servicio pasó a "${type === 'mantenimiento' ? 'En proceso' : 'En instalación'}".`,
-        [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
-      );
     } catch {
       Alert.alert('Error', 'No se pudo actualizar el estado. Intente nuevamente.');
     } finally {
@@ -102,34 +122,75 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
   const handleCompleteService = async () => {
     if (!validateForm()) return;
     setSubmitting(true);
+
+    const netState = await NetInfo.fetch();
+    const isOnline = netState.isConnected && netState.isInternetReachable;
+
     try {
-      if (type === 'mantenimiento') {
-        await MantenimientoService.updateVisitaMantenimiento(visitaId, {
-          estado: 'completada',
-          diagnostico: diagnostico.trim(),
-          trabajos_realizados: trabajosRealizados.trim(),
-          repuestos_utilizados: repuestosUtilizados.trim(),
-          costo_total: Number(costoTotal),
-        });
-        await MantenimientoService.updateMantenimientoStatus(id, 'resuelto');
+      if (isOnline) {
+        if (type === 'mantenimiento') {
+          await MantenimientoService.updateVisitaMantenimiento(visitaId, {
+            estado: 'completada',
+            diagnostico: diagnostico.trim(),
+            trabajos_realizados: trabajosRealizados.trim(),
+            repuestos_utilizados: repuestosUtilizados.trim(),
+            costo_total: Number(costoTotal),
+          });
+          await MantenimientoService.updateMantenimientoStatus(id, 'resuelto');
+        } else {
+          await CotizacionService.updateVisitaTecnica(visitaId, {
+            estado: 'completada',
+            medidas: medidas.trim(),
+            materiales_necesarios: materialesNecesarios.trim(),
+            observaciones: observaciones.trim(),
+            dificultad: dificultad.trim(),
+            tiempo_estimado: tiempoEstimado.trim(),
+          });
+          await CotizacionService.updateCotizacionStatus(id, 'en_revision' as any);
+        }
+        Alert.alert(
+          type === 'mantenimiento' ? 'Reporte guardado' : 'Relevamiento guardado',
+          type === 'mantenimiento'
+            ? 'El reporte técnico fue enviado al administrador. El servicio quedó marcado como resuelto.'
+            : 'Las medidas y materiales fueron registrados. El administrador generará la cotización formal.',
+          [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
+        );
       } else {
-        await CotizacionService.updateVisitaTecnica(visitaId, {
-          estado: 'completada',
-          medidas: medidas.trim(),
-          materiales_necesarios: materialesNecesarios.trim(),
-          observaciones: observaciones.trim(),
-          dificultad: dificultad.trim(),
-          tiempo_estimado: tiempoEstimado.trim(),
-        });
-        await CotizacionService.updateCotizacionStatus(id, 'en_revision' as any);
+        // Sin señal: encolar ambas acciones
+        if (type === 'mantenimiento') {
+          await OfflineStorage.enqueue({
+            type: 'updateVisitaMantenimiento',
+            visitaId,
+            data: {
+              estado: 'completada',
+              diagnostico: diagnostico.trim(),
+              trabajos_realizados: trabajosRealizados.trim(),
+              repuestos_utilizados: repuestosUtilizados.trim(),
+              costo_total: Number(costoTotal),
+            },
+          });
+          await OfflineStorage.enqueue({ type: 'updateMantenimientoStatus', id, status: 'resuelto' });
+        } else {
+          await OfflineStorage.enqueue({
+            type: 'updateVisitaTecnica',
+            visitaId,
+            data: {
+              estado: 'completada',
+              medidas: medidas.trim(),
+              materiales_necesarios: materialesNecesarios.trim(),
+              observaciones: observaciones.trim(),
+              dificultad: dificultad.trim(),
+              tiempo_estimado: tiempoEstimado.trim(),
+            },
+          });
+          await OfflineStorage.enqueue({ type: 'updateCotizacionStatus', id, status: 'en_revision' });
+        }
+        Alert.alert(
+          'Guardado sin conexión',
+          'No hay señal. El reporte se guardó localmente y se enviará automáticamente cuando recuperes conexión.',
+          [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
+        );
       }
-      Alert.alert(
-        type === 'mantenimiento' ? 'Reporte guardado' : 'Relevamiento guardado',
-        type === 'mantenimiento'
-          ? 'El reporte técnico fue enviado al administrador. El servicio quedó marcado como resuelto.'
-          : 'Las medidas y materiales fueron registrados. El administrador generará la cotización formal.',
-        [{ text: 'Aceptar', onPress: () => navigation.goBack() }]
-      );
     } catch {
       Alert.alert('Error', 'No se pudo guardar el reporte. Intente nuevamente.');
     } finally {
@@ -137,21 +198,16 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
     }
   };
 
-  // Mantenimiento: puede iniciar si está en visita_agendada
-  // Cotización: puede iniciar instalación solo si el cliente ya aceptó (cotizado o aceptado)
   const canStartProgress = type === 'mantenimiento'
     ? currentStatus === 'visita_agendada'
     : ['cotizado', 'aceptado'].includes(currentStatus);
 
-  // Mantenimiento: puede completar solo si ya está en proceso
-  // Cotización: puede completar si está en instalacion O si está en visita_agendada (registrar medidas)
   const canComplete = type === 'mantenimiento'
     ? currentStatus === 'en_proceso'
     : currentStatus === 'en_instalacion' || currentStatus === 'visita_agendada';
 
   const isMant = type === 'mantenimiento';
 
-  // Título y subtítulo del botón completar según contexto
   const completeTitle = isMant
     ? 'Completar y cargar reporte'
     : currentStatus === 'visita_agendada'
@@ -195,7 +251,6 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                 title="Acciones disponibles"
                 desc="Seleccione la siguiente etapa del servicio"
               >
-                {/* Iniciar — solo visible si puede iniciar */}
                 {canStartProgress && (
                   <View style={styles.actionItem}>
                     <View style={styles.actionTop}>
@@ -224,7 +279,6 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                   </View>
                 )}
 
-                {/* Completar — visible si está en proceso / en instalación / visita_agendada (cotización) */}
                 {canComplete && (
                   <View style={[styles.actionItem, { marginBottom: 0 }]}>
                     <View style={styles.actionTop}>
@@ -357,7 +411,6 @@ export const UpdateStatusScreen: React.FC<any> = ({ route, navigation }) => {
                   </>
                 )}
 
-                {/* Botones */}
                 <View style={styles.formBtns}>
                   <Button
                     title="Cancelar"
@@ -424,7 +477,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1, paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0 },
   scroll: { padding: 14, paddingTop: 12, paddingBottom: 88, flexGrow: 1 },
 
-  // ── Estado actual ─────────────────────────────────────────────────────────
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -450,7 +502,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
 
-  // ── Card contenedor ───────────────────────────────────────────────────────
   card: {
     backgroundColor: COLORS.BG_SURFACE,
     borderRadius: 18,
@@ -483,7 +534,6 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 3 },
   cardDesc:  { fontSize: 12, color: COLORS.TEXT_SECONDARY, lineHeight: 17 },
 
-  // ── Action items ──────────────────────────────────────────────────────────
   actionItem: {
     backgroundColor: COLORS.BG_ELEVATED,
     borderRadius: 14,
@@ -507,10 +557,8 @@ const styles = StyleSheet.create({
   actionSubtitle: { fontSize: 11, color: COLORS.TEXT_SECONDARY, lineHeight: 16 },
   actionBtn:      { marginTop: 0 },
 
-  // ── Textarea ──────────────────────────────────────────────────────────────
   textArea: { textAlignVertical: 'top' },
 
-  // ── Switch conformidad ────────────────────────────────────────────────────
   switchCard: {
     backgroundColor: COLORS.BG_ELEVATED,
     borderRadius: 14,
@@ -528,7 +576,6 @@ const styles = StyleSheet.create({
   switchError:     { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8 },
   switchErrorText: { fontSize: 12, color: COLORS.ERROR_RED, fontWeight: '500' },
 
-  // ── Botones formulario ────────────────────────────────────────────────────
   formBtns: { flexDirection: 'row', gap: 10, marginTop: 20 },
 });
 
