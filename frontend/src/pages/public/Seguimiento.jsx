@@ -4,7 +4,7 @@ import { getSeguimientoMantenimiento } from '../../services/mantenimientos'
 import { FaSearch, FaCheckCircle, FaTimesCircle, FaTools, FaFileAlt, FaWhatsapp, FaPhone, FaDownload, FaCalendarAlt, FaStar } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import api from '../../services/api'
+import api, { publicApi } from '../../services/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
@@ -175,22 +175,18 @@ function Seguimiento() {
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
 
-  // Estados para aceptar/rechazar
   const [respondiendo, setRespondiendo] = useState(false)
   const [mostrarRechazo, setMostrarRechazo] = useState(false)
   const [motivoRechazo, setMotivoRechazo] = useState('')
   const [errorRespuesta, setErrorRespuesta] = useState('')
   const [exito, setExito] = useState('')
 
-  // Estados para proponer fecha
   const [fechaPropuesta, setFechaPropuesta] = useState('')
-
   const [horaPropuesta, setHoraPropuesta] = useState('')
   const [enviandoFecha, setEnviandoFecha] = useState(false)
   const [errorFecha, setErrorFecha] = useState('')
   const [exitoFecha, setExitoFecha] = useState('')
 
-  // Estados para testimonio
   const [calificacion, setCalificacion] = useState(5)
   const [comentario, setComentario] = useState('')
   const [enviandoTestimonio, setEnviandoTestimonio] = useState(false)
@@ -211,17 +207,22 @@ function Seguimiento() {
     setHoraPropuesta('')
     setComentario('')
     setCalificacion(5)
-    setTestimonioEnviado(false)
     setErrorTestimonio('')
     setCargando(true)
     if (codigo.startsWith('GYG')) {
       getSeguimiento(codigo)
-        .then(res => setResultado({ tipo: 'cotizacion', data: res.data }))
+        .then(res => {
+          setResultado({ tipo: 'cotizacion', data: res.data })
+          setTestimonioEnviado(localStorage.getItem(`testimonio_${codigo}`) === 'true')
+        })
         .catch(() => setError('No se encontró ninguna solicitud con ese código.'))
         .finally(() => setCargando(false))
     } else if (codigo.startsWith('MANT')) {
       getSeguimientoMantenimiento(codigo)
-        .then(res => setResultado({ tipo: 'mantenimiento', data: res.data }))
+        .then(res => {
+          setResultado({ tipo: 'mantenimiento', data: res.data })
+          setTestimonioEnviado(localStorage.getItem(`testimonio_${codigo}`) === 'true')
+        })
         .catch(() => setError('No se encontró ninguna solicitud con ese código.'))
         .finally(() => setCargando(false))
     } else {
@@ -273,7 +274,7 @@ function Seguimiento() {
     }
     setErrorFecha('')
     setEnviandoFecha(true)
-    api.post(`/cotizaciones/${resultado.data.id}/proponer_fecha/`, {
+    publicApi.post(`/cotizaciones/${resultado.data.id}/proponer_fecha/`, {
       fecha: fechaPropuesta,
       hora: horaPropuesta,
     })
@@ -299,13 +300,16 @@ function Seguimiento() {
     }
     setErrorTestimonio('')
     setEnviandoTestimonio(true)
-    api.post('/testimonios/', {
+    publicApi.post('/testimonios/', {
       nombre_cliente: resultado.data.nombre_cliente,
       comentario: comentario.trim(),
       calificacion,
       mostrar_en_web: true,
     })
-      .then(() => setTestimonioEnviado(true))
+      .then(() => {
+        setTestimonioEnviado(true)
+        localStorage.setItem(`testimonio_${codigo}`, 'true')
+      })
       .catch(() => setErrorTestimonio('Ocurrió un error al enviar. Intenta nuevamente.'))
       .finally(() => setEnviandoTestimonio(false))
   }
@@ -540,7 +544,6 @@ function Seguimiento() {
                 />
               </div>
 
-              {/* PDF — solo cuando estado es cotizado, aceptado, instalacion_agendada, en_instalacion o completado */}
               {resultado.tipo === 'cotizacion'
                 && resultado.data.cotizacion_formal?.pdf_cotizacion
                 && ['cotizado', 'aceptado', 'instalacion_agendada', 'en_instalacion', 'completado'].includes(resultado.data.estado)
@@ -584,16 +587,13 @@ function Seguimiento() {
                 </div>
               )}
 
-              {/* BLOQUE ACEPTAR / RECHAZAR — solo cuando estado es 'cotizado' */}
               {resultado.tipo === 'cotizacion' && resultado.data.estado === 'cotizado' && (
                 <div style={{ padding: '0 32px 24px' }}>
                   <div style={{
                     background: '#FFF7ED', border: '2px solid #FDBA74',
                     borderRadius: '12px', padding: '24px',
                   }}>
-                    <p style={{
-                      margin: '0 0 6px', fontWeight: 700, color: '#92400E', fontSize: '15px',
-                    }}>
+                    <p style={{ margin: '0 0 6px', fontWeight: 700, color: '#92400E', fontSize: '15px' }}>
                       ¿Deseas aceptar esta cotización?
                     </p>
                     <p style={{ margin: '0 0 20px', color: '#B45309', fontSize: '13px' }}>
@@ -717,7 +717,6 @@ function Seguimiento() {
                 </div>
               )}
 
-              {/* BLOQUE PROPONER FECHA — solo cuando estado es 'aceptado' */}
               {resultado.tipo === 'cotizacion' && resultado.data.estado === 'aceptado' && (
                 <div style={{ padding: '0 32px 24px' }}>
                   <div style={{
@@ -850,7 +849,6 @@ function Seguimiento() {
                 </div>
               )}
 
-              {/* FECHA CONFIRMADA — cuando estado es 'instalacion_agendada' y hay fecha propuesta */}
               {resultado.tipo === 'cotizacion' && resultado.data.estado === 'instalacion_agendada' && resultado.data.fecha_instalacion_propuesta && (
                 <div style={{ padding: '0 32px 24px' }}>
                   <div style={{
@@ -887,7 +885,6 @@ function Seguimiento() {
                 </div>
               )}
 
-              {/* TESTIMONIO — solo cuando estado es 'completado' */}
               {resultado.data.estado === 'completado' && (
                 <div style={{ padding: '0 32px 24px' }}>
                   <div style={{
@@ -1004,37 +1001,19 @@ function Seguimiento() {
                   display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
                   gap: '12px', marginBottom: '12px',
                 }}>
-                  <div style={{
-                    background: '#FAFAF8', borderRadius: '12px',
-                    padding: '16px', border: '1px solid #EEECEA',
-                  }}>
+                  <div style={{ background: '#FAFAF8', borderRadius: '12px', padding: '16px', border: '1px solid #EEECEA' }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Cliente</p>
-                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
-                      {resultado.data.nombre_cliente}
-                    </p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>{resultado.data.nombre_cliente}</p>
                   </div>
-                  <div style={{
-                    background: '#FAFAF8', borderRadius: '12px',
-                    padding: '16px', border: '1px solid #EEECEA',
-                  }}>
+                  <div style={{ background: '#FAFAF8', borderRadius: '12px', padding: '16px', border: '1px solid #EEECEA' }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Teléfono</p>
-                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
-                      {resultado.data.telefono}
-                    </p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>{resultado.data.telefono}</p>
                   </div>
-                  <div style={{
-                    background: '#FAFAF8', borderRadius: '12px',
-                    padding: '16px', border: '1px solid #EEECEA',
-                  }}>
+                  <div style={{ background: '#FAFAF8', borderRadius: '12px', padding: '16px', border: '1px solid #EEECEA' }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Distrito</p>
-                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
-                      {resultado.data.distrito}
-                    </p>
+                    <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>{resultado.data.distrito}</p>
                   </div>
-                  <div style={{
-                    background: '#FAFAF8', borderRadius: '12px',
-                    padding: '16px', border: '1px solid #EEECEA',
-                  }}>
+                  <div style={{ background: '#FAFAF8', borderRadius: '12px', padding: '16px', border: '1px solid #EEECEA' }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 4px' }}>Fecha de solicitud</p>
                     <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: 0 }}>
                       {new Date(resultado.data.creado_en).toLocaleDateString('es-PE')}
@@ -1043,41 +1022,23 @@ function Seguimiento() {
                 </div>
 
                 {resultado.data.descripcion && (
-                  <div style={{
-                    background: '#FAFAF8', borderRadius: '12px',
-                    padding: '16px', marginBottom: '12px',
-                    border: '1px solid #EEECEA',
-                  }}>
+                  <div style={{ background: '#FAFAF8', borderRadius: '12px', padding: '16px', marginBottom: '12px', border: '1px solid #EEECEA' }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 8px' }}>Descripción</p>
-                    <p style={{ fontWeight: 500, color: '#111', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                      {resultado.data.descripcion}
-                    </p>
+                    <p style={{ fontWeight: 500, color: '#111', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{resultado.data.descripcion}</p>
                   </div>
                 )}
 
                 {resultado.data.descripcion_problema && (
-                  <div style={{
-                    background: '#FAFAF8', borderRadius: '12px',
-                    padding: '16px', marginBottom: '12px',
-                    border: '1px solid #EEECEA',
-                  }}>
+                  <div style={{ background: '#FAFAF8', borderRadius: '12px', padding: '16px', marginBottom: '12px', border: '1px solid #EEECEA' }}>
                     <p style={{ color: '#BBB', fontSize: '11px', margin: '0 0 8px' }}>Problema reportado</p>
-                    <p style={{ fontWeight: 500, color: '#111', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                      {resultado.data.descripcion_problema}
-                    </p>
+                    <p style={{ fontWeight: 500, color: '#111', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{resultado.data.descripcion_problema}</p>
                   </div>
                 )}
 
-                {/* Motivo de rechazo — solo cuando estado es 'rechazado' */}
                 {resultado.data.motivo_rechazo && resultado.data.estado === 'rechazado' && (
-                  <div style={{
-                    background: '#FEE2E2', border: '1px solid #FCA5A5',
-                    borderRadius: '12px', padding: '16px', marginBottom: '12px',
-                  }}>
+                  <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: '12px', padding: '16px', marginBottom: '12px' }}>
                     <p style={{ color: '#DC2626', fontSize: '11px', margin: '0 0 8px', fontWeight: 700 }}>Motivo de rechazo</p>
-                    <p style={{ fontWeight: 500, color: '#DC2626', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                      {resultado.data.motivo_rechazo}
-                    </p>
+                    <p style={{ fontWeight: 500, color: '#DC2626', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{resultado.data.motivo_rechazo}</p>
                   </div>
                 )}
 
@@ -1092,52 +1053,18 @@ function Seguimiento() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <a
-                    href="https://wa.me/51947316874"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn-whatsapp"
-                    style={{
-                      flex: 1, minWidth: '140px',
-                      background: '#22C55E', color: '#fff',
-                      padding: '14px 0', borderRadius: '8px',
-                      fontWeight: 700, textAlign: 'center',
-                      fontSize: '14px', textDecoration: 'none',
-                      display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', gap: '8px',
-                    }}
-                  >
+                  <a href="https://wa.me/51947316874" target="_blank" rel="noreferrer" className="btn-whatsapp"
+                    style={{ flex: 1, minWidth: '140px', background: '#22C55E', color: '#fff', padding: '14px 0', borderRadius: '8px', fontWeight: 700, textAlign: 'center', fontSize: '14px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <FaWhatsapp size={16} />
                     WhatsApp
                   </a>
-                  <a
-                    href="tel:+51947316864"
-                    className="btn-llamar"
-                    style={{
-                      flex: 1, minWidth: '140px',
-                      background: '#111', color: '#fff',
-                      padding: '14px 0', borderRadius: '8px',
-                      fontWeight: 700, textAlign: 'center',
-                      fontSize: '14px', textDecoration: 'none',
-                      display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', gap: '8px',
-                    }}
-                  >
+                  <a href="tel:+51947316864" className="btn-llamar"
+                    style={{ flex: 1, minWidth: '140px', background: '#111', color: '#fff', padding: '14px 0', borderRadius: '8px', fontWeight: 700, textAlign: 'center', fontSize: '14px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <FaPhone size={14} />
                     Llamar
                   </a>
-                  <Link
-                    to="/contacto"
-                    className="btn-contacto"
-                    style={{
-                      flex: 1, minWidth: '140px',
-                      background: '#FAFAF8', color: '#111',
-                      padding: '14px 0', borderRadius: '8px',
-                      fontWeight: 700, textAlign: 'center',
-                      fontSize: '14px', textDecoration: 'none',
-                      display: 'block',
-                    }}
-                  >
+                  <Link to="/contacto" className="btn-contacto"
+                    style={{ flex: 1, minWidth: '140px', background: '#FAFAF8', color: '#111', padding: '14px 0', borderRadius: '8px', fontWeight: 700, textAlign: 'center', fontSize: '14px', textDecoration: 'none', display: 'block' }}>
                     Contacto
                   </Link>
                 </div>

@@ -14,7 +14,7 @@ class CotizacionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ['create', 'seguimiento']:
+        if self.action in ['create', 'seguimiento', 'responder', 'proponer_fecha']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
