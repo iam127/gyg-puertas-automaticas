@@ -13,7 +13,7 @@ class CategoriaProductoViewSet(viewsets.ModelViewSet):
 
 
 class ProductoViewSet(viewsets.ModelViewSet):
-    queryset = Producto.objects.all()
+    queryset = Producto.objects.all().order_by('-creado_en')
     serializer_class = ProductoSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion', 'uso', 'material']
@@ -28,13 +28,13 @@ class ProductoViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         return {'request': self.request}
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def destacados(self, request):
         productos = Producto.objects.filter(activo=True, destacado=True)
         serializer = ProductoListSerializer(productos, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def por_uso(self, request):
         uso = request.query_params.get('uso', None)
         if uso:

@@ -1,6 +1,6 @@
-import api from './api'
+import { publicApi } from './api'
 
-export const getBlog = () => api.get('/blog/')
-export const getFAQ = () => api.get('/faq/')
-export const getGaleria = () => api.get('/galeria/')
-export const getTestimonios = () => api.get('/testimonios/')
+export const getBlog = () => publicApi.get('/blog/')
+export const getFAQ = () => publicApi.get('/faq/')
+export const getGaleria = () => publicApi.get('/galeria/')
+export const getTestimonios = () => publicApi.get('/testimonios/')
