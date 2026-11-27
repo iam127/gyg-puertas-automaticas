@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaWhatsapp, FaClock } from 'react-icons/fa'
-import logo from '../assets/Logo-gyg.png'
+import logo from '../assets/logo-gyg.png'
 
 function Footer() {
   const whatsappUrl = 'https://wa.me/51947316874?text=Hola%2C%20me%20gustaria%20obtener%20informacion%20sobre%20sus%20puertas%20automaticas'

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { FaPhone, FaEnvelope, FaBars, FaTimes, FaWhatsapp, FaClock } from 'react-icons/fa'
-import logo from '../assets/Logo-gyg.png'
+import logo from '../assets/logo-gyg.png'
 
 function Navbar() {
   const [menuAbierto, setMenuAbierto] = useState(false)
