@@ -1,6 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
+import dj_database_url
 import os
 
 load_dotenv()
@@ -61,16 +62,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
